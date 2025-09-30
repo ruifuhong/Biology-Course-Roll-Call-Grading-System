@@ -8,7 +8,7 @@ function App() {
   const [hello, setHello] = useState('')
 
   useEffect(() => {
-    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     fetch(`${apiBase}/hello`)
       .then((r) => r.json())
       .then((data) => setHello(data.message))
