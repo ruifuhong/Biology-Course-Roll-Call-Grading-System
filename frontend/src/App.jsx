@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import CrudTest from './CrudTest.jsx'
+import FeedbackForm from './FeedbackForm.jsx'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
@@ -28,6 +29,8 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       {hello && <p>Backend says: {hello}</p>}
+      <FeedbackForm />
+      <h1>-------</h1>
       <CrudTest />
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
