@@ -4,13 +4,8 @@ services:
     container_name: bio-frontend-dev
     ports:
       - "5173:5173"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
     networks:
       - app-net
-    stdin_open: true
-    tty: true
 
   db:
     image: postgres
@@ -38,9 +33,6 @@ services:
       - mongo
     env_file:
       - .env
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
     networks:
       - app-net
 

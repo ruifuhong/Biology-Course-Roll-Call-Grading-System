@@ -1,0 +1,22 @@
+services:
+  frontend:
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  backend:
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  pgadmin:
+    tty: true
+    stdin_open: true
+
+  mongo-express:
+    tty: true
+    stdin_open: true
