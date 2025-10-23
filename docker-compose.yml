@@ -1,4 +1,17 @@
 services:
+  frontend:
+    image: bio-frontend:dev
+    container_name: bio-frontend-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - app-net
+    stdin_open: true
+    tty: true
+
   db:
     image: postgres
     container_name: bio-postgres
