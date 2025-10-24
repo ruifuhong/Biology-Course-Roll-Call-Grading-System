@@ -1,6 +1,8 @@
 services:
   frontend:
-    image: bio-frontend:dev
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     container_name: bio-frontend-dev
     ports:
       - "5173:5173"

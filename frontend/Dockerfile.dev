@@ -16,4 +16,4 @@ COPY . .
 EXPOSE 5173
 
 ## Start Vite dev server with host binding
-CMD ["npm", "run", "dev", "--", "--host"]
+CMD ["npx", "vite", "--host", "--port", "5173"]
