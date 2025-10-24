@@ -1,8 +1,6 @@
 import express from 'express';
 import { MongoClient } from 'mongodb';
-import dotenv from 'dotenv';
-
-dotenv.config({ path: './backend/.env' });
+import 'dotenv/config';
 
 const router = express.Router();
 

@@ -1,8 +1,6 @@
 import express from 'express';
 import pkg from 'pg';
-import dotenv from 'dotenv';
-
-dotenv.config({ path: './backend/.env' });
+import 'dotenv/config';
 
 const { Pool } = pkg;
 const router = express.Router();
