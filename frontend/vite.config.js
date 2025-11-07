@@ -21,8 +21,8 @@ export default defineConfig({
     reportsDirectory: './coverage',
     include: [
       'src/utils/semesterUtils.js',
-      'src/AdminDashboard.jsx',
-      'src/SessionManagement.jsx'
+      'src/components/AdminDashboard.jsx',
+      'src/components/SessionManagement.jsx'
   ],
     exclude: [
       'node_modules/**',

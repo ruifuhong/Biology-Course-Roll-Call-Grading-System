@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import SessionManagement from '../../SessionManagement.jsx';
+import SessionManagement from '../../components/SessionManagement.jsx';
 
 global.fetch = vi.fn();
 

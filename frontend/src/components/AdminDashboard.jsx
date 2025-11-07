@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import StudentManagement from './StudentManagement';
 import SessionManagement from './SessionManagement';
-import { generateSemesterOptions } from './utils/semesterUtils';
-import './styles/AdminDashboard.css';
+import { generateSemesterOptions } from '../utils/semesterUtils';
+import '../styles/AdminDashboard.css';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('students');

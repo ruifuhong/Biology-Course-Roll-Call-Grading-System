@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import './styles/SessionManagement.css';
+import '../styles/SessionManagement.css';
 
 const DateInputForm = ({ courseType, onSubmit, loading, semester }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);

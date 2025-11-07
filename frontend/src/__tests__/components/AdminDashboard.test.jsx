@@ -1,8 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import AdminDashboard from '../../AdminDashboard.jsx';
+import AdminDashboard from '../../components/AdminDashboard.jsx';
 
-vi.mock('../../StudentManagement', () => ({
+vi.mock('../../components/StudentManagement', () => ({
   default: ({ semester }) => (
     <div data-testid="student-management">
       Student Management - Semester: {semester}
@@ -10,7 +10,7 @@ vi.mock('../../StudentManagement', () => ({
   )
 }));
 
-vi.mock('../../SessionManagement', () => ({
+vi.mock('../../components/SessionManagement', () => ({
   default: ({ semester }) => (
     <div data-testid="session-management">
       Session Management - Semester: {semester}
