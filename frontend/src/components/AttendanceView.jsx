@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { naturalSort } from '../utils/sortUtils';
 import '../styles/StudentManagement.css';
 
 export default function AttendanceView({ semester }) {
@@ -26,7 +27,8 @@ export default function AttendanceView({ semester }) {
 
       if (attendanceResponse.ok) {
         const attendance = await attendanceResponse.json();
-        setAttendanceData(attendance);
+        const sortedAttendance = attendance.sort(naturalSort);
+        setAttendanceData(sortedAttendance);
       } else {
         setMessage('Failed to load attendance data / 載入出席資料失敗');
         setAttendanceData([]);

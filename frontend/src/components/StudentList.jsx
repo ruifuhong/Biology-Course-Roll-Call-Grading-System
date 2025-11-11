@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { naturalSort } from '../utils/sortUtils';
 import '../styles/StudentManagement.css';
 
 export default function StudentList({ semester }) {
@@ -29,11 +30,7 @@ export default function StudentList({ semester }) {
       const response = await fetch(`${apiBase}/students/${semester}`);
       if (response.ok) {
         const data = await response.json();
-        const sortedData = data.sort((a, b) => {
-          const groupA = a.group_name || '';
-          const groupB = b.group_name || '';
-          return groupA.localeCompare(groupB);
-        });
+        const sortedData = data.sort(naturalSort);
         setStudents(sortedData);
       } else {
         setMessage('Failed to load students / 載入學生失敗');
@@ -57,11 +54,7 @@ export default function StudentList({ semester }) {
       if (response.ok) {
         const newStudent = await response.json();
         const updatedStudents = [...students, newStudent];
-        const sortedStudents = updatedStudents.sort((a, b) => {
-          const groupA = a.group_name || '';
-          const groupB = b.group_name || '';
-          return groupA.localeCompare(groupB);
-        });
+        const sortedStudents = updatedStudents.sort(naturalSort);
         setStudents(sortedStudents);
         setMessage('Student added successfully / 學生新增成功');
         setShowAddForm(false);
@@ -128,11 +121,7 @@ export default function StudentList({ semester }) {
         const updatedStudents = students.map(student => 
           student.student_id === originalStudentId ? updatedStudent : student
         );
-        const sortedStudents = updatedStudents.sort((a, b) => {
-          const groupA = a.group_name || '';
-          const groupB = b.group_name || '';
-          return groupA.localeCompare(groupB);
-        });
+        const sortedStudents = updatedStudents.sort(naturalSort);
         setStudents(sortedStudents);
         setMessage('Student updated successfully / 學生更新成功');
         setEditingStudentId(null);
