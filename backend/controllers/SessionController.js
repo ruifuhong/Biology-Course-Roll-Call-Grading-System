@@ -30,9 +30,8 @@ export async function setLectureDates(req, res) {
       }
     }
     
-    alert(`Successfully created ${createdDates.length} lecture dates`);
+    console.log(`Successfully created ${createdDates.length} lecture dates`);
     
-    // Return all dates for this semester (sorted chronologically)
     const allDates = await SessionDateModel.getLectureDatesBySemester(semester);
     res.status(201).json(allDates);
   } catch (error) {
@@ -54,7 +53,16 @@ export async function getLectureDates(req, res) {
     const { semester } = req.params;
     
     const dates = await SessionDateModel.getLectureDatesBySemester(semester);
-    res.json(dates);
+    
+    // Add session_order based on chronological order
+    const datesWithOrder = dates
+      .sort((a, b) => new Date(a.actual_date) - new Date(b.actual_date))
+      .map((date, index) => ({
+        ...date,
+        session_order: index + 1
+      }));
+    
+    res.json(datesWithOrder);
   } catch (error) {
     console.error('SessionController getLectureDates error:', error);
     res.status(500).json({ error: error.message });
