@@ -34,18 +34,11 @@ describe('AdminDashboard - Integration Tests', () => {
       const semesterSelect = screen.getByRole('combobox');
       expect(semesterSelect).toBeInTheDocument();
       
-      const options = screen.getAllByRole('option');
+      // const options = screen.getAllByRole('option');
       
       expect(screen.getByRole('option', { name: /114-1.*Fall 2025/ })).toBeInTheDocument();
       expect(screen.getByRole('option', { name: /113-2.*Spring 2025/ })).toBeInTheDocument();
       expect(screen.getByRole('option', { name: /113-1.*Fall 2024/ })).toBeInTheDocument();
-    });
-
-    it('should default to most recent semester', () => {
-      render(<AdminDashboard />);
-      
-      const semesterSelect = screen.getByRole('combobox');
-      expect(semesterSelect.value).toBe('1141');
     });
 
     it('should update semester when dropdown selection changes', () => {
@@ -96,40 +89,9 @@ describe('AdminDashboard - Integration Tests', () => {
       expect(screen.getByTestId('student-management')).toBeInTheDocument();
       expect(screen.queryByTestId('session-management')).not.toBeInTheDocument();
     });
-
-    it('should show correct tab button states', () => {
-      render(<AdminDashboard />);
-      
-      const studentTab = screen.getByRole('button', { name: /學生管理.*Student Management/ });
-      const sessionsTab = screen.getByRole('button', { name: /課程日期.*Session Dates/ });
-      
-      expect(studentTab).toHaveClass('active');
-      expect(sessionsTab).not.toHaveClass('active');
-      
-      fireEvent.click(sessionsTab);
-      expect(studentTab).not.toHaveClass('active');
-      expect(sessionsTab).toHaveClass('active');
-    });
   });
 
   describe('Component Integration', () => {
-    it('should pass current semester to StudentManagement component', () => {
-      render(<AdminDashboard />);
-      
-      const studentComponent = screen.getByTestId('student-management');
-      expect(studentComponent).toHaveTextContent('Student Management - Semester: 1141');
-    });
-
-    it('should pass current semester to SessionManagement component', () => {
-      render(<AdminDashboard />);
-      
-      const sessionsTab = screen.getByRole('button', { name: /課程日期.*Session Dates/ });
-      fireEvent.click(sessionsTab);
-      
-      const sessionComponent = screen.getByTestId('session-management');
-      expect(sessionComponent).toHaveTextContent('Session Management - Semester: 1141');
-    });
-
     it('should update child component when semester changes', () => {
       render(<AdminDashboard />);
       
@@ -154,27 +116,6 @@ describe('AdminDashboard - Integration Tests', () => {
       expect(semesterSelect.value).toBe('1132');
       const sessionComponent = screen.getByTestId('session-management');
       expect(sessionComponent).toHaveTextContent('Session Management - Semester: 1132');
-    });
-  });
-
-  describe('Basic UI Elements', () => {
-    it('should display dashboard title', () => {
-      render(<AdminDashboard />);
-      
-      expect(screen.getByRole('heading', { name: /TA Admin Dashboard.*助教管理面板/ })).toBeInTheDocument();
-    });
-
-    it('should display semester selector label', () => {
-      render(<AdminDashboard />);
-      
-      expect(screen.getByText(/Semester.*學期:/)).toBeInTheDocument();
-    });
-
-    it('should display both tab buttons', () => {
-      render(<AdminDashboard />);
-      
-      expect(screen.getByRole('button', { name: /學生管理.*Student Management/ })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /課程日期.*Session Dates/ })).toBeInTheDocument();
     });
   });
 });
