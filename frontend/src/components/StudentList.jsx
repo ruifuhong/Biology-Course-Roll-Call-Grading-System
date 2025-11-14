@@ -401,8 +401,9 @@ function StudentForm({ onSubmit, onCancel, semester, mode = 'add', initialData =
       <form onSubmit={handleSubmit}>
         <div className="form-grid">
           <div className="form-group">
-            <label>Student ID / 學號 *</label>
+            <label htmlFor="student_id_input">Student ID / 學號 *</label>
             <input
+              id="student_id_input"
               type="text"
               name="student_id"
               value={formData.student_id}
@@ -413,8 +414,9 @@ function StudentForm({ onSubmit, onCancel, semester, mode = 'add', initialData =
             {mode === 'edit' && <small>Student ID cannot be changed / 學號無法修改</small>}
           </div>
           <div className="form-group">
-            <label>Name / 姓名 *</label>
+            <label htmlFor="student_name_input">Name / 姓名 *</label>
             <input
+              id="student_name_input"
               type="text"
               name="name"
               value={formData.name}
@@ -423,8 +425,9 @@ function StudentForm({ onSubmit, onCancel, semester, mode = 'add', initialData =
             />
           </div>
           <div className="form-group">
-            <label>Department / 系別 *</label>
+            <label htmlFor="student_department_input">Department / 系別 *</label>
             <input
+              id="student_department_input"
               type="text"
               name="department"
               value={formData.department}
@@ -433,8 +436,9 @@ function StudentForm({ onSubmit, onCancel, semester, mode = 'add', initialData =
             />
           </div>
           <div className="form-group">
-            <label>Group Name / 組別 *</label>
+            <label htmlFor="group_name_input">Group Name / 組別 *</label>
             <input
+              id="group_name_input"
               type="text"
               name="group_name"
               value={formData.group_name}
