@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import '../styles/SessionManagement.css';
 
+ const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const DateInputForm = ({ courseType, onSubmit, loading, semester }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -82,7 +84,7 @@ const DateInputForm = ({ courseType, onSubmit, loading, semester }) => {
   );
 };
 
-const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, loading, semester }) => {
+const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAttendance, loading, semester }) => {
   const [editingDate, setEditingDate] = useState(null);
   const [editDate, setEditDate] = useState('');
 
@@ -132,6 +134,8 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, loading, sem
     setEditDate('');
   };
 
+
+  
   return (
     <div className="session-dates-table">
       <h3>{courseType === 'lecture' ? 'Lecture' : 'Discussion'} Dates ({dates.length})</h3>
@@ -178,15 +182,14 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, loading, sem
                   <td>
                     <div className="attendance-status">
                       <span className={`status-indicator ${isActive ? 'active' : 'inactive'}`}>
-                        {isActive ? '🟢 Open' : '🔴 Closed'}
+                        {isActive ? '🟢 開放中 Open' : '🔴 關閉中 Closed'}
                       </span>
                       <button
-                        // onClick={() => onToggleAttendance(courseType, currentDate, isActive)}  // COMMENTED - function disabled
+                        onClick={() => onToggleAttendance(courseType, session.actual_date, isActive)}
                         className={`btn btn-toggle ${isActive ? 'btn-disable' : 'btn-enable'}`}
                         title={isActive ? 'Click to disable attendance submission' : 'Click to enable attendance submission'}
-                        disabled
                       >
-                        {isActive ? '🔒 Close' : '🔓 Open'}
+                        {isActive ? '🔒 關閉點名 Close' : '🔓 開放點名 Open'}
                       </button>
                     </div>
                   </td>
@@ -240,8 +243,6 @@ export default function SessionManagement({ semester }) {
   const [message, setMessage] = useState('');
   const [activeTab, setActiveTab] = useState('lecture');
 
-  const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
   useEffect(() => {
     if (semester) {
       fetchSessionDates();
@@ -251,7 +252,6 @@ export default function SessionManagement({ semester }) {
   const fetchSessionDates = async () => {
     setLoading(true);
     try {
-      // Only fetch lecture dates - discussion functionality temporarily disabled
       const lectureResponse = await fetch(`${apiBase}/sessions/lecture-dates/${semester}`);
 
       if (lectureResponse.ok) {
@@ -259,7 +259,6 @@ export default function SessionManagement({ semester }) {
         setLectureDates(lectureData);
       }
 
-      // Discussion dates - placeholder for future implementation
       setDiscussionDates([]);
     } catch (error) {
       setMessage('Error loading session dates: ' + error.message);
@@ -418,44 +417,37 @@ export default function SessionManagement({ semester }) {
     }
   };
 
-  // COMMENTED OUT - TOGGLE OPERATION
-  // const handleToggleAttendance = async (courseType, sessionOrder, currentStatus) => {
-  //   const newStatus = !currentStatus;
-  //   const action = newStatus ? 'enable' : 'disable';
-    
-  //   if (!confirm(`Are you sure you want to ${action} attendance submission for this session?`)) return;
+   const handleToggleAttendance = async (courseType, selectedDate, currentStatus) => {
+    const newStatus = !currentStatus;
 
-  //   setLoading(true);
-  //   try {
-  //     const endpoint = courseType === 'lecture' ? 'lecture-dates' : 'discussion-dates';
-  //     const response = await fetch(`${apiBase}/sessions/${endpoint}/${semester}/${sessionOrder}/toggle`, {
-  //       method: 'PATCH',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({ isActive: newStatus })
-  //     });
+    try {
+      const endpoint = courseType === 'lecture' ? 'lecture-dates' : 'discussion-dates';
+      const response = await fetch(`${apiBase}/sessions/${endpoint}/${semester}/${selectedDate}/toggle`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: newStatus })
+      });
 
-  //     if (response.ok) {
-  //       const updatedSession = await response.json();
-  //       if (courseType === 'lecture') {
-  //         setLectureDates(lectureDates.map(d => 
-  //           d.session_order === sessionOrder ? updatedSession : d
-  //         ));
-  //       } else {
-  //         setDiscussionDates(discussionDates.map(d => 
-  //           d.session_order === sessionOrder ? updatedSession : d
-  //         ));
-  //       }
-  //       setMessage(`Attendance submission ${newStatus ? 'enabled' : 'disabled'} for Session ${sessionOrder}`);
-  //     } else {
-  //       const error = await response.json();
-  //       setMessage('Error: ' + error.error);
-  //     }
-  //   } catch (error) {
-  //     setMessage('Error toggling attendance: ' + error.message);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+      if (response.ok) {
+        const updatedSession = await response.json();
+        if (courseType === 'lecture') {
+          setLectureDates(lectureDates.map(d => 
+            d.actual_date === selectedDate ? updatedSession : d
+          ));
+        } else {
+          setDiscussionDates(discussionDates.map(d => 
+            d.actual_date === selectedDate ? updatedSession : d
+          ));
+        }
+        setMessage(`Attendance submission ${newStatus ? 'enabled' : 'disabled'} for Session ${selectedDate}`);
+      } else {
+        const error = await response.json();
+        setMessage('Error: ' + error.error);
+      }
+    } catch (error) {
+      setMessage('Error toggling attendance: ' + error.message);
+    } 
+  };
 
   return (
     <div className="session-management">
@@ -495,7 +487,7 @@ export default function SessionManagement({ semester }) {
           dates={lectureDates}
           onUpdate={handleUpdateDate}
           onDelete={handleDeleteDate}
-          // onToggleAttendance={handleToggleAttendance}  // COMMENTED - toggle function disabled
+          onToggleAttendance={handleToggleAttendance}
           loading={loading}
           semester={semester}
         />

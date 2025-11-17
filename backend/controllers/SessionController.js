@@ -54,7 +54,6 @@ export async function getLectureDates(req, res) {
     
     const dates = await SessionDateModel.getLectureDatesBySemester(semester);
     
-    // Add session_order based on chronological order
     const datesWithOrder = dates
       .sort((a, b) => new Date(a.actual_date) - new Date(b.actual_date))
       .map((date, index) => ({
@@ -114,49 +113,51 @@ export async function deleteLectureDate(req, res) {
 
 // REMOVED - deleteDiscussionDate functionality temporarily disabled
 
-// STILL COMMENTED OUT - TOGGLE OPERATIONS
-/*
 export async function toggleLectureAttendance(req, res) {
   try {
-    const { semester, sessionOrder } = req.params;
+    const { semester, selectedDate } = req.params;
     const { isActive } = req.body;
-    
+
     if (typeof isActive !== 'boolean') {
       return res.status(400).json({ error: 'isActive must be a boolean value' });
     }
-    
-    const updatedDate = await SessionDateModel.toggleLectureAttendance(semester, parseInt(sessionOrder), isActive);
-    
+
+    const updatedDate = await SessionDateModel.toggleLectureAttendance(
+      semester,
+      selectedDate,
+      isActive
+    );
+
     if (!updatedDate) {
       return res.status(404).json({ error: 'Lecture date not found' });
     }
-    
+
     res.json(updatedDate);
+
   } catch (error) {
-    console.error('SessionController toggleLectureAttendance error:', error);
+    console.error("🔥 Controller error:", error);
     res.status(500).json({ error: error.message });
   }
 }
 
-export async function toggleDiscussionAttendance(req, res) {
-  try {
-    const { semester, sessionOrder } = req.params;
-    const { isActive } = req.body;
+// export async function toggleDiscussionAttendance(req, res) {
+//   try {
+//     const { semester, sessionOrder } = req.params;
+//     const { isActive } = req.body;
     
-    if (typeof isActive !== 'boolean') {
-      return res.status(400).json({ error: 'isActive must be a boolean value' });
-    }
+//     if (typeof isActive !== 'boolean') {
+//       return res.status(400).json({ error: 'isActive must be a boolean value' });
+//     }
     
-    const updatedDate = await SessionDateModel.toggleDiscussionAttendance(semester, parseInt(sessionOrder), isActive);
+//     const updatedDate = await SessionDateModel.toggleDiscussionAttendance(semester, parseInt(sessionOrder), isActive);
     
-    if (!updatedDate) {
-      return res.status(404).json({ error: 'Discussion date not found' });
-    }
+//     if (!updatedDate) {
+//       return res.status(404).json({ error: 'Discussion date not found' });
+//     }
     
-    res.json(updatedDate);
-  } catch (error) {
-    console.error('SessionController toggleDiscussionDate error:', error);
-    res.status(500).json({ error: error.message });
-  }
-}
-*/
+//     res.json(updatedDate);
+//   } catch (error) {
+//     console.error('SessionController toggleDiscussionDate error:', error);
+//     res.status(500).json({ error: error.message });
+//   }
+// }

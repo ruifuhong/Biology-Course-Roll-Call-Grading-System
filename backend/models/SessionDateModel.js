@@ -121,19 +121,19 @@ export async function deleteLectureDate(semester, actualDate) {
 //   }
 // }
 
-// export async function toggleLectureAttendance(semester, sessionOrder, isActive) {
-//   try {
-//     const result = await pool.query(
-//       'UPDATE "Roll-Call".lecture_dates SET is_active = $1 WHERE semester = $2 AND session_order = $3 RETURNING *',
-//       [isActive, semester, sessionOrder]
-//     );
-    
-//     return result.rows[0];
-//   } catch (error) {
-//     console.error('SessionDateModel toggleLectureAttendance error:', error);
-//     throw error;
-//   }
-// }
+export async function toggleLectureAttendance(semester, selectedDate, isActive) {
+  try {
+    console.log(`line 127 ${semester}, ${selectedDate}, ${isActive}`);
+    const result = await pool.query(
+      'UPDATE "Roll-Call".lecture_dates SET is_active = $1 WHERE semester = $2 AND actual_date = $3 RETURNING *',
+      [isActive, semester, selectedDate]
+    );
+    return result.rows[0];
+  } catch (error) {
+    console.error('SessionDateModel toggleLectureAttendance error:', error);
+    throw error;
+  }
+}
 
 // export async function toggleDiscussionAttendance(semester, sessionOrder, isActive) {
 //   try {
