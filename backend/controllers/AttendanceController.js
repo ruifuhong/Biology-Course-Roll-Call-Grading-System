@@ -46,45 +46,46 @@ export const submitLectureAttendance = async (req, res) => {
 };
 
 export const submitDiscussionAttendance = async (req, res) => {
-    try {
-      const { semester, studentId, sessionOrder, status = 'present' } = req.body;
+  try {
+    const { semester, studentId, actual_date, status = 'present' } = req.body;
 
-      if (!semester || !studentId || !sessionOrder) {
-        return res.status(400).json({ 
-          error: 'Semester, student ID, and session order are required' 
-        });
-      }
+    console.log('Discussion attendance request:', { semester, studentId, actual_date, status });
 
-      const student = await StudentModel.findStudentById(semester, studentId);
-      if (!student) {
-        return res.status(404).json({ error: 'Student not found' });
-      }
-
-      if (sessionOrder < 1 || sessionOrder > 18) {
-        return res.status(400).json({ 
-          error: 'Session order must be between 1 and 18' 
-        });
-      }
-
-      const attendance = await AttendanceModel.markDiscussionAttendance(
-        semester, 
-        studentId, 
-        sessionOrder, 
-        status
-      );
-
-      res.status(200).json({
-        message: 'Discussion attendance recorded successfully',
-        attendance,
-        student: {
-          student_id: student.student_id,
-          name: student.name
-        }
+    if (!semester || !studentId || !actual_date) {
+      return res.status(400).json({ 
+        error: 'Semester, student ID, and actual_date are required' 
       });
+    }
+    const student = await StudentModel.findStudentById(semester, studentId);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    console.log('Student found:', student);
+
+    console.log('About to mark attendance...');
+    const attendance = await AttendanceModel.markDiscussionAttendance(
+      semester,
+      studentId,
+      actual_date,
+      status
+    );
+
+    console.log('Attendance marked successfully:', attendance);
+
+    res.status(200).json({
+      message: 'Lecture attendance recorded successfully',
+      attendance,
+      student: {
+        student_id: student.student_id,
+        name: student.name
+      }
+    });
 
   } catch (error) {
-    console.error('Error submitting discussion attendance:', error);
-    res.status(500).json({ error: 'Failed to submit discussion attendance' });
+    console.error('Error submitting lecture attendance:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: 'Failed to submit lecture attendance', details: error.message });
   }
 };
 

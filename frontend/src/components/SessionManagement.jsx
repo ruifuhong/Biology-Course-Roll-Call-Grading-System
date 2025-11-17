@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import '../styles/SessionManagement.css';
 
- const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const DateInputForm = ({ courseType, onSubmit, loading, semester }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -133,8 +133,6 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAtte
     setEditingDate(null);
     setEditDate('');
   };
-
-
   
   return (
     <div className="session-dates-table">
@@ -259,7 +257,13 @@ export default function SessionManagement({ semester }) {
         setLectureDates(lectureData);
       }
 
-      setDiscussionDates([]);
+      const discussionResponse = await fetch(`${apiBase}/sessions/discussion-dates/${semester}`);
+      if (discussionResponse.ok) {
+        const discussionData = await discussionResponse.json();
+        setDiscussionDates(discussionData);
+      } else {
+        setDiscussionDates([]);
+      }
     } catch (error) {
       setMessage('Error loading session dates: ' + error.message);
     } finally {
@@ -316,11 +320,6 @@ export default function SessionManagement({ semester }) {
       return;
     }
 
-    if (courseType !== 'lecture') {
-      setMessage('Discussion functionality is temporarily disabled. Focus on lectures only.');
-      return;
-    }
-
     for (const date of dates) {
       const validation = validateDateForSemester(date, semester);
       if (!validation.isValid) {
@@ -331,7 +330,8 @@ export default function SessionManagement({ semester }) {
 
     setLoading(true);
     try {
-      const response = await fetch(`${apiBase}/sessions/lecture-dates`, {
+      const endpoint = courseType === 'lecture' ? 'lecture-dates' : 'discussion-dates';
+      const response = await fetch(`${apiBase}/sessions/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ semester, dates })
@@ -339,8 +339,13 @@ export default function SessionManagement({ semester }) {
 
       if (response.ok) {
         const result = await response.json();
-        setLectureDates(result);
-        setMessage('Lecture dates set successfully');
+        if (courseType === 'lecture') {
+          setLectureDates(result);
+          setMessage('Lecture dates set successfully');
+        } else {
+          setDiscussionDates(result);
+          setMessage('Discussion dates set successfully');
+        }
       } else {
         const error = await response.json();
         setMessage('Error: ' + error.error);
@@ -353,11 +358,6 @@ export default function SessionManagement({ semester }) {
   };
 
   const handleUpdateDate = async (courseType, oldDate, newDate) => {
-    if (courseType !== 'lecture') {
-      setMessage('Discussion functionality is temporarily disabled. Focus on lectures only.');
-      return;
-    }
-
     const validation = validateDateForSemester(newDate, semester);
     if (!validation.isValid) {
       setMessage(validation.message);
@@ -366,7 +366,8 @@ export default function SessionManagement({ semester }) {
 
     setLoading(true);
     try {
-      const response = await fetch(`${apiBase}/sessions/lecture-dates/${semester}/${oldDate}`, {
+      const endpoint = courseType === 'lecture' ? 'lecture-dates' : 'discussion-dates';
+      const response = await fetch(`${apiBase}/sessions/${endpoint}/${semester}/${oldDate}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ actualDate: newDate })
@@ -374,10 +375,17 @@ export default function SessionManagement({ semester }) {
 
       if (response.ok) {
         const updatedDate = await response.json();
-        setLectureDates(lectureDates.map(d => 
-          d.actual_date === oldDate ? updatedDate : d
-        ));
-        setMessage('Date updated successfully');
+        if (courseType === 'lecture') {
+          setLectureDates(lectureDates.map(d => 
+            d.actual_date === oldDate ? updatedDate : d
+          ));
+          setMessage('Date updated successfully');
+        } else {
+          setDiscussionDates(discussionDates.map(d => 
+            d.actual_date === oldDate ? updatedDate : d
+          ));
+          setMessage('Discussion date updated successfully');
+        }
       } else {
         const error = await response.json();
         setMessage('Error: ' + error.error);
@@ -392,20 +400,21 @@ export default function SessionManagement({ semester }) {
   const handleDeleteDate = async (courseType, actualDate) => {
     if (!confirm('Are you sure you want to delete this session date?')) return;
 
-    if (courseType !== 'lecture') {
-      setMessage('Discussion functionality is temporarily disabled. Focus on lectures only.');
-      return;
-    }
-
     setLoading(true);
     try {
-      const response = await fetch(`${apiBase}/sessions/lecture-dates/${semester}/${actualDate}`, {
+      const endpoint = courseType === 'lecture' ? 'lecture-dates' : 'discussion-dates';
+      const response = await fetch(`${apiBase}/sessions/${endpoint}/${semester}/${actualDate}`, {
         method: 'DELETE'
       });
 
       if (response.ok) {
-        setLectureDates(lectureDates.filter(d => d.actual_date !== actualDate));
-        setMessage('Session date deleted successfully');
+        if (courseType === 'lecture') {
+          setLectureDates(lectureDates.filter(d => d.actual_date !== actualDate));
+          setMessage('Session date deleted successfully');
+        } else {
+          setDiscussionDates(discussionDates.filter(d => d.actual_date !== actualDate));
+          setMessage('Discussion session date deleted successfully');
+        }
       } else {
         const error = await response.json();
         setMessage('Error: ' + error.error);
@@ -492,10 +501,15 @@ export default function SessionManagement({ semester }) {
           semester={semester}
         />
       ) : (
-        <div className="discussion-placeholder">
-          <h3>討論課 (Discussion) - Coming Soon</h3>
-          <p>Discussion functionality is temporarily disabled. Focus on lectures first.</p>
-        </div>
+        <SessionDatesTable 
+          courseType={activeTab}
+          dates={discussionDates}
+          onUpdate={handleUpdateDate}
+          onDelete={handleDeleteDate}
+          onToggleAttendance={handleToggleAttendance}
+          loading={loading}
+          semester={semester}
+        />
       )}
     </div>
   );

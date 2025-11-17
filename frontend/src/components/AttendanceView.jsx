@@ -20,9 +20,18 @@ export default function AttendanceView({ semester }) {
   const fetchAttendanceData = async () => {
     setLoading(true);
     try {
+      let attendanceUrl, datesUrl;
+      if (courseType === 'lecture') {
+        attendanceUrl = `${apiBase}/attendance/lecture/${semester}`;
+        datesUrl = `${apiBase}/sessions/lecture-dates/${semester}`;
+      } else {
+        attendanceUrl = `${apiBase}/attendance/discussion/${semester}`;
+        datesUrl = `${apiBase}/sessions/discussion-dates/${semester}`;
+      }
+
       const [attendanceResponse, datesResponse] = await Promise.all([
-        fetch(`${apiBase}/attendance/lecture/${semester}`),
-        fetch(`${apiBase}/sessions/lecture-dates/${semester}`)
+        fetch(attendanceUrl),
+        fetch(datesUrl)
       ]);
 
       if (attendanceResponse.ok) {
