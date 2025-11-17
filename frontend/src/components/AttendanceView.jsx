@@ -86,44 +86,44 @@ export default function AttendanceView({ semester }) {
 }
 
 function AttendanceTable({ attendanceData, sessionDates, courseType, loading, onRefresh }) {
-  const calculateAttendanceStats = (attendanceRecord) => {
+  const groupAttendanceByStudent = () => {
+    const grouped = {};
+    attendanceData.forEach(record => {
+      if (!grouped[record.student_id]) {
+        grouped[record.student_id] = {
+          ...record,
+          attendance: {}
+        };
+      }
+      if (record.actual_date) {
+        grouped[record.student_id].attendance[record.actual_date] = record.status;
+      }
+    });
+    return Object.values(grouped);
+  };
+
+  const calculateAttendanceStats = (attendanceMap) => {
     let present = 0;
     let absent = 0;
-    
-    for (let i = 1; i <= 18; i++) {
-      const columnName = `date${i}`;
-      const status = attendanceRecord[columnName];
-      if (status === 'present') {
-        present++;
-      } else if (status === 'absent') {
-        absent++;
-      }
-    }
-    
+    Object.values(attendanceMap).forEach(status => {
+      if (status === 'present') present++;
+      else if (status === 'absent') absent++;
+    });
     return { present, absent };
   };
 
-  const getDateHeader = (sessionOrder) => {
-    const sessionDate = sessionDates.find(d => d.session_order === sessionOrder);
-    if (sessionDate) {
-      const date = new Date(sessionDate.actual_date);
-      return date.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' });
-    }
-    return `date${sessionOrder}`;
-  };
-
+  const groupedStudents = groupAttendanceByStudent();
   return (
     <div className="attendance-table-view">
       <div className="attendance-header">
-        <h3>{courseType === 'lecture' ? 'Lecture / 正課' : 'Discussion / 討論課'} Attendance - {attendanceData.length} students / 出席 - {attendanceData.length} 學生</h3>
+        <h3>{courseType === 'lecture' ? 'Lecture / 正課' : 'Discussion / 討論課'} Attendance - {groupedStudents.length} students / 出席 - {groupedStudents.length} 學生</h3>
         <button onClick={onRefresh} className="btn btn-secondary" disabled={loading}>
           {loading ? 'Loading... / 載入中...' : '🔄 Refresh / 重新整理'}
         </button>
       </div>
-      
       {loading ? (
         <div className="loading">Loading attendance data... / 載入出席資料中...</div>
-      ) : attendanceData.length === 0 ? (
+      ) : groupedStudents.length === 0 ? (
         <div className="no-data">No attendance data found for this semester. / 本學期未找到出席資料。</div>
       ) : (
         <div className="attendance-table-container">
@@ -134,32 +134,31 @@ function AttendanceTable({ attendanceData, sessionDates, courseType, loading, on
                 <th rowSpan="2">Student ID / 學號</th>
                 <th rowSpan="2">系級 / Department</th>
                 <th rowSpan="2">Name / 姓名</th>
-                <th colSpan="18">Session Dates / 課程日期</th>
+                <th colSpan={sessionDates.length}>Session Dates / 課程日期</th>
                 <th rowSpan="2">出席次數 / Present</th>
                 <th rowSpan="2">缺席次數 / Absent</th>
               </tr>
               <tr>
-                {Array.from({ length: 18 }, (_, i) => (
-                  <th key={i + 1} className="date-header">
-                    {getDateHeader(i + 1)}
+                {sessionDates.map((session, idx) => (
+                  <th key={session.actual_date} className="date-header">
+                    {new Date(session.actual_date).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {attendanceData.map(record => {
-                const stats = calculateAttendanceStats(record);
+              {groupedStudents.map(student => {
+                const stats = calculateAttendanceStats(student.attendance);
                 return (
-                  <tr key={record.student_id}>
-                    <td>{record.group_name || 'N/A'}</td>
-                    <td>{record.student_id}</td>
-                    <td>{record.department}</td>
-                    <td>{record.name}</td>
-                    {Array.from({ length: 18 }, (_, i) => {
-                      const columnName = `date${i + 1}`;
-                      const status = record[columnName];
+                  <tr key={student.student_id}>
+                    <td>{student.group_name || 'N/A'}</td>
+                    <td>{student.student_id}</td>
+                    <td>{student.department}</td>
+                    <td>{student.name}</td>
+                    {sessionDates.map(session => {
+                      const status = student.attendance[session.actual_date];
                       return (
-                        <td key={i + 1} className={`attendance-cell ${status}`}>
+                        <td key={session.actual_date} className={`attendance-cell ${status}`}>
                           {status === 'present' ? '✓' : status === 'absent' ? '✗' : '-'}
                         </td>
                       );
