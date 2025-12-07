@@ -20,10 +20,9 @@ export default defineConfig({
     reporter: ['text', 'html'],
     reportsDirectory: './coverage',
     include: [
-      'src/utils/semesterUtils.js',
-      'src/components/AdminDashboard.jsx',
-      'src/components/SessionManagement.jsx'
-  ],
+      'src/utils/*',
+      'src/components/*'
+    ],
     exclude: [
       'node_modules/**',
       'src/__tests__/**',
