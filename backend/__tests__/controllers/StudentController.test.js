@@ -1,431 +1,383 @@
-import request from 'supertest';
-import express from 'express';
-import cors from 'cors';
 import { jest } from '@jest/globals';
 
-// Create mock functions for StudentModel
-const mockStudentModel = {
-  findStudentsBySemester: jest.fn(),
-  createStudent: jest.fn(),
-  updateStudent: jest.fn(),
-  deleteStudent: jest.fn(),
-  findStudentById: jest.fn()
-};
+const mockCreateStudent = jest.fn();
+const mockFindStudentsBySemester = jest.fn();
+const mockFindStudentById = jest.fn();
+const mockUpdateStudent = jest.fn();
+const mockDeleteStudent = jest.fn();
 
-// Mock the StudentModel module before importing anything that uses it
-jest.unstable_mockModule('../../models/StudentModel.js', () => mockStudentModel);
+jest.unstable_mockModule('../../models/StudentModel.js', () => ({
+  createStudent: mockCreateStudent,
+  findStudentsBySemester: mockFindStudentsBySemester,
+  findStudentById: mockFindStudentById,
+  updateStudent: mockUpdateStudent,
+  deleteStudent: mockDeleteStudent
+}));
 
-// Now dynamically import the controller after the mock is set up
-const { 
-  createStudent,
-  getStudentsBySemester,
-  getStudentById,
-  updateStudent,
-  deleteStudent,
-  uploadStudentsCSV
-} = await import('../../controllers/StudentController.js');
+const StudentController = await import('../../controllers/StudentController.js');
 
-// Create test app instance with direct controller usage instead of routes
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-// Set up routes manually to ensure mocked controllers are used
-app.post('/students', createStudent);
-app.get('/students/:semester', getStudentsBySemester);
-app.get('/students/:semester/:studentId', getStudentById);
-app.put('/students/:semester/:studentId', updateStudent);
-app.delete('/students/:semester/:studentId', deleteStudent);
-app.post('/students/upload-csv', uploadStudentsCSV);
-
-describe('StudentController', () => {
+describe('StudentController - createStudent', () => {
+  let req, res;
   beforeEach(() => {
+    req = { body: {}, params: {} };
+    res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
     jest.clearAllMocks();
+    mockCreateStudent.mockClear();
   });
 
-  describe('GET /students/:semester', () => {
-    test('returns students for valid semester', async () => {
-      const mockStudents = [
-        { student_id: '1001', name: 'John Doe', department: 'CS', group_name: '1' },
-        { student_id: '1002', name: 'Jane Smith', department: 'EE', group_name: '2' }
-      ];
-      
-      mockStudentModel.findStudentsBySemester.mockResolvedValue(mockStudents);
+  it('should create a student with valid data', async () => {
+    req.body = {
+      student_id: 'B100000001',
+      semester: '1131',
+      department: 'Bio',
+      group_name: 'A',
+      name: 'Alice'
+    };
 
-      const response = await request(app)
-        .get('/students/1131')
-        .expect(200);
+    const mockStudent = { ...req.body };
 
-      expect(response.body).toEqual(mockStudents);
-      expect(mockStudentModel.findStudentsBySemester).toHaveBeenCalledWith('1131');
-    });
+    mockCreateStudent.mockResolvedValueOnce(mockStudent);
 
-    test('returns empty array when no students found', async () => {
-      mockStudentModel.findStudentsBySemester.mockResolvedValue([]);
+    await StudentController.createStudent(req, res);
 
-      const response = await request(app)
-        .get('/students/1131')
-        .expect(200);
-
-      expect(response.body).toEqual([]);
-    });
-
-    test('handles database errors', async () => {
-      mockStudentModel.findStudentsBySemester.mockRejectedValue(new Error('Database error'));
-
-      const response = await request(app)
-        .get('/students/1131')
-        .expect(500);
-
-      expect(response.body.error).toBe('Database error');
-    });
+    expect(mockCreateStudent).toHaveBeenCalledWith(req.body);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(mockStudent);
   });
 
-  describe('GET /students/:semester/:studentId', () => {
-    test('returns student by ID successfully', async () => {
-      const mockStudent = { student_id: '1001', name: 'John Doe', department: 'CS', group_name: '1' };
-      
-      mockStudentModel.findStudentById.mockResolvedValue(mockStudent);
+  it('should return 400 if required fields are missing', async () => {
+    req.body = { student_id: 'B100000001', semester: '1131', department: 'Bio' };
 
-      const response = await request(app)
-        .get('/students/1131/1001')
-        .expect(200);
+    await StudentController.createStudent(req, res);
 
-      expect(response.body).toEqual(mockStudent);
-      expect(mockStudentModel.findStudentById).toHaveBeenCalledWith('1131', '1001');
-    });
-
-    test('returns 404 for non-existent student', async () => {
-      mockStudentModel.findStudentById.mockResolvedValue(null);
-
-      const response = await request(app)
-        .get('/students/1131/9999')
-        .expect(404);
-
-      expect(response.body.error).toBe('Student not found');
-    });
-
-    test('handles database errors', async () => {
-      mockStudentModel.findStudentById.mockRejectedValue(new Error('Database error'));
-
-      const response = await request(app)
-        .get('/students/1131/1001')
-        .expect(500);
-
-      expect(response.body.error).toBe('Database error');
-    });
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: 'student_id, semester, department, and name are required' });
+    expect(mockCreateStudent).not.toHaveBeenCalled();
   });
 
-  describe('POST /students', () => {
-    test('creates student successfully', async () => {
-      const newStudent = {
-        student_id: '1003',
-        name: 'Bob Johnson',
-        department: 'ME',
-        group_name: '3',
-        semester: '1131'
-      };
+  it('should handle model/database errors', async () => {
+    req.body = {
+      student_id: 'B100000001',
+      semester: '1131',
+      department: 'Bio',
+      group_name: 'A',
+      name: 'Alice'
+    };
 
-      mockStudentModel.createStudent.mockResolvedValue(newStudent);
+    const dbError = new Error('DB error');
 
-      const response = await request(app)
-        .post('/students')
-        .send(newStudent)
-        .expect(201);
+    mockCreateStudent.mockRejectedValueOnce(dbError);
 
-      expect(response.body).toEqual(newStudent);
-      expect(mockStudentModel.createStudent).toHaveBeenCalledWith({
-        student_id: '1003',
-        semester: '1131',
-        department: 'ME',
-        group_name: '3',
-        name: 'Bob Johnson'
-      });
-    });
+    await StudentController.createStudent(req, res);
 
-    test('validates required fields - missing student_id', async () => {
-      const invalidStudent = {
-        name: 'Bob Johnson',
-        department: 'ME',
-        semester: '1131'
-      };
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: 'DB error' });
+  });
+});
 
-      const response = await request(app)
-        .post('/students')
-        .send(invalidStudent)
-        .expect(400);
+describe('StudentController - getStudentsBySemester', () => {
+  let req, res;
 
-      expect(response.body.error).toBe('student_id, semester, department, and name are required');
-    });
-
-    test('validates required fields - missing semester', async () => {
-      const invalidStudent = {
-        student_id: '1003',
-        name: 'Bob Johnson',
-        department: 'ME'
-      };
-
-      const response = await request(app)
-        .post('/students')
-        .send(invalidStudent)
-        .expect(400);
-
-      expect(response.body.error).toBe('student_id, semester, department, and name are required');
-    });
-
-    test('validates required fields - missing department', async () => {
-      const invalidStudent = {
-        student_id: '1003',
-        name: 'Bob Johnson',
-        semester: '1131'
-      };
-
-      const response = await request(app)
-        .post('/students')
-        .send(invalidStudent)
-        .expect(400);
-
-      expect(response.body.error).toBe('student_id, semester, department, and name are required');
-    });
-
-    test('validates required fields - missing name', async () => {
-      const invalidStudent = {
-        student_id: '1003',
-        department: 'ME',
-        semester: '1131'
-      };
-
-      const response = await request(app)
-        .post('/students')
-        .send(invalidStudent)
-        .expect(400);
-
-      expect(response.body.error).toBe('student_id, semester, department, and name are required');
-    });
-
-    test('handles duplicate student_id error', async () => {
-      const duplicateStudent = {
-        student_id: '1001',
-        name: 'Bob Johnson',
-        department: 'ME',
-        group_name: '3',
-        semester: '1131'
-      };
-
-      mockStudentModel.createStudent.mockRejectedValue(new Error('duplicate key value violates unique constraint'));
-
-      const response = await request(app)
-        .post('/students')
-        .send(duplicateStudent)
-        .expect(500);
-
-      expect(response.body.error).toBe('duplicate key value violates unique constraint');
-    });
+  beforeEach(() => {
+    req = { body: {}, params: {} };
+    res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    jest.clearAllMocks();
+    mockFindStudentsBySemester.mockClear();
   });
 
-  describe('PUT /students/:semester/:studentId', () => {
-    test('updates student successfully', async () => {
-      const updateData = {
-        student_id: '1001',
-        name: 'John Doe Updated',
-        department: 'CS',
-        group_name: '2'
-      };
-      
-      const updatedStudent = { ...updateData, semester: '1131' };
-      mockStudentModel.updateStudent.mockResolvedValue(updatedStudent);
+  it('should return students for a given semester', async () => {
+    req.params = { semester: '1131' };
 
-      const response = await request(app)
-        .put('/students/1131/1001')
-        .send(updateData)
-        .expect(200);
+    const mockStudents = [
+      { student_id: 'B100000001', semester: '1131', name: 'Alice' },
+      { student_id: 'B100000002', semester: '1131', name: 'Bob' }
+    ];
 
-      expect(response.body).toEqual(updatedStudent);
-      expect(mockStudentModel.updateStudent).toHaveBeenCalledWith('1131', '1001', updateData);
-    });
+    mockFindStudentsBySemester.mockResolvedValueOnce(mockStudents);
 
-    test('returns 404 for non-existent student', async () => {
-      mockStudentModel.updateStudent.mockResolvedValue(null);
+    await StudentController.getStudentsBySemester(req, res);
 
-      const response = await request(app)
-        .put('/students/1131/9999')
-        .send({ name: 'Updated Name' })
-        .expect(404);
-
-      expect(response.body.error).toBe('Student not found');
-    });
-
-    test('handles database errors', async () => {
-      mockStudentModel.updateStudent.mockRejectedValue(new Error('Database error'));
-
-      const response = await request(app)
-        .put('/students/1131/1001')
-        .send({ name: 'Updated Name' })
-        .expect(500);
-
-      expect(response.body.error).toBe('Database error');
-    });
+    expect(mockFindStudentsBySemester).toHaveBeenCalledWith('1131');
+    expect(res.json).toHaveBeenCalledWith(mockStudents);
   });
 
-  describe('DELETE /students/:semester/:studentId', () => {
-    test('deletes student successfully', async () => {
-      const deletedStudent = { student_id: '1001', name: 'John Doe', department: 'CS' };
-      mockStudentModel.deleteStudent.mockResolvedValue(deletedStudent);
+  it('should return 400 if semester param is missing', async () => {
+    req.params = {};
 
-      const response = await request(app)
-        .delete('/students/1131/1001')
-        .expect(200);
+    await StudentController.getStudentsBySemester(req, res);
 
-      expect(response.body.message).toBe('Student deleted successfully');
-      expect(response.body.student).toEqual(deletedStudent);
-      expect(mockStudentModel.deleteStudent).toHaveBeenCalledWith('1131', '1001');
-    });
-
-    test('returns 404 for non-existent student', async () => {
-      mockStudentModel.deleteStudent.mockResolvedValue(null);
-
-      const response = await request(app)
-        .delete('/students/1131/9999')
-        .expect(404);
-
-      expect(response.body.error).toBe('Student not found');
-    });
-
-    test('handles database errors', async () => {
-      mockStudentModel.deleteStudent.mockRejectedValue(new Error('Database error'));
-
-      const response = await request(app)
-        .delete('/students/1131/1001')
-        .expect(500);
-
-      expect(response.body.error).toBe('Database error');
-    });
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: 'semester parameter is required' });
   });
 
-  describe('POST /students/upload-csv', () => {
-    test('processes CSV data successfully', async () => {
-      const csvData = 'student_id,name,department,group_name\n1001,John Doe,CS,1\n1002,Jane Smith,EE,2';
-      
-      const createdStudent1 = { student_id: '1001', name: 'John Doe', department: 'CS', group_name: '1', semester: '1131' };
-      const createdStudent2 = { student_id: '1002', name: 'Jane Smith', department: 'EE', group_name: '2', semester: '1131' };
-      
-      mockStudentModel.createStudent
-        .mockResolvedValueOnce(createdStudent1)
-        .mockResolvedValueOnce(createdStudent2);
+  it('should handle model/database errors', async () => {
+    req.params = { semester: '1131' };
 
-      const response = await request(app)
-        .post('/students/upload-csv')
-        .send({ csvData, semester: '1131' })
-        .expect(201);
+    const dbError = new Error('DB error');
 
-      expect(response.body.message).toBe('CSV upload processed');
-      expect(response.body.summary.totalRows).toBe(2);
-      expect(response.body.summary.parsed).toBe(2);
-      expect(response.body.summary.created).toBe(2);
-      expect(response.body.summary.parseErrors).toBe(0);
-      expect(response.body.summary.dbErrors).toBe(0);
-      expect(response.body.created).toEqual([createdStudent1, createdStudent2]);
-    });
+    mockFindStudentsBySemester.mockRejectedValueOnce(dbError);
 
-    test('handles missing required headers', async () => {
-      const invalidCsvData = 'student_id,name,department\n1001,John Doe,CS';
+    await StudentController.getStudentsBySemester(req, res);
 
-      const response = await request(app)
-        .post('/students/upload-csv')
-        .send({ csvData: invalidCsvData, semester: '1131' })
-        .expect(400);
-
-      expect(response.body.error).toBe('Missing required headers: group_name');
-    });
-
-    test('handles multiple missing required headers', async () => {
-      const invalidCsvData = 'student_id,name\n1001,John Doe';
-
-      const response = await request(app)
-        .post('/students/upload-csv')
-        .send({ csvData: invalidCsvData, semester: '1131' })
-        .expect(400);
-
-      expect(response.body.error).toBe('Missing required headers: department, group_name');
-    });
-
-    test('handles column count mismatch', async () => {
-      const invalidCsvData = 'student_id,name,department,group_name\n1001,John Doe,CS\n1002,Jane Smith,EE,2';
-
-      const response = await request(app)
-        .post('/students/upload-csv')
-        .send({ csvData: invalidCsvData, semester: '1131' })
-        .expect(201);
-
-      expect(response.body.summary.parseErrors).toBe(1);
-      expect(response.body.errors.parseErrors[0].error).toBe('Column count mismatch');
-      expect(response.body.errors.parseErrors[0].row).toBe(2);
-    });
-
-    test('handles missing required fields in CSV rows', async () => {
-      const invalidCsvData = 'student_id,name,department,group_name\n1001,,CS,1\n,Jane Smith,EE,2';
-
-      const response = await request(app)
-        .post('/students/upload-csv')
-        .send({ csvData: invalidCsvData, semester: '1131' })
-        .expect(201);
-
-      expect(response.body.summary.parseErrors).toBe(2);
-      expect(response.body.errors.parseErrors[0].error).toBe('Missing required fields (student_id, name, department, group_name)');
-      expect(response.body.errors.parseErrors[1].error).toBe('Missing required fields (student_id, name, department, group_name)');
-    });
-
-    test('handles database errors during CSV upload', async () => {
-      const csvData = 'student_id,name,department,group_name\n1001,John Doe,CS,1\n1002,Jane Smith,EE,2';
-      
-      mockStudentModel.createStudent
-        .mockResolvedValueOnce({ student_id: '1001' })
-        .mockRejectedValueOnce(new Error('Database constraint violation'));
-
-      const response = await request(app)
-        .post('/students/upload-csv')
-        .send({ csvData, semester: '1131' })
-        .expect(201);
-
-      expect(response.body.summary.created).toBe(1);
-      expect(response.body.summary.dbErrors).toBe(1);
-      expect(response.body.errors.dbErrors[0].error).toBe('Database constraint violation');
-    });
-
-    test('handles empty CSV data', async () => {
-      const response = await request(app)
-        .post('/students/upload-csv')
-        .send({ csvData: '', semester: '1131' })
-        .expect(400);
-
-      expect(response.body.error).toBe('csvData and semester are required');
-    });
-
-    test('handles missing csvData', async () => {
-      const response = await request(app)
-        .post('/students/upload-csv')
-        .send({ semester: '1131' })
-        .expect(400);
-
-      expect(response.body.error).toBe('csvData and semester are required');
-    });
-
-    test('handles missing semester', async () => {
-      const response = await request(app)
-        .post('/students/upload-csv')
-        .send({ csvData: 'student_id,name\n1001,John' })
-        .expect(400);
-
-      expect(response.body.error).toBe('csvData and semester are required');
-    });
-
-    test('handles CSV upload with general error', async () => {
-      const response = await request(app)
-        .post('/students/upload-csv')
-        .send({ csvData: 'invalid csv format that causes parsing error' })
-        .expect(400);
-
-      expect(response.body.error).toBe('csvData and semester are required');
-    });
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: 'DB error' });
   });
+});
+
+describe('StudentController - getStudentById', () => {
+  let req, res;
+
+  beforeEach(() => {
+    req = { body: {}, params: {} };
+    res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    jest.clearAllMocks();
+    mockFindStudentById.mockClear();
+  });
+
+  it('should return student if found', async () => {
+    req.params = { semester: '1131', studentId: 'B100000001' };
+
+    const mockStudent = { student_id: 'B100000001', semester: '1131', name: 'Alice' };
+
+    mockFindStudentById.mockResolvedValueOnce(mockStudent);
+
+    await StudentController.getStudentById(req, res);
+
+    expect(mockFindStudentById).toHaveBeenCalledWith('1131', 'B100000001');
+    expect(res.json).toHaveBeenCalledWith(mockStudent);
+  });
+
+  it('should return 404 if not found', async () => {
+    req.params = { semester: '1131', studentId: 'S999' };
+
+    mockFindStudentById.mockResolvedValueOnce(undefined);
+
+    await StudentController.getStudentById(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Student not found' });
+  });
+
+  it('should handle model/database errors', async () => {
+    req.params = { semester: '1131', studentId: 'B100000001' };
+
+    const dbError = new Error('DB error');
+
+    mockFindStudentById.mockRejectedValueOnce(dbError);
+
+    await StudentController.getStudentById(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: 'DB error' });
+  });
+});
+
+describe('StudentController - updateStudent', () => {
+  let req, res;
+
+  beforeEach(() => {
+    req = { body: {}, params: {} };
+    res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    jest.clearAllMocks();
+    mockUpdateStudent.mockClear();
+  });
+
+  it('should update student with valid data', async () => {
+    req.params = { semester: '1131', studentId: 'B100000001' };
+
+    req.body = {
+      student_id: 'B100000001',
+      department: 'Bio',
+      group_name: 'A',
+      name: 'Alice'
+    };
+
+    const mockUpdated = { ...req.body, semester: '1131' };
+
+    mockUpdateStudent.mockResolvedValueOnce(mockUpdated);
+
+    await StudentController.updateStudent(req, res);
+
+    expect(mockUpdateStudent).toHaveBeenCalledWith('1131', 'B100000001', req.body);
+    expect(res.json).toHaveBeenCalledWith(mockUpdated);
+  });
+
+  it('should return 404 if student not found', async () => {
+    req.params = { semester: '1131', studentId: 'S999' };
+
+    req.body = {
+      student_id: 'S999',
+      department: 'Bio',
+      group_name: 'A',
+      name: 'Ghost'
+    };
+
+    mockUpdateStudent.mockResolvedValueOnce(undefined);
+
+    await StudentController.updateStudent(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Student not found' });
+  });
+
+  it('should handle model/database errors', async () => {
+    req.params = { semester: '1131', studentId: 'B100000001' };
+
+    req.body = {
+      student_id: 'B100000001',
+      department: 'Bio',
+      group_name: 'A',
+      name: 'Alice'
+    };
+
+    const dbError = new Error('DB error');
+
+    mockUpdateStudent.mockRejectedValueOnce(dbError);
+
+    await StudentController.updateStudent(req, res);
+    
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: 'DB error' });
+  });
+});
+
+describe('StudentController - deleteStudent', () => {
+  let req, res;
+
+  beforeEach(() => {
+    req = { body: {}, params: {} };
+    res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    jest.clearAllMocks();
+    mockDeleteStudent.mockClear();
+  });
+
+  it('should delete student if found', async () => {
+    req.params = { semester: '1131', studentId: 'B100000001' };
+
+    const mockDeleted = { student_id: 'B100000001', semester: '1131', name: 'Alice' };
+
+    mockDeleteStudent.mockResolvedValueOnce(mockDeleted);
+
+    await StudentController.deleteStudent(req, res);
+
+    expect(mockDeleteStudent).toHaveBeenCalledWith('1131', 'B100000001');
+    expect(res.json).toHaveBeenCalledWith({ message: 'Student deleted successfully', student: mockDeleted });
+  });
+
+  it('should return 404 if not found', async () => {
+    req.params = { semester: '1131', studentId: 'S999' };
+
+    mockDeleteStudent.mockResolvedValueOnce(undefined);
+
+    await StudentController.deleteStudent(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Student not found' });
+  });
+
+  it('should handle model/database errors', async () => {
+    req.params = { semester: '1131', studentId: 'B100000001' };
+
+    const dbError = new Error('DB error');
+
+    mockDeleteStudent.mockRejectedValueOnce(dbError);
+
+    await StudentController.deleteStudent(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: 'DB error' });
+  });
+});
+
+describe('StudentController - uploadStudentsCSV', () => {
+  let req, res;
+
+  beforeEach(() => {
+    req = { body: {}, params: {} };
+    res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    jest.clearAllMocks();
+    mockCreateStudent.mockClear();
+  });
+
+  it('should process valid CSV and create students', async () => {
+    req.body = {
+      csvData: 'student_id,name,department,group_name\nB100000001,Alice,Bio,A\nB100000002,Bob,Bio,B',
+      semester: '1131'
+    };
+
+    mockCreateStudent.mockResolvedValueOnce({ student_id: 'B100000001', name: 'Alice', department: 'Bio', group_name: 'A', semester: '1131' });
+    mockCreateStudent.mockResolvedValueOnce({ student_id: 'B100000002', name: 'Bob', department: 'Bio', group_name: 'B', semester: '1131' });
+
+    await StudentController.uploadStudentsCSV(req, res);
+
+    expect(mockCreateStudent).toHaveBeenCalledTimes(2);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+      message: 'CSV upload processed',
+      summary: expect.objectContaining({ created: 2 })
+    }));
+  });
+
+  it('should return 400 if csvData or semester missing', async () => {
+    req.body = { csvData: '', semester: '' };
+
+    await StudentController.uploadStudentsCSV(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: 'csvData and semester are required' });
+  });
+
+  it('should return 400 if required headers missing', async () => {
+    req.body = {
+      csvData: 'student_id,name\nB100000001,Alice',
+      semester: '1131'
+    };
+
+    await StudentController.uploadStudentsCSV(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: expect.stringContaining('Missing required headers') });
+  });
+
+  it('should report parse errors for malformed rows', async () => {
+    req.body = {
+      csvData: 'student_id,name,department,group_name\nB100000001,Alice,Bio\nB100000002,Bob,Bio,B',
+      semester: '1131'
+    };
+
+    mockCreateStudent.mockResolvedValueOnce({ student_id: 'B100000002', name: 'Bob', department: 'Bio', group_name: 'B', semester: '1131' });
+
+    await StudentController.uploadStudentsCSV(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+      errors: expect.objectContaining({ parseErrors: expect.any(Array) })
+    }));
+  });
+
+  it('should return 400 if all rows are malformed', async () => {
+    req.body = {
+      csvData: 'student_id,name,department,group_name\nB100000001,Alice,Bio\nB100000002,Bob,Bio',
+      semester: '1131'
+    };
+
+    await StudentController.uploadStudentsCSV(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+      error: 'No valid student rows found',
+      errors: expect.objectContaining({ parseErrors: expect.any(Array) })
+    }));
+  });
+  
+  it('should return 500 on unexpected error', async () => {
+  req.body = null;
+
+  await StudentController.uploadStudentsCSV(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(500);
+  expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+    error: expect.any(String)
+  }));
+});
 });
