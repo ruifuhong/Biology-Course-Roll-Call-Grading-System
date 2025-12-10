@@ -58,7 +58,7 @@ export async function getLectureDate(semester, actualDate) {
   }
 }
 
-export async function getDiscussionDate(semester, sessionOrder) {
+export async function getDiscussionDate(semester, actualDate) {
   try {
     const result = await pool.query(
       'SELECT * FROM "Roll-Call".discussion_dates WHERE semester = $1 AND actual_date = $2',
@@ -140,7 +140,7 @@ export async function deleteLectureDate(semester, actualDate) {
   }
 }
 
-export async function deleteDiscussionDate(semester, sessionOrder) {
+export async function deleteDiscussionDate(semester, actualDate) {
   try {
     const result = await pool.query(
       'DELETE FROM "Roll-Call".discussion_dates WHERE semester = $1 AND actual_date = $2 RETURNING *',
