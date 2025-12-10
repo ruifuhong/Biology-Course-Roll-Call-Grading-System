@@ -24,6 +24,10 @@ export async function createStudent(req, res) {
 export async function getStudentsBySemester(req, res) {
   try {
     const { semester } = req.params;
+
+    if (!semester) {
+      return res.status(400).json({ error: 'semester parameter is required' });
+    }
     
     const students = await StudentModel.findStudentsBySemester(semester);
     res.json(students);
@@ -163,6 +167,24 @@ export async function uploadStudentsCSV(req, res) {
       }
     }
     
+    if (createdStudents.length === 0) {
+      return res.status(400).json({
+        error: 'No valid student rows found',
+        summary: {
+          totalRows: lines.length - 1,
+          parsed: students.length,
+          created: createdStudents.length,
+          parseErrors: errors.length,
+          dbErrors: dbErrors.length
+        },
+        created: [],
+        errors: {
+          parseErrors: errors,
+          dbErrors: dbErrors
+        }
+      });
+    }
+
     res.status(201).json({
       message: 'CSV upload processed',
       summary: {
