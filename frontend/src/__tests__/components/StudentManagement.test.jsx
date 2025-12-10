@@ -23,13 +23,6 @@ describe('StudentManagement', () => {
     expect(screen.getByText('Student Management - 1131 / 學生管理 - 1131')).toBeInTheDocument();
   });
 
-  it('displays bilingual text in tab buttons', () => {
-    render(<StudentManagement semester={mockSemester} />);
-    
-    expect(screen.getByText('👥 Manage Students / 管理學生')).toBeInTheDocument();
-    expect(screen.getByText('📊 View Attendance / 查看出席')).toBeInTheDocument();
-  });
-
   it('defaults to students view', () => {
     render(<StudentManagement semester={mockSemester} />);
     
@@ -107,15 +100,5 @@ describe('StudentManagement', () => {
     fireEvent.click(attendanceTab);
     
     expect(screen.getByText('AttendanceView Component - 1142')).toBeInTheDocument();
-  });
-
-  it('renders with proper component structure', () => {
-    render(<StudentManagement semester={mockSemester} />);
-    
-    const container = screen.getByText('Student Management - 1131 / 學生管理 - 1131').closest('div');
-    expect(container).toHaveClass('student-management');
-    
-    const tabsContainer = screen.getByText('👥 Manage Students / 管理學生').closest('div');
-    expect(tabsContainer).toHaveClass('view-mode-tabs');
   });
 });

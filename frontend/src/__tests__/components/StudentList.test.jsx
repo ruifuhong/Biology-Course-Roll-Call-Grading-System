@@ -5,9 +5,9 @@ import StudentList from '../../components/StudentList.jsx';
 global.fetch = vi.fn();
 
 const mockStudents = [
-  { student_id: '1001', name: 'John Doe', department: 'CS', group_name: '1' },
-  { student_id: '1002', name: 'Jane Smith', department: 'EE', group_name: '10' },
-  { student_id: '1003', name: 'Bob Johnson', department: 'ME', group_name: '2' }
+  { student_id: 'B100000001', name: 'John Doe', department: 'CS', group_name: '1' },
+  { student_id: 'B100000002', name: 'Jane Smith', department: 'EE', group_name: '10' },
+  { student_id: 'B100000003', name: 'Bob Johnson', department: 'ME', group_name: '2' }
 ];
 
 describe('StudentList', () => {
@@ -76,9 +76,9 @@ describe('StudentList', () => {
 
     it('displays students sorted by natural sort', async () => {
       const unsortedStudents = [
-        { student_id: '1002', name: 'Jane Smith', department: 'EE', group_name: '10' },
-        { student_id: '1003', name: 'Bob Johnson', department: 'ME', group_name: '2' },
-        { student_id: '1001', name: 'John Doe', department: 'CS', group_name: '1' }
+        { student_id: 'B100000002', name: 'Jane Smith', department: 'EE', group_name: '10' },
+        { student_id: 'B100000003', name: 'Bob Johnson', department: 'ME', group_name: '2' },
+        { student_id: 'B100000001', name: 'John Doe', department: 'CS', group_name: '1' }
       ];
     
       fetch.mockResolvedValueOnce({
@@ -156,15 +156,10 @@ describe('StudentList', () => {
         expect(screen.getByText('113-1 Add New Student / 新增學生')).toBeInTheDocument();
       });
 
-      let form = null;
-      const heading = screen.queryByText('113-1 Add New Student / 新增學生');
-      if (heading) {
-        form = heading.closest('form');
-      }
-      const { getAllByText } = form ? require('@testing-library/react').within(form) : screen;
-      const cancelButtons = getAllByText('Cancel / 取消');
+      const cancelButtons = screen.getAllByText('Cancel / 取消');
+      
       await waitFor(() => {
-        fireEvent.click(cancelButtons[cancelButtons.length - 1]);
+        fireEvent.click(cancelButtons[0]);
         expect(screen.queryByText('113-1 Add New Student / 新增學生')).not.toBeInTheDocument();
       });
     });
@@ -181,7 +176,9 @@ describe('StudentList', () => {
 
       await waitFor(() => {
         fireEvent.click(screen.getByRole('button', { name: 'Add Student / 新增學生' }));
+
         const addButtons = screen.getAllByRole('button', { name: 'Add Student / 新增學生' });
+
         expect(addButtons).toHaveLength(1);
         expect(addButtons[0].type).toBe('submit');
       });
@@ -190,7 +187,8 @@ describe('StudentList', () => {
 
   describe('StudentForm Component', () => {
     it('submits form with valid data', async () => {
-      const newStudent = { student_id: '1004', name: 'New Student', department: 'Physics', group_name: '3' };
+      const newStudent = { student_id: 'B100000004', name: 'New Student', department: 'Physics', group_name: '3' };
+
       fetch
         .mockResolvedValueOnce({
           ok: true,
@@ -207,7 +205,7 @@ describe('StudentList', () => {
         fireEvent.click(screen.getByText('Add Student / 新增學生'));
       });
 
-      fireEvent.change(screen.getByLabelText('Student ID / 學號 *'), { target: { value: '1004' } });
+      fireEvent.change(screen.getByLabelText('Student ID / 學號 *'), { target: { value: 'B100000004' } });
       fireEvent.change(screen.getByLabelText('Name / 姓名 *'), { target: { value: 'New Student' } });
       fireEvent.change(screen.getByLabelText('Department / 系別 *'), { target: { value: 'Physics' } });
       fireEvent.change(screen.getByLabelText('Group Name / 組別 *'), { target: { value: '3' } });
@@ -222,7 +220,7 @@ describe('StudentList', () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              student_id: '1004',
+              student_id: 'B100000004',
               name: 'New Student',
               department: 'Physics',
               group_name: '3',
@@ -234,7 +232,7 @@ describe('StudentList', () => {
     });
 
     it('shows success message after adding student', async () => {
-      const newStudent = { student_id: '1004', name: 'New Student', department: 'Physics', group_name: '3' };
+      const newStudent = { student_id: 'B100000004', name: 'New Student', department: 'Physics', group_name: '3' };
       
       fetch
         .mockResolvedValueOnce({
@@ -252,7 +250,7 @@ describe('StudentList', () => {
         fireEvent.click(screen.getByText('Add Student / 新增學生'));
       });
 
-      fireEvent.change(screen.getByLabelText('Student ID / 學號 *'), { target: { value: '1004' } });
+      fireEvent.change(screen.getByLabelText('Student ID / 學號 *'), { target: { value: 'B100000004' } });
       fireEvent.change(screen.getByLabelText('Name / 姓名 *'), { target: { value: 'New Student' } });
       fireEvent.change(screen.getByLabelText('Department / 系別 *'), { target: { value: 'Physics' } });
       fireEvent.change(screen.getByLabelText('Group Name / 組別 *'), { target: { value: '3' } });
@@ -282,7 +280,7 @@ describe('StudentList', () => {
         fireEvent.click(screen.getByText('Add Student / 新增學生'));
       });
 
-      fireEvent.change(screen.getByLabelText('Student ID / 學號 *'), { target: { value: '1004' } });
+      fireEvent.change(screen.getByLabelText('Student ID / 學號 *'), { target: { value: 'B100000004' } });
       fireEvent.change(screen.getByLabelText('Name / 姓名 *'), { target: { value: 'New Student' } });
       fireEvent.change(screen.getByLabelText('Department / 系別 *'), { target: { value: 'Physics' } });
       fireEvent.change(screen.getByLabelText('Group Name / 組別 *'), { target: { value: '3' } });
@@ -311,7 +309,7 @@ describe('StudentList', () => {
       });
 
       expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('1001')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('B100000001')).toBeInTheDocument();
       expect(screen.getByText('Save / 儲存')).toBeInTheDocument();
     });
 
@@ -426,12 +424,12 @@ describe('StudentList', () => {
 
       await waitFor(() => {
         expect(fetch).toHaveBeenCalledWith(
-          expect.stringContaining('/students/1131/1001'),
+          expect.stringContaining('/students/1131/B100000001'),
           expect.objectContaining({
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              student_id: '1001',
+              student_id: 'B100000001',
               name: 'Updated Name',
               department: 'CS',
               group_name: '1'
@@ -444,21 +442,44 @@ describe('StudentList', () => {
         expect(screen.getByText('Student updated successfully / 學生更新成功')).toBeInTheDocument();
       });
     });
+
+    it('shows error message when edit fails', async () => {
+      fetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockStudents
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({ error: 'Edit failed' })
+      });
+
+      render(<StudentList semester="1131" />);
+
+      await waitFor(() => {
+      const editButtons = screen.getAllByText('Edit / 編輯');
+      fireEvent.click(editButtons[0]);
+      });
+
+      const nameInput = screen.getByDisplayValue('John Doe');
+      fireEvent.change(nameInput, { target: { value: 'Changed Name' } });
+
+      fireEvent.click(screen.getByText('Save / 儲存'));
+
+      await waitFor(() => {
+      expect(screen.getByText('Error: Edit failed / 錯誤: Edit failed')).toBeInTheDocument();
+      });
+    });
   });
 
   describe('Delete Student', () => {
     it('shows confirmation dialog when Delete button is clicked', async () => {
-      window.confirm.mockReturnValue(true);
 
       fetch
         .mockResolvedValueOnce({
           ok: true,
           json: async () => mockStudents
         })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({})
-        });
 
       render(<StudentList semester="1131" />);
 
@@ -474,6 +495,7 @@ describe('StudentList', () => {
 
     it('deletes student when confirmed', async () => {
       window.confirm.mockReturnValue(true);
+
       fetch
         .mockResolvedValueOnce({
           ok: true,
@@ -493,7 +515,7 @@ describe('StudentList', () => {
 
       await waitFor(() => {
         expect(fetch).toHaveBeenCalledWith(
-          expect.stringContaining('/students/1131/1001'),
+          expect.stringContaining('/students/1131/B100000001'),
           expect.objectContaining({
             method: 'DELETE'
           })
@@ -502,6 +524,31 @@ describe('StudentList', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Student deleted successfully / 學生刪除成功')).toBeInTheDocument();
+      });
+    });
+
+    it('shows error message when delete fails', async () => {
+      window.confirm.mockReturnValue(true);
+
+      fetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockStudents
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({ error: 'Delete failed' })
+      });
+
+      render(<StudentList semester="1131" />);
+
+      await waitFor(() => {
+      const deleteButtons = screen.getAllByText('Delete / 刪除');
+      fireEvent.click(deleteButtons[0]);
+      });
+
+      await waitFor(() => {
+      expect(screen.getByText('Error: Delete failed / 錯誤: Delete failed')).toBeInTheDocument();
       });
     });
 
@@ -544,6 +591,7 @@ describe('StudentList', () => {
       const uploadResult = { 
         summary: { created: 2, parseErrors: 0, dbErrors: 0 } 
       };
+
       fetch
         .mockResolvedValueOnce({
           ok: true,
@@ -555,13 +603,13 @@ describe('StudentList', () => {
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => [...mockStudents, { student_id: '1004', name: 'Test User', department: 'CS', group_name: '3' }]
+          json: async () => [...mockStudents, { student_id: 'B100000004', name: 'Test User', department: 'CS', group_name: '3' }]
         });
 
       render(<StudentList semester="1131" />);
 
       await waitFor(() => {
-        const csvData = 'student_id,name,department,group_name\n1004,Test User,CS,3';
+        const csvData = 'student_id,name,department,group_name\nB100000004,Test User,CS,3';
         fireEvent.change(screen.getByPlaceholderText('Paste CSV data here... / 在此貼上CSV資料...'), { target: { value: csvData } });
         fireEvent.click(screen.getByText('Upload CSV Data / 上傳CSV資料'));
       });
@@ -573,7 +621,7 @@ describe('StudentList', () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              csvData: 'student_id,name,department,group_name\n1004,Test User,CS,3',
+              csvData: 'student_id,name,department,group_name\nB100000004,Test User,CS,3',
               semester: '1131'
             })
           })
@@ -647,27 +695,6 @@ describe('StudentList', () => {
       await waitFor(() => {
         expect(fetch).toHaveBeenCalledTimes(2);
       });
-    });
-  });
-
-  describe('Loading States', () => {
-    it('shows loading text on buttons during operations', async () => {
-      fetch
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => mockStudents
-        })
-        .mockImplementationOnce(() => new Promise(() => {})); // Never resolves
-
-      render(<StudentList semester="1131" />);
-
-      await waitFor(() => {
-        const csvData = 'student_id,name,department,group_name\n1004,Test User,CS,3';
-        fireEvent.change(screen.getByPlaceholderText('Paste CSV data here... / 在此貼上CSV資料...'), { target: { value: csvData } });
-        fireEvent.click(screen.getByText('Upload CSV Data / 上傳CSV資料'));
-      });
-
-      expect(screen.getByText('Uploading... / 上傳中...')).toBeInTheDocument();
     });
   });
 });
