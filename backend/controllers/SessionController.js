@@ -44,7 +44,6 @@ export async function setDiscussionDates(req, res) {
   }
 }
 
-
 export async function setLectureDates(req, res) {
   try {
     const { semester, dates } = req.body;
@@ -94,6 +93,10 @@ export async function getDiscussionDates(req, res) {
   try {
     const { semester } = req.params;
 
+    if (!semester) {
+      return res.status(400).json({ error: 'semester parameter is required' });
+    }
+
     const dates = await SessionDateModel.getDiscussionDatesBySemester(semester);
 
     const datesWithOrder = dates
@@ -113,6 +116,11 @@ export async function getDiscussionDates(req, res) {
 export async function getLectureDates(req, res) {
   try {
     const { semester } = req.params;
+
+    
+    if (!semester) {
+      return res.status(400).json({ error: 'semester parameter is required' });
+    }
     
     const dates = await SessionDateModel.getLectureDatesBySemester(semester);
     
