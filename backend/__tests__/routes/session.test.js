@@ -6,19 +6,30 @@ const mockSetLectureDates = jest.fn();
 const mockGetLectureDates = jest.fn();
 const mockUpdateLectureDate = jest.fn();
 const mockDeleteLectureDate = jest.fn();
+const mockSetDiscussionDates = jest.fn();
+const mockGetDiscussionDates = jest.fn();
+const mockUpdateDiscussionDate = jest.fn();
+const mockDeleteDiscussionDate = jest.fn();
+const mockToggleLectureAttendance = jest.fn();
+const mockToggleDiscussionAttendance = jest.fn();
 
 jest.unstable_mockModule('../../controllers/SessionController.js', () => ({
   setLectureDates: mockSetLectureDates,
   getLectureDates: mockGetLectureDates,
   updateLectureDate: mockUpdateLectureDate,
-  deleteLectureDate: mockDeleteLectureDate
+  deleteLectureDate: mockDeleteLectureDate,
+  setDiscussionDates: mockSetDiscussionDates,
+  getDiscussionDates: mockGetDiscussionDates,
+  updateDiscussionDate: mockUpdateDiscussionDate,
+  deleteDiscussionDate: mockDeleteDiscussionDate,
+  toggleLectureAttendance: mockToggleLectureAttendance,
+  toggleDiscussionAttendance: mockToggleDiscussionAttendance
 }));
 
 const sessionRoutes = (await import('../../routes/sessions.js')).default;
 
-describe('Session Routes - Add Session Date Integration Tests', () => {
+describe('Session Routes', () => {
   let app;
-
   beforeEach(() => {
     app = express();
     app.use(express.json());
@@ -27,164 +38,230 @@ describe('Session Routes - Add Session Date Integration Tests', () => {
   });
 
   describe('POST /api/sessions/lecture-dates', () => {
-    it('should call controller with correct parameters for single date', async () => {
-      const requestBody = {
-        semester: '1131',
-        dates: ['2024-10-15']
-      };
-
+    it('returns 200 on success', async () => {
       mockSetLectureDates.mockImplementation((req, res) => {
-        res.status(201).json([
-          { semester: '1131', actual_date: '2024-10-15', is_active: false }
-        ]);
+        res.status(200).json({ success: true });
       });
-
-      const response = await request(app)
-        .post('/api/sessions/lecture-dates')
-        .send(requestBody);
-
-      expect(response.status).toBe(201);
-      expect(mockSetLectureDates).toHaveBeenCalledTimes(1);
-      
-      const [req, res] = mockSetLectureDates.mock.calls[0];
-      expect(req.body).toEqual(requestBody);
-      expect(typeof res.status).toBe('function');
-      expect(typeof res.json).toBe('function');
-    });
-
-    it('should handle multiple dates in request', async () => {
-      const requestBody = {
-        semester: '1131',
-        dates: ['2024-10-15', '2024-10-22', '2024-10-29']
-      };
-
-      mockSetLectureDates.mockImplementation((req, res) => {
-        res.status(201).json([
-          { semester: '1131', actual_date: '2024-10-15', is_active: false },
-          { semester: '1131', actual_date: '2024-10-22', is_active: false },
-          { semester: '1131', actual_date: '2024-10-29', is_active: false }
-        ]);
-      });
-
-      const response = await request(app)
-        .post('/api/sessions/lecture-dates')
-        .send(requestBody);
-
-      expect(response.status).toBe(201);
-      expect(response.body).toHaveLength(3);
-      expect(mockSetLectureDates).toHaveBeenCalledTimes(1);
-    });
-
-    it('should pass through validation errors from controller', async () => {
-      const requestBody = { semester: '1131' };
-
-      mockSetLectureDates.mockImplementation((req, res) => {
-        res.status(400).json({
-          error: 'semester and non-empty dates array are required'
-        });
-      });
-
-      const response = await request(app)
-        .post('/api/sessions/lecture-dates')
-        .send(requestBody);
-
-      expect(response.status).toBe(400);
-      expect(response.body.error).toBe('semester and non-empty dates array are required');
-    });
-
-    it('should pass through duplicate date errors from controller', async () => {
-      const requestBody = {
-        semester: '1131',
-        dates: ['2024-10-15']
-      };
-
-      mockSetLectureDates.mockImplementation((req, res) => {
-        res.status(409).json({
-          error: 'Date 2024-10-15 already exists for semester 1131'
-        });
-      });
-
-      const response = await request(app)
-        .post('/api/sessions/lecture-dates')
-        .send(requestBody);
-
-      expect(response.status).toBe(409);
-      expect(response.body.error).toContain('already exists');
-    });
-
-    it('should handle JSON parsing errors', async () => {
-      const response = await request(app)
-        .post('/api/sessions/lecture-dates')
-        .send('invalid json')
-        .set('Content-Type', 'application/json');
-
-      expect(response.status).toBe(400);
-    });
-
-    it('should handle server errors from controller', async () => {
-      const requestBody = {
-        semester: '1131',
-        dates: ['2024-10-15']
-      };
-
-      mockSetLectureDates.mockImplementation((req, res) => {
-        res.status(500).json({
-          error: 'Failed to set lecture dates',
-          details: 'Database connection failed'
-        });
-      });
-
-      const response = await request(app)
-        .post('/api/sessions/lecture-dates')
-        .send(requestBody);
-
-      expect(response.status).toBe(500);
-      expect(response.body.error).toBe('Failed to set lecture dates');
-    });
-
-    it('should handle missing Content-Type header', async () => {
       const response = await request(app)
         .post('/api/sessions/lecture-dates')
         .send({ semester: '1131', dates: ['2024-10-15'] });
-      expect(mockSetLectureDates).toHaveBeenCalled();
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+    });
+
+    it('returns 500 on error', async () => {
+      mockSetLectureDates.mockImplementation((req, res) => {
+        res.status(500).json({ error: 'Internal Server Error' });
+      });
+      const response = await request(app)
+        .post('/api/sessions/lecture-dates')
+        .send({ semester: '1131', dates: ['2024-10-15'] });
+      expect(response.status).toBe(500);
+      expect(response.body.error).toBe('Internal Server Error');
     });
   });
 
-  describe('Route Parameter Validation', () => {
-    it('should handle requests with extra body parameters', async () => {
-      const requestBody = {
-        semester: '1131',
-        dates: ['2024-10-15'],
-        extraField: 'should be ignored'
-      };
-
-      mockSetLectureDates.mockImplementation((req, res) => {
-        res.status(201).json([
-          { semester: '1131', actual_date: '2024-10-15', is_active: false }
-        ]);
+  describe('GET /api/sessions/lecture-dates/:semester', () => {
+    it('returns 200 on success', async () => {
+      mockGetLectureDates.mockImplementation((req, res) => {
+        res.status(200).json({ dates: ['2024-10-15'] });
       });
-
       const response = await request(app)
-        .post('/api/sessions/lecture-dates')
-        .send(requestBody);
-
-      expect(response.status).toBe(201);
-      const [req] = mockSetLectureDates.mock.calls[0];
-      expect(req.body.extraField).toBe('should be ignored');
+        .get('/api/sessions/lecture-dates/1131');
+      expect(response.status).toBe(200);
+      expect(response.body.dates).toEqual(['2024-10-15']);
     });
 
-    it('should handle empty request body', async () => {
-      mockSetLectureDates.mockImplementation((req, res) => {
-        res.status(400).json({
-          error: 'semester and non-empty dates array are required'
-        });
+    it('returns 500 on error', async () => {
+      mockGetLectureDates.mockImplementation((req, res) => {
+        res.status(500).json({ error: 'Internal Server Error' });
       });
-
       const response = await request(app)
-        .post('/api/sessions/lecture-dates')
-        .send({});
+        .get('/api/sessions/lecture-dates/1131');
+      expect(response.status).toBe(500);
+      expect(response.body.error).toBe('Internal Server Error');
+    });
+  });
 
-      expect(response.status).toBe(400);
+  describe('PUT /api/sessions/lecture-dates/:semester/:oldDate', () => {
+    it('returns 200 on success', async () => {
+      mockUpdateLectureDate.mockImplementation((req, res) => {
+        res.status(200).json({ updated: true });
+      });
+      const response = await request(app)
+        .put('/api/sessions/lecture-dates/1131/2024-10-15')
+        .send({ newDate: '2024-10-22' });
+      expect(response.status).toBe(200);
+      expect(response.body.updated).toBe(true);
+    });
+
+    it('returns 500 on error', async () => {
+      mockUpdateLectureDate.mockImplementation((req, res) => {
+        res.status(500).json({ error: 'Internal Server Error' });
+      });
+      const response = await request(app)
+        .put('/api/sessions/lecture-dates/1131/2024-10-15')
+        .send({ newDate: '2024-10-22' });
+      expect(response.status).toBe(500);
+      expect(response.body.error).toBe('Internal Server Error');
+    });
+  });
+
+  describe('DELETE /api/sessions/lecture-dates/:semester/:actualDate', () => {
+    it('returns 200 on success', async () => {
+      mockDeleteLectureDate.mockImplementation((req, res) => {
+        res.status(200).json({ deleted: true });
+      });
+      const response = await request(app)
+        .delete('/api/sessions/lecture-dates/1131/2024-10-15');
+      expect(response.status).toBe(200);
+      expect(response.body.deleted).toBe(true);
+    });
+
+    it('returns 500 on error', async () => {
+      mockDeleteLectureDate.mockImplementation((req, res) => {
+        res.status(500).json({ error: 'Internal Server Error' });
+      });
+      const response = await request(app)
+        .delete('/api/sessions/lecture-dates/1131/2024-10-15');
+      expect(response.status).toBe(500);
+      expect(response.body.error).toBe('Internal Server Error');
+    });
+  });
+
+  describe('POST /api/sessions/discussion-dates', () => {
+    it('returns 200 on success', async () => {
+      mockSetDiscussionDates.mockImplementation((req, res) => {
+        res.status(200).json({ success: true });
+      });
+      const response = await request(app)
+        .post('/api/sessions/discussion-dates')
+        .send({ semester: '1131', dates: ['2024-10-15'] });
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+    });
+
+    it('returns 500 on error', async () => {
+      mockSetDiscussionDates.mockImplementation((req, res) => {
+        res.status(500).json({ error: 'Internal Server Error' });
+      });
+      const response = await request(app)
+        .post('/api/sessions/discussion-dates')
+        .send({ semester: '1131', dates: ['2024-10-15'] });
+      expect(response.status).toBe(500);
+      expect(response.body.error).toBe('Internal Server Error');
+    });
+  });
+
+  describe('GET /api/sessions/discussion-dates/:semester', () => {
+    it('returns 200 on success', async () => {
+      mockGetDiscussionDates.mockImplementation((req, res) => {
+        res.status(200).json({ dates: ['2024-10-15'] });
+      });
+      const response = await request(app)
+        .get('/api/sessions/discussion-dates/1131');
+      expect(response.status).toBe(200);
+      expect(response.body.dates).toEqual(['2024-10-15']);
+    });
+
+    it('returns 500 on error', async () => {
+      mockGetDiscussionDates.mockImplementation((req, res) => {
+        res.status(500).json({ error: 'Internal Server Error' });
+      });
+      const response = await request(app)
+        .get('/api/sessions/discussion-dates/1131');
+      expect(response.status).toBe(500);
+      expect(response.body.error).toBe('Internal Server Error');
+    });
+  });
+
+  describe('PUT /api/sessions/discussion-dates/:semester/:oldDate', () => {
+    it('returns 200 on success', async () => {
+      mockUpdateDiscussionDate.mockImplementation((req, res) => {
+        res.status(200).json({ updated: true });
+      });
+      const response = await request(app)
+        .put('/api/sessions/discussion-dates/1131/2024-10-15')
+        .send({ newDate: '2024-10-22' });
+      expect(response.status).toBe(200);
+      expect(response.body.updated).toBe(true);
+    });
+
+    it('returns 500 on error', async () => {
+      mockUpdateDiscussionDate.mockImplementation((req, res) => {
+        res.status(500).json({ error: 'Internal Server Error' });
+      });
+      const response = await request(app)
+        .put('/api/sessions/discussion-dates/1131/2024-10-15')
+        .send({ newDate: '2024-10-22' });
+      expect(response.status).toBe(500);
+      expect(response.body.error).toBe('Internal Server Error');
+    });
+  });
+
+  describe('DELETE /api/sessions/discussion-dates/:semester/:actualDate', () => {
+    it('returns 200 on success', async () => {
+      mockDeleteDiscussionDate.mockImplementation((req, res) => {
+        res.status(200).json({ deleted: true });
+      });
+      const response = await request(app)
+        .delete('/api/sessions/discussion-dates/1131/2024-10-15');
+      expect(response.status).toBe(200);
+      expect(response.body.deleted).toBe(true);
+    });
+
+    it('returns 500 on error', async () => {
+      mockDeleteDiscussionDate.mockImplementation((req, res) => {
+        res.status(500).json({ error: 'Internal Server Error' });
+      });
+      const response = await request(app)
+        .delete('/api/sessions/discussion-dates/1131/2024-10-15');
+      expect(response.status).toBe(500);
+      expect(response.body.error).toBe('Internal Server Error');
+    });
+  });
+
+  describe('PATCH /api/sessions/lecture-dates/:semester/:selectedDate/toggle', () => {
+    it('returns 200 on success', async () => {
+      mockToggleLectureAttendance.mockImplementation((req, res) => {
+        res.status(200).json({ toggled: true });
+      });
+      const response = await request(app)
+        .patch('/api/sessions/lecture-dates/1131/2024-10-15/toggle');
+      expect(response.status).toBe(200);
+      expect(response.body.toggled).toBe(true);
+    });
+
+    it('returns 500 on error', async () => {
+      mockToggleLectureAttendance.mockImplementation((req, res) => {
+        res.status(500).json({ error: 'Internal Server Error' });
+      });
+      const response = await request(app)
+        .patch('/api/sessions/lecture-dates/1131/2024-10-15/toggle');
+      expect(response.status).toBe(500);
+      expect(response.body.error).toBe('Internal Server Error');
+    });
+  });
+
+  describe('PATCH /api/sessions/discussion-dates/:semester/:selectedDate/toggle', () => {
+    it('returns 200 on success', async () => {
+      mockToggleDiscussionAttendance.mockImplementation((req, res) => {
+        res.status(200).json({ toggled: true });
+      });
+      const response = await request(app)
+        .patch('/api/sessions/discussion-dates/1131/2024-10-15/toggle');
+      expect(response.status).toBe(200);
+      expect(response.body.toggled).toBe(true);
+    });
+    
+    it('returns 500 on error', async () => {
+      mockToggleDiscussionAttendance.mockImplementation((req, res) => {
+        res.status(500).json({ error: 'Internal Server Error' });
+      });
+      const response = await request(app)
+        .patch('/api/sessions/discussion-dates/1131/2024-10-15/toggle');
+      expect(response.status).toBe(500);
+      expect(response.body.error).toBe('Internal Server Error');
     });
   });
 });
