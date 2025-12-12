@@ -7,6 +7,7 @@ export default function DiscussionRollcall() {
     name: '',
     department: ''
   });
+  const [feedback, setFeedback] = useState('');
   const [loading, setLoading] = useState(false);
   const [lookupLoading, setLookupLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -156,7 +157,7 @@ export default function DiscussionRollcall() {
 
     setLoading(true);
     try {
-      const attendanceResponse = await fetch(`${apiBase}/attendance/discussion`, {
+      const attendancePromise = fetch(`${apiBase}/attendance/discussion`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -167,16 +168,37 @@ export default function DiscussionRollcall() {
         })
       });
 
-      if (attendanceResponse.ok) {
-        setMessage(`成功！Attendance recorded successfully for ${studentInfo.name} (${studentId})`);
+      let feedbackPromise = Promise.resolve({ ok: true });
+      if (feedback && feedback.trim() !== '') {
+        feedbackPromise = fetch(`${apiBase}/feedback/discussion`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            studentId,
+            name: studentInfo.name,
+            semester: sessionInfo.semester,
+            actual_date: sessionInfo.actual_date,
+            feedback
+          })
+        });
+      }
+
+      const [attendanceRes, feedbackRes] = await Promise.all([attendancePromise, feedbackPromise]);
+
+      if (attendanceRes.ok && feedbackRes.ok) {
+        setMessage('成功！Attendance and feedback submitted.');
         setStudentId('');
         setStudentInfo({ name: '', department: '' });
+        setFeedback('');
       } else {
-        const error = await attendanceResponse.json();
-        setMessage('Error recording attendance: ' + error.error);
+        const attendanceError = attendanceRes.ok ? null : await attendanceRes.json();
+        const feedbackError = feedbackRes.ok ? null : await feedbackRes.json();
+        setMessage(
+          `Error: ${attendanceError?.error || ''} ${feedbackError?.error || ''}`.trim()
+        );
       }
     } catch (error) {
-      setMessage('Error submitting attendance: ' + error.message);
+      setMessage('Error submitting: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -227,8 +249,8 @@ export default function DiscussionRollcall() {
 
       {message && (
         <div className={`${message.includes('成功') || message.includes('successfully') ? 'success-message' : 
-                       message.includes('Error') || message.includes('not found') ? 'error-message' : 
-                       'loading-message'}`}>
+            message.includes('Error') || message.includes('not found') ? 'error-message' : 
+            'loading-message'}`}>
           {message}
         </div>
       )}
@@ -281,22 +303,33 @@ export default function DiscussionRollcall() {
             value={studentInfo.name}
             placeholder="Name will auto-populate"
             disabled
-            style={{ 
-              backgroundColor: '#f8f9fa', 
-              color: studentInfo.name ? '#333' : '#999'
-            }}
+            className={studentInfo.name ? "input-filled" : "input-empty"}
           />
         </div>
 
-        <button 
-          type="submit" 
-          className="submit-btn"
-          disabled={loading || !sessionInfo || !studentInfo.name || !sessionInfo?.is_active}
-        >
-          {loading ? '提交中... Submitting...' : 
-           !sessionInfo?.is_active ? '點名已關閉 Attendance Closed' :
-           '提交出席 Submit Attendance'}
-        </button>
+          <div className="form-field">
+            <label htmlFor="feedback">
+              Feedback / 意見回饋
+            </label>
+            <textarea
+              id="feedback"
+              value={feedback}
+              onChange={e => setFeedback(e.target.value)}
+              placeholder="輸入回饋（非必填） Enter feedback (optional)"
+              rows={3}
+              className="feedback-textarea"
+              disabled={loading}
+            />
+          </div>
+          <button 
+            type="submit" 
+            className="submit-btn"
+            disabled={loading || !sessionInfo || !studentInfo.name || !sessionInfo?.is_active}
+          >
+            {loading ? '提交中... Submitting...' : 
+             !sessionInfo?.is_active ? '點名已關閉 Attendance Closed' :
+             '提交出席 Submit Attendance'}
+          </button>
       </form>
 
       <div className="back-link">

@@ -8,12 +8,14 @@ export default function AttendanceView({ semester }) {
   const [courseType, setCourseType] = useState('lecture');
   const [attendanceData, setAttendanceData] = useState([]);
   const [sessionDates, setSessionDates] = useState([]);
+  const [feedbackData, setFeedbackData] = useState([]);
 
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   useEffect(() => {
     if (semester) {
       fetchAttendanceData();
+      fetchFeedbackData();
     }
   }, [semester, courseType]);
 
@@ -60,6 +62,34 @@ export default function AttendanceView({ semester }) {
     }
   };
 
+  const fetchFeedbackData = async () => {
+    setLoading(true);
+    try {
+      let feedbackUrl;
+
+      if (courseType === 'lecture') {
+        feedbackUrl = `${apiBase}/feedback`;
+      } else {
+        feedbackUrl = `${apiBase}/feedback/discussion`;
+      }
+
+      const feedbackResponse = await fetch(feedbackUrl);
+      console.log("URL is " + feedbackUrl)
+
+      if (feedbackResponse.ok) {
+        const feedbacks = await feedbackResponse.json();
+        const filtered = feedbacks.filter(fb => fb.semester === semester);
+        setFeedbackData(filtered);
+      } else {
+        setFeedbackData([]);
+      }
+    } catch (error) {
+      setFeedbackData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="attendance-view">
       {message && (
@@ -88,10 +118,12 @@ export default function AttendanceView({ semester }) {
         sessionDates={sessionDates}
         courseType={courseType}
         loading={loading}
-        onRefresh={fetchAttendanceData}
+        onRefresh={() => { fetchAttendanceData(); fetchFeedbackData(); }}
       />
+
+      <FeedbackList feedbackData={feedbackData} courseType={courseType} loading={loading} />
     </div>
-  );
+  )
 }
 
 function AttendanceTable({ attendanceData, sessionDates, courseType, loading, onRefresh }) {
@@ -184,3 +216,30 @@ function AttendanceTable({ attendanceData, sessionDates, courseType, loading, on
     </div>
   );
 }
+
+ function FeedbackList({ feedbackData, courseType, loading }) {
+    return (
+      <div className="feedback-list-container">
+        <h3 className="feedback-list-title">
+          {courseType === 'lecture' ? 'Lecture Feedback / 正課回饋' : 'Discussion Feedback / 討論課回饋'}
+        </h3>
+        {loading ? (
+          <div className="loading">Loading feedback... / 載入回饋中...</div>
+        ) : feedbackData.length === 0 ? (
+          <div className="no-data">No feedback found for this semester. / 本學期未找到回饋。</div>
+        ) : (
+          <ul className="feedback-list">
+            {feedbackData.map(fb => (
+              <li key={fb._id} className="feedback-item">
+                <div className="feedback-meta">
+                  <span className="feedback-student">{fb.name} ({fb.studentId})</span>
+                  <span className="feedback-date">{new Date(fb.actual_date).toLocaleDateString('zh-TW')}</span>
+                </div>
+                <div className="feedback-content">{fb.feedback}</div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  }
