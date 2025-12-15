@@ -48,7 +48,7 @@ describe('DiscussionRollcall Frontend', () => {
     await waitFor(() => screen.getByDisplayValue('Jane Doe'));
     fireEvent.click(screen.getByText(/Submit Attendance/));
     await waitFor(() => {
-      expect(screen.getByText(/success/i)).toBeInTheDocument();
+      expect(screen.getByText(/成功|Attendance and feedback submitted/i)).toBeInTheDocument();
     });
   });
 
@@ -63,5 +63,29 @@ describe('DiscussionRollcall Frontend', () => {
     await waitFor(() => {
       expect(screen.getByText(/Attendance has already been submitted for this session/)).toBeInTheDocument();
     });
+  });
+
+    
+  it('prevents rapid double submission for discussion', async () => {
+    fetchMock
+      .mockResolvedValueOnce({ ok: true, json: async () => [mockSessionInfo] }) // session info
+      .mockResolvedValueOnce({ ok: true, json: async () => mockStudentInfo }) // student info
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ message: 'Success' }) }) // attendance
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ message: 'Success' }) }); // feedback
+
+    render(<DiscussionRollcall />);
+
+    fireEvent.change(screen.getByPlaceholderText(/student ID/i), { target: { value: mockStudentInfo.studentID } });
+    await waitFor(() => expect(screen.getByDisplayValue(mockStudentInfo.name)).toBeInTheDocument());
+    fireEvent.change(screen.getByLabelText(/Feedback/i), { target: { value: 'Double submit test' } });
+
+    const submitButton = screen.getByRole('button', { name: /submit/i });
+    fireEvent.click(submitButton);
+    fireEvent.click(submitButton);
+    
+    expect(await screen.findByText(/成功|Attendance and feedback submitted/i)).toBeInTheDocument();
+
+    const feedbackCalls = fetchMock.mock.calls.filter(([url]) => url.includes('/feedback'));
+    expect(feedbackCalls.length).toBe(1);
   });
 });
