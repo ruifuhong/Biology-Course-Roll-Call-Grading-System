@@ -49,7 +49,7 @@ describe('Session Routes', () => {
       expect(response.body.success).toBe(true);
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockSetLectureDates.mockImplementation((req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       });
@@ -72,7 +72,7 @@ describe('Session Routes', () => {
       expect(response.body.dates).toEqual(['2024-10-15']);
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockGetLectureDates.mockImplementation((req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       });
@@ -95,7 +95,7 @@ describe('Session Routes', () => {
       expect(response.body.updated).toBe(true);
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockUpdateLectureDate.mockImplementation((req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       });
@@ -118,7 +118,7 @@ describe('Session Routes', () => {
       expect(response.body.deleted).toBe(true);
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockDeleteLectureDate.mockImplementation((req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       });
@@ -141,7 +141,7 @@ describe('Session Routes', () => {
       expect(response.body.success).toBe(true);
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockSetDiscussionDates.mockImplementation((req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       });
@@ -164,7 +164,7 @@ describe('Session Routes', () => {
       expect(response.body.dates).toEqual(['2024-10-15']);
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockGetDiscussionDates.mockImplementation((req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       });
@@ -187,7 +187,7 @@ describe('Session Routes', () => {
       expect(response.body.updated).toBe(true);
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockUpdateDiscussionDate.mockImplementation((req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       });
@@ -210,7 +210,7 @@ describe('Session Routes', () => {
       expect(response.body.deleted).toBe(true);
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockDeleteDiscussionDate.mockImplementation((req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       });
@@ -232,7 +232,7 @@ describe('Session Routes', () => {
       expect(response.body.toggled).toBe(true);
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockToggleLectureAttendance.mockImplementation((req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       });
@@ -253,8 +253,8 @@ describe('Session Routes', () => {
       expect(response.status).toBe(200);
       expect(response.body.toggled).toBe(true);
     });
-    
-    it('returns 500 on error', async () => {
+
+    it('returns 500 on server error', async () => {
       mockToggleDiscussionAttendance.mockImplementation((req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       });

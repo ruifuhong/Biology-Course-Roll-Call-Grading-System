@@ -42,7 +42,7 @@ describe('Students Routes', () => {
       expect(response.body.student_id).toBe('B100000001');
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockCreateStudent.mockImplementation((req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       });
@@ -65,7 +65,7 @@ describe('Students Routes', () => {
       expect(Array.isArray(response.body)).toBe(true);
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockGetStudentsBySemester.mockImplementation((req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       });
@@ -87,7 +87,7 @@ describe('Students Routes', () => {
       expect(response.body.student_id).toBe('B100000001');
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockGetStudentById.mockImplementation((req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       });
@@ -110,7 +110,7 @@ describe('Students Routes', () => {
       expect(response.body.student_id).toBe('B100000001');
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockUpdateStudent.mockImplementation((req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       });
@@ -133,7 +133,7 @@ describe('Students Routes', () => {
       expect(response.body.message).toBe('Student deleted successfully');
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockDeleteStudent.mockImplementation((req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       });
@@ -156,7 +156,7 @@ describe('Students Routes', () => {
       expect(response.body.message).toBe('CSV upload processed');
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockUploadStudentsCSV.mockImplementation((req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       });

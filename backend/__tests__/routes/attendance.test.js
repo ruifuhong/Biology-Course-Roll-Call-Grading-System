@@ -44,14 +44,14 @@ describe('Attendance Routes', () => {
       expect(mockSubmitLectureAttendance).toHaveBeenCalledTimes(1);
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockSubmitLectureAttendance.mockImplementation((req, res) => {
-      res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error' });
       });
 
       const response = await request(app)
-      .post('/api/attendance/lecture')
-      .send({});
+        .post('/api/attendance/lecture')
+        .send({});
 
       expect(response.status).toBe(500);
       expect(response.body.error).toBe('Internal server error');
@@ -72,14 +72,14 @@ describe('Attendance Routes', () => {
       expect(mockSubmitDiscussionAttendance).toHaveBeenCalledTimes(1);
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockSubmitDiscussionAttendance.mockImplementation((req, res) => {
-      res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error' });
       });
 
       const response = await request(app)
-      .post('/api/attendance/discussion')
-      .send({});
+        .post('/api/attendance/discussion')
+        .send({});
 
       expect(response.status).toBe(500);
       expect(response.body.error).toBe('Internal server error');
@@ -100,13 +100,13 @@ describe('Attendance Routes', () => {
       expect(mockGetStudentLectureAttendance).toHaveBeenCalledTimes(1);
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockGetStudentLectureAttendance.mockImplementation((req, res) => {
-      res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error' });
       });
 
       const response = await request(app)
-      .get('/api/attendance/lecture/1131/B100000001');
+        .get('/api/attendance/lecture/1131/B100000001');
 
       expect(response.status).toBe(500);
       expect(response.body.error).toBe('Internal server error');
@@ -128,13 +128,13 @@ describe('Attendance Routes', () => {
       expect(mockGetStudentDiscussionAttendance).toHaveBeenCalledTimes(1);
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockGetStudentDiscussionAttendance.mockImplementation((req, res) => {
-      res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error' });
       });
 
       const response = await request(app)
-      .get('/api/attendance/discussion/1131/B100000001');
+        .get('/api/attendance/discussion/1131/B100000001');
 
       expect(response.status).toBe(500);
       expect(response.body.error).toBe('Internal server error');
@@ -156,13 +156,13 @@ describe('Attendance Routes', () => {
       expect(mockGetAllLectureAttendance).toHaveBeenCalledTimes(1);
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockGetAllLectureAttendance.mockImplementation((req, res) => {
-      res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error' });
       });
 
       const response = await request(app)
-      .get('/api/attendance/lecture/1131');
+        .get('/api/attendance/lecture/1131');
 
       expect(response.status).toBe(500);
       expect(response.body.error).toBe('Internal server error');
@@ -184,13 +184,13 @@ describe('Attendance Routes', () => {
       expect(mockGetAllDiscussionAttendance).toHaveBeenCalledTimes(1);
     });
 
-    it('returns 500 on error', async () => {
+    it('returns 500 on server error', async () => {
       mockGetAllDiscussionAttendance.mockImplementation((req, res) => {
-      res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error' });
       });
 
       const response = await request(app)
-      .get('/api/attendance/discussion/1131');
+        .get('/api/attendance/discussion/1131');
 
       expect(response.status).toBe(500);
       expect(response.body.error).toBe('Internal server error');
