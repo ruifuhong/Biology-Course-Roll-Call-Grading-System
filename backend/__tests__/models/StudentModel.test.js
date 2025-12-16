@@ -24,7 +24,7 @@ describe('StudentModel', () => {
         semester: '1131',
         department: 'Biology',
         group_name: '1',
-        name: 'Alice'
+        name: 'John Doe'
       };
 
       const mockResult = { rows: [studentData] };
@@ -72,9 +72,10 @@ describe('StudentModel', () => {
 
   describe('findStudentsBySemester', () => {
     it('should return students for semester', async () => {
+
       const semester = '1131';
       const mockRows = [
-        { student_id: 'B100000001', semester, department: 'Biology', group_name: '1', name: 'Alice' },
+        { student_id: 'B100000001', semester, department: 'Biology', group_name: '1', name: 'John Doe' },
         { student_id: 'B100000002', semester, department: 'Biology', group_name: 'B', name: 'Bob' }
       ];
 
@@ -112,7 +113,7 @@ describe('StudentModel', () => {
     it('should return student by id', async () => {
       const semester = '1131';
       const studentId = 'B100000001';
-      const mockRow = { student_id: studentId, semester, department: 'Biology', group_name: '1', name: 'Alice' };
+      const mockRow = { student_id: studentId, semester, department: 'Biology', group_name: '1', name: 'John Doe' };
 
       mockQuery.mockResolvedValueOnce({ rows: [mockRow] });
 
@@ -153,9 +154,9 @@ describe('StudentModel', () => {
         student_id: 'B100000001',
         department: 'Biology',
         group_name: '1',
-        name: 'Alice Updated'
+        name: 'John Doe'
       };
-    
+
       const mockRow = { ...studentData, semester };
       mockQuery.mockResolvedValueOnce({ rows: [mockRow] });
 
@@ -176,7 +177,7 @@ describe('StudentModel', () => {
         student_id: 'B100000001',
         department: 'Biology',
         group_name: '1',
-        name: 'Ghost'
+        name: 'John Doe'
       };
 
       mockQuery.mockResolvedValueOnce({ rows: [] });
@@ -206,7 +207,7 @@ describe('StudentModel', () => {
     it('should delete student successfully', async () => {
       const semester = '1131';
       const studentId = 'B100000001';
-      const mockRow = { student_id: studentId, semester, department: 'Biology', group_name: '1', name: 'Alice' };
+      const mockRow = { student_id: studentId, semester, department: 'Biology', group_name: '1', name: 'John Doe' };
 
       mockQuery.mockResolvedValueOnce({ rows: [mockRow] });
 
