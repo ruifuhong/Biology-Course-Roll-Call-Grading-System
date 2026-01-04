@@ -20,6 +20,68 @@ async function connectToMongoDB() {
   return db;
 }
 
+export async function findLectureFeedbackBySemester(semester) {
+  try {
+    const database = await connectToMongoDB();
+    const items = await database.collection('lecture-feedback')
+      .find({ semester })
+      .sort({ submitted_at: -1 })
+      .toArray();
+    return items.map(item => {
+      const id = item._id && item._id.toString ? item._id.toString() : (item._id && item._id.$oid) ? item._id.$oid : item._id;
+      let submitted_at = null;
+      if (item.submitted_at) {
+        if (item.submitted_at.$date) {
+          submitted_at = new Date(item.submitted_at.$date).toISOString();
+        } else if (item.submitted_at instanceof Date) {
+          submitted_at = item.submitted_at.toISOString();
+        } else {
+          submitted_at = String(item.submitted_at);
+        }
+      }
+      return {
+        ...item,
+        _id: id,
+        submitted_at
+      };
+    });
+  } catch (error) {
+    console.error('Lecture FeedbackModel findBySemester error:', error);
+    throw error;
+  }
+}
+
+export async function findDiscussionFeedbackBySemester(semester) {
+  try {
+    const database = await connectToMongoDB();
+    const items = await database.collection('discussion-feedback')
+      .find({ semester })
+      .sort({ submitted_at: -1 })
+      .toArray();
+    return items.map(item => {
+      const id = item._id && item._id.toString ? item._id.toString() : (item._id && item._id.$oid) ? item._id.$oid : item._id;
+      let submitted_at = null;
+      if (item.submitted_at) {
+        if (item.submitted_at.$date) {
+          submitted_at = new Date(item.submitted_at.$date).toISOString();
+        } else if (item.submitted_at instanceof Date) {
+          submitted_at = item.submitted_at.toISOString();
+        } else {
+          submitted_at = String(item.submitted_at);
+        }
+      }
+      return {
+        ...item,
+        _id: id,
+        submitted_at
+      };
+    });
+  } catch (error) {
+    console.error('Discussion FeedbackModel findBySemester error:', error);
+    throw error;
+  }
+}
+
 export async function findAllLectureFeedback() {
   try {
     const database = await connectToMongoDB();

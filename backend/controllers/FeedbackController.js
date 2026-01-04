@@ -1,11 +1,24 @@
 import * as FeedbackModel from '../models/FeedbackModel.js';
 
+function canAccessSemester(user, semester) {
+  if (!user || user.role !== 'ta') return true;
+  return user.assignedSemesters && user.assignedSemesters.includes(semester);
+}
+
+
 export async function getAllLectureFeedback(req, res) {
   try {
-    const feedbackItems = await FeedbackModel.findAllLectureFeedback();
+    const { semester } = req.params;
+    if (!semester) {
+      return res.status(400).json({ error: 'semester parameter is required' });
+    }
+    if (!canAccessSemester(req.user, semester)) {
+      return res.status(403).json({ error: 'Access denied for this semester' });
+    }
+    const feedbackItems = await FeedbackModel.findLectureFeedbackBySemester(semester);
     res.json(feedbackItems);
   } catch (error) {
-    console.error('FeedbackController getAllFeedback error:', error);
+    console.error('FeedbackController getAllLectureFeedback error:', error);
     res.status(500).json({ error: error.message });
   }
 }
@@ -48,7 +61,14 @@ export async function createLectureFeedback(req, res) {
 
 export async function getAllDiscussionFeedback(req, res) {
   try {
-    const feedbackItems = await FeedbackModel.findAllDiscussionFeedback();
+    const { semester } = req.params;
+    if (!semester) {
+      return res.status(400).json({ error: 'semester parameter is required' });
+    }
+    if (!canAccessSemester(req.user, semester)) {
+      return res.status(403).json({ error: 'Access denied for this semester' });
+    }
+    const feedbackItems = await FeedbackModel.findDiscussionFeedbackBySemester(semester);
     res.json(feedbackItems);
   } catch (error) {
     console.error('FeedbackController getAllDiscussionFeedback error:', error);

@@ -170,7 +170,7 @@ export default function LectureRollcall() {
 
       let feedbackPromise = Promise.resolve({ ok: true });
       if (feedback && feedback.trim() !== '') {
-        feedbackPromise = fetch(`${apiBase}/feedback`, {
+        feedbackPromise = fetch(`${apiBase}/feedback/lecture`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

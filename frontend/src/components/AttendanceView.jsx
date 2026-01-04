@@ -66,20 +66,15 @@ export default function AttendanceView({ semester }) {
     setLoading(true);
     try {
       let feedbackUrl;
-
       if (courseType === 'lecture') {
-        feedbackUrl = `${apiBase}/feedback`;
+        feedbackUrl = `${apiBase}/feedback/lecture/${semester}`;
       } else {
-        feedbackUrl = `${apiBase}/feedback/discussion`;
+        feedbackUrl = `${apiBase}/feedback/discussion/${semester}`;
       }
-
       const feedbackResponse = await fetch(feedbackUrl);
-      console.log("URL is " + feedbackUrl)
-
       if (feedbackResponse.ok) {
         const feedbacks = await feedbackResponse.json();
-        const filtered = feedbacks.filter(fb => fb.semester === semester);
-        setFeedbackData(filtered);
+        setFeedbackData(feedbacks);
       } else {
         setFeedbackData([]);
       }
