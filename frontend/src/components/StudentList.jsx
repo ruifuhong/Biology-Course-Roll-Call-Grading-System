@@ -33,10 +33,10 @@ export default function StudentList({ semester }) {
         const sortedData = data.sort(naturalSort);
         setStudents(sortedData);
       } else {
-        setMessage('Failed to load students / 載入學生失敗');
+        setMessage('載入學生失敗 Failed to load students');
       }
     } catch (error) {
-      setMessage('Error loading students: ' + error.message + ' / 載入學生錯誤: ' + error.message);
+      setMessage('載入學生錯誤: ' + error.message + ' Error loading students: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -56,14 +56,14 @@ export default function StudentList({ semester }) {
         const updatedStudents = [...students, newStudent];
         const sortedStudents = updatedStudents.sort(naturalSort);
         setStudents(sortedStudents);
-        setMessage('Student added successfully / 學生新增成功');
+        setMessage('新增學生成功 Student added successfully');
         setShowAddForm(false);
       } else {
         const error = await response.json();
-        setMessage('Error: ' + error.error + ' / 錯誤: ' + error.error);
+        setMessage('錯誤:' + error.error + ' Error: ' + error.error);
       }
     } catch (error) {
-      setMessage('Error adding student: ' + error.message + ' / 新增學生錯誤: ' + error.message);
+      setMessage(' 新增學生錯誤: ' + error.message + ' Error adding student: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -71,7 +71,7 @@ export default function StudentList({ semester }) {
 
   const handleCSVUpload = async () => {
     if (!csvData.trim()) {
-      setMessage('Please provide CSV data / 請提供CSV資料');
+      setMessage('請提供CSV資料 Please provide CSV data');
       return;
     }
 
@@ -87,15 +87,15 @@ export default function StudentList({ semester }) {
         const result = await response.json();
         const successful = result.summary.created || 0;
         const failed = (result.summary.parseErrors || 0) + (result.summary.dbErrors || 0);
-        setMessage(`CSV upload completed: ${successful} successful, ${failed} failed / CSV上傳完成: ${successful} 成功, ${failed} 失敗`);
+        setMessage(`CSV上傳完成: ${successful} 成功, ${failed} 失敗 CSV upload completed: ${successful} successful, ${failed} failed`);
         setCsvData('');
         fetchStudents();
       } else {
         const error = await response.json();
-        setMessage('Error: ' + error.error + ' / 錯誤: ' + error.error);
+        setMessage('錯誤: ' + error.error + ' Error: ' + error.error);
       }
     } catch (error) {
-      setMessage('Error uploading CSV: ' + error.message + ' / CSV上傳錯誤: ' + error.message);
+      setMessage('CSV上傳錯誤: ' + error.message + ' Error uploading CSV: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -103,7 +103,7 @@ export default function StudentList({ semester }) {
 
   const handleEditStudent = async () => {
     if (!editFormData.student_id || !editFormData.name || !editFormData.department || !editFormData.group_name) {
-      alert('Student ID, Name, Department, and Group Name are required / 學號、姓名、系別和組別為必填欄位');
+      alert('學號、姓名、系別和組別為必填欄位 Student ID, Name, Department, and Group Name are required');
       return;
     }
 
@@ -123,22 +123,22 @@ export default function StudentList({ semester }) {
         );
         const sortedStudents = updatedStudents.sort(naturalSort);
         setStudents(sortedStudents);
-        setMessage('Student updated successfully / 學生更新成功');
+        setMessage('更新學生成功 Student updated successfully');
         setEditingStudentId(null);
         setEditFormData({});
       } else {
         const error = await response.json();
-        setMessage('Error: ' + error.error + ' / 錯誤: ' + error.error);
+        setMessage('錯誤: ' + error.error + ' Error: ' + error.error);
       }
     } catch (error) {
-      setMessage('Error updating student: ' + error.message + ' / 更新學生錯誤: ' + error.message);
+      setMessage('更新學生錯誤: ' + error.message + ' Error updating student: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteStudent = async (studentId) => {
-    if (!window.confirm('Are you sure you want to delete this student? / 確定要刪除此學生嗎？')) {
+    if (!window.confirm('確定要刪除此學生嗎？Are you sure you want to delete this student?')) {
       return;
     }
 
@@ -150,13 +150,13 @@ export default function StudentList({ semester }) {
 
       if (response.ok) {
         setStudents(students.filter(student => student.student_id !== studentId));
-        setMessage('Student deleted successfully / 學生刪除成功');
+        setMessage('學生刪除成功 Student deleted successfully');
       } else {
         const error = await response.json();
-        setMessage('Error: ' + error.error + ' / 錯誤: ' + error.error);
+        setMessage('錯誤: ' + error.error + ' Error: ' + error.error);
       }
     } catch (error) {
-      setMessage('Error deleting student: ' + error.message + ' / 刪除學生錯誤: ' + error.message);
+      setMessage('刪除學生錯誤:' + error.message + ' Error deleting student: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -202,21 +202,21 @@ export default function StudentList({ semester }) {
           }}
           className={`btn ${showAddForm ? 'btn-secondary' : 'btn-primary'}`}
         >
-          {showAddForm ? 'Cancel / 取消' : 'Add Student / 新增學生'}
+          {showAddForm ? '取消 Cancel' : '新增學生 Add Student'}
         </button>
         {editingStudentId && (
           <button 
             onClick={cancelEdit}
             className="btn btn-secondary"
           >
-            Cancel Edit / 取消編輯
+            取消編輯 Cancel Edit
           </button>
         )}
         <button 
           onClick={fetchStudents}
           className="btn btn-secondary"
         >
-          Refresh / 重新整理
+          重新整理 Refresh
         </button>
       </div>
 
@@ -230,13 +230,13 @@ export default function StudentList({ semester }) {
       )}
 
       <div className="csv-upload-section">
-        <h3>{formatSemester(semester)} CSV Upload / CSV上傳</h3>
-        <p>Format: student_id,name,department,group_name / 格式: 學號,姓名,系別,組別</p>
+        <h3>{formatSemester(semester)} CSV上傳 CSV Upload</h3>
+        <p>格式: 學號,姓名,系別,組別 Format: student_id,name,department,group_name</p>
         <div className="file-input-wrapper">
           <textarea
             value={csvData}
             onChange={(e) => setCsvData(e.target.value)}
-            placeholder="Paste CSV data here... / 在此貼上CSV資料..."
+            placeholder="在此貼上CSV資料... Paste CSV data here..."
           />
         </div>
         <button 
@@ -244,25 +244,25 @@ export default function StudentList({ semester }) {
           disabled={loading || !csvData.trim()}
           className="btn btn-success"
         >
-          {loading ? 'Uploading... / 上傳中...' : 'Upload CSV Data / 上傳CSV資料'}
+          {loading ? '上傳中... Uploading...' : '上傳CSV資料 Upload CSV Data'}
         </button>
       </div>
 
       <div className="data-table-container">
-        <h3>Current Students ({students.length}) / 目前學生 ({students.length})</h3>
+        <h3>目前學生  ({students.length}) Current Students ({students.length})</h3>
         {loading ? (
-          <div className="loading">Loading students... / 載入學生中...</div>
+          <div className="loading">載入學生中... Loading students...</div>
         ) : students.length === 0 ? (
-          <div className="no-data">No students found for this semester. / 本學期未找到學生。</div>
+          <div className="no-data">本學期未找到學生 No students found for this semester. </div>
         ) : (
           <table className="data-table">
             <thead>
               <tr>
-                <th>Group / 組別</th>
-                <th>Student ID / 學號</th>
-                <th>Name / 姓名</th>
-                <th>Department / 系別</th>
-                <th>Actions / 操作</th>
+                <th>組別 Group </th>
+                <th>學號 Student ID </th>
+                <th>姓名 Name </th>
+                <th>系別 Department </th>
+                <th>操作 Actions </th>
               </tr>
             </thead>
             <tbody>
@@ -327,14 +327,14 @@ export default function StudentList({ semester }) {
                               className="btn btn-sm btn-success"
                               disabled={loading}
                             >
-                              Save / 儲存
+                              儲存 Save
                             </button>
                             <button
                               onClick={cancelEdit}
                               className="btn btn-sm btn-secondary"
                               disabled={loading}
                             >
-                              Cancel / 取消
+                              取消 Cancel
                             </button>
                           </>
                         ) : (
@@ -344,14 +344,14 @@ export default function StudentList({ semester }) {
                               className="btn btn-sm btn-primary"
                               disabled={loading || editingStudentId !== null}
                             >
-                              Edit / 編輯
+                              編輯 Edit 
                             </button>
                             <button
                               onClick={() => handleDeleteStudent(student.student_id)}
                               className="btn btn-sm btn-danger"
                               disabled={loading || editingStudentId !== null}
                             >
-                              Delete / 刪除
+                              刪除 Delete 
                             </button>
                           </>
                         )}
@@ -384,7 +384,7 @@ function StudentForm({ onSubmit, onCancel, semester, mode = 'add', initialData =
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.student_id || !formData.name || !formData.department || !formData.group_name) {
-      alert('Student ID, Name, Department, and Group Name are required / 學號、姓名、系別和組別為必填欄位');
+      alert('學號、姓名、系別和組別為必填欄位 Student ID, Name, Department, and Group Name are required');
       return;
     }
     onSubmit(formData);
@@ -397,11 +397,11 @@ function StudentForm({ onSubmit, onCancel, semester, mode = 'add', initialData =
 
   return (
     <div className="form-section">
-      <h3>{formatSemester(semester)} {mode === 'edit' ? 'Edit Student / 編輯學生' : 'Add New Student / 新增學生'}</h3>
+      <h3>{formatSemester(semester)} {mode === 'edit' ? '編輯學生 Edit Student' : '新增學生 Add New Student'}</h3>
       <form onSubmit={handleSubmit}>
         <div className="form-grid">
           <div className="form-group">
-            <label htmlFor="student_id_input">Student ID / 學號 *</label>
+            <label htmlFor="student_id_input">學號 Student ID*</label>
             <input
               id="student_id_input"
               type="text"
@@ -411,10 +411,10 @@ function StudentForm({ onSubmit, onCancel, semester, mode = 'add', initialData =
               disabled={mode === 'edit'}
               required
             />
-            {mode === 'edit' && <small>Student ID cannot be changed / 學號無法修改</small>}
+            {mode === 'edit' && <small>學號無法修改 Student ID cannot be changed</small>}
           </div>
           <div className="form-group">
-            <label htmlFor="student_name_input">Name / 姓名 *</label>
+            <label htmlFor="student_name_input">姓名 Name*</label>
             <input
               id="student_name_input"
               type="text"
@@ -425,7 +425,7 @@ function StudentForm({ onSubmit, onCancel, semester, mode = 'add', initialData =
             />
           </div>
           <div className="form-group">
-            <label htmlFor="student_department_input">Department / 系別 *</label>
+            <label htmlFor="student_department_input">系級 Department*</label>
             <input
               id="student_department_input"
               type="text"
@@ -436,7 +436,7 @@ function StudentForm({ onSubmit, onCancel, semester, mode = 'add', initialData =
             />
           </div>
           <div className="form-group">
-            <label htmlFor="group_name_input">Group Name / 組別 *</label>
+            <label htmlFor="group_name_input">組別 Group Name*</label>
             <input
               id="group_name_input"
               type="text"
@@ -449,10 +449,10 @@ function StudentForm({ onSubmit, onCancel, semester, mode = 'add', initialData =
         </div>
         <div className="action-buttons">
           <button type="submit" className="btn btn-success">
-            {mode === 'edit' ? 'Update Student / 更新學生' : 'Add Student / 新增學生'}
+            {mode === 'edit' ? '更新學生 Update Student' : '新增學生 Add Student'}
           </button>
           <button type="button" onClick={onCancel} className="btn btn-secondary">
-            Cancel / 取消
+            取消 Cancel 
           </button>
         </div>
       </form>

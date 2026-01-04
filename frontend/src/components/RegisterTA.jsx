@@ -229,7 +229,7 @@ export default function RegisterTA({ onRegister }) {
             <div className="ta-list-semesters">學期 Semesters</div>
             <div className="ta-list-actions">操作 Actions</div>
           </div>
-          {tas.length === 0 && <div className="ta-list-empty">No TAs found.</div>}
+          {tas.length === 0 && <div className="ta-list-empty">找不到助教 No TAs found.</div>}
           {tas.map(ta => {
             const isEditing = editStates[ta.id]?.editing;
             return (

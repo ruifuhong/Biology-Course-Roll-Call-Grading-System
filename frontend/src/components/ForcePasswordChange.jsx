@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/ForcePasswordChange.css';
@@ -97,7 +96,7 @@ export default function ForcePasswordChange({ onChanged }) {
           type="submit"
           disabled={loading}
         >
-          {loading ? 'Changing...' : 'Change Password'}
+          {loading ? '密碼更新中... Password Changing...' : '更新密碼 Change Password'}
         </button>
       </form>
     </div>

@@ -41,7 +41,7 @@ export default function AttendanceView({ semester }) {
         const sortedAttendance = attendance.sort(naturalSort);
         setAttendanceData(sortedAttendance);
       } else {
-        setMessage('Failed to load attendance data / 載入出席資料失敗');
+        setMessage('載入出席資料失敗 Failed to load attendance data');
         setAttendanceData([]);
       }
 
@@ -50,11 +50,11 @@ export default function AttendanceView({ semester }) {
         const sortedDates = dates.sort((a, b) => a.session_order - b.session_order);
         setSessionDates(sortedDates);
       } else {
-        setMessage('Failed to load session dates / 載入課程日期失敗');
+        setMessage('載入課程日期失敗 Failed to load session dates');
         setSessionDates([]);
       }
     } catch (error) {
-      setMessage('Error loading attendance data: ' + error.message + ' / 載入出席資料錯誤: ' + error.message);
+      setMessage('載入出席資料錯誤 Error loading attendance data: ' + error.message);
       setAttendanceData([]);
       setSessionDates([]);
     } finally {
@@ -76,9 +76,11 @@ export default function AttendanceView({ semester }) {
         const feedbacks = await feedbackResponse.json();
         setFeedbackData(feedbacks);
       } else {
+        setMessage('載入回饋失敗 Failed to load feedback');
         setFeedbackData([]);
       }
     } catch (error) {
+      setMessage('載入回饋錯誤 Error loading feedback: ' + error.message);
       setFeedbackData([]);
     } finally {
       setLoading(false);
@@ -88,7 +90,7 @@ export default function AttendanceView({ semester }) {
   return (
     <div className="attendance-view">
       {message && (
-        <div className={`message ${message.includes('Error') ? 'error' : 'success'}`}>
+        <div className={`message ${message.includes('錯誤') || message.includes('失敗') ? 'error' : 'success'}`}>
           {message}
         </div>
       )}
@@ -152,27 +154,27 @@ function AttendanceTable({ attendanceData, sessionDates, courseType, loading, on
   return (
     <div className="attendance-table-view">
       <div className="attendance-header">
-        <h3>{courseType === 'lecture' ? 'Lecture / 正課' : 'Discussion / 討論課'} Attendance - {groupedStudents.length} students / 出席 - {groupedStudents.length} 學生</h3>
+        <h3>{courseType === 'lecture' ? '正課 Lecture' : '討論課 Discussion'} 出席 Attendance - {groupedStudents.length} 學生 students</h3>
         <button onClick={onRefresh} className="btn btn-secondary" disabled={loading}>
-          {loading ? 'Loading... / 載入中...' : '🔄 Refresh / 重新整理'}
+          {loading ? '載入中... Loading...' : '🔄 重新整理 Refresh'}
         </button>
       </div>
       {loading ? (
-        <div className="loading">Loading attendance data... / 載入出席資料中...</div>
+        <div className="loading">載入出席資料中... Loading attendance data...</div>
       ) : groupedStudents.length === 0 ? (
-        <div className="no-data">No attendance data found for this semester. / 本學期未找到出席資料。</div>
+        <div className="no-data">本學期未找到出席資料。No attendance data found for this semester.</div>
       ) : (
         <div className="attendance-table-container">
           <table className="attendance-table">
             <thead>
               <tr>
-                <th rowSpan="2">組別 / Group</th>
-                <th rowSpan="2">Student ID / 學號</th>
-                <th rowSpan="2">系級 / Department</th>
-                <th rowSpan="2">Name / 姓名</th>
-                <th colSpan={sessionDates.length}>Session Dates / 課程日期</th>
-                <th rowSpan="2">出席次數 / Present</th>
-                <th rowSpan="2">缺席次數 / Absent</th>
+                <th rowSpan="2">組別 Group</th>
+                <th rowSpan="2">學號 Student ID</th>
+                <th rowSpan="2">系級 Department</th>
+                <th rowSpan="2">姓名 Name</th>
+                <th colSpan={sessionDates.length}>課程日期 Session Dates</th>
+                <th rowSpan="2">出席次數 Present</th>
+                <th rowSpan="2">缺席次數 Absent</th>
               </tr>
               <tr>
                 {sessionDates.map((session, idx) => (
@@ -216,12 +218,12 @@ function AttendanceTable({ attendanceData, sessionDates, courseType, loading, on
     return (
       <div className="feedback-list-container">
         <h3 className="feedback-list-title">
-          {courseType === 'lecture' ? 'Lecture Feedback / 正課回饋' : 'Discussion Feedback / 討論課回饋'}
+          {courseType === 'lecture' ? '正課回饋 Lecture Feedback' : '討論課回饋 Discussion Feedback'}
         </h3>
         {loading ? (
-          <div className="loading">Loading feedback... / 載入回饋中...</div>
+          <div className="loading">載入回饋中... Loading feedback...</div>
         ) : feedbackData.length === 0 ? (
-          <div className="no-data">No feedback found for this semester. / 本學期未找到回饋。</div>
+          <div className="no-data">本學期未找到回饋。No feedback found for this semester.</div>
         ) : (
           <ul className="feedback-list">
             {feedbackData.map(fb => (

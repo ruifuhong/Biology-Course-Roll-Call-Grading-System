@@ -42,18 +42,16 @@ export default function Login({ onLogin }) {
       <form onSubmit={handleSubmit}>
         <div>
           <label>帳號 Username</label>
-          <input value={username} onChange={e => setUsername(e.target.value)} required placeholder="Username / 使用者名稱" />
+          <input value={username} onChange={e => setUsername(e.target.value)} required placeholder="使用者名稱 Username" />
         </div>
         <div>
           <label>密碼 Password</label>
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="Password / 密碼" />
+          <input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="密碼 Password" />
         </div>
-        {error && <div className="error">{error} / 錯誤</div>}
-        <button type="submit" disabled={loading}>{loading ? 'Logging in... / 登入中...' : 'Login / 登入'}</button>
+        {error && <div className="error">錯誤 {error}</div>}
+        <button type="submit" disabled={loading}>{loading ? '登入中... Logging in...' : '登入 Login'}</button>
       </form>
-      <button className="mainpage-link-btn" onClick={() => navigate('/')}
-        style={{ marginTop: '18px', background: 'none', border: 'none', color: '#007bff', textDecoration: 'underline', cursor: 'pointer', fontSize: '1rem' }}
-      >
+      <button className="mainpage-link-btn" onClick={() => navigate('/')}>
         回首頁 Go to Main Page
       </button>
     </div>

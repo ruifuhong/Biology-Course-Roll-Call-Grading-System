@@ -42,11 +42,11 @@ const DateInputForm = ({ courseType, onSubmit, loading, semester }) => {
 
   return (
     <div className="date-input-form">
-      <h3>Add {courseType === 'lecture' ? 'Lecture' : 'Discussion'} Date</h3>
+      <h3>{courseType === 'lecture' ? '新增正課日期 Add Lecture Date' : '新增討論課日期 Add Discussion Date'}</h3>
       
       {semester && (
         <div className="semester-info">
-          <small>📅 Valid date range for {dateRange.display}: {dateRange.min} to {dateRange.max}</small>
+          <small>📅 {dateRange.display} 可用日期範圍 Valid date range: {dateRange.min} 至 to {dateRange.max}</small>
         </div>
       )}
       
@@ -58,11 +58,11 @@ const DateInputForm = ({ courseType, onSubmit, loading, semester }) => {
             className="btn btn-secondary"
             disabled={loading}
           >
-            ➕ Add Date Field
+            ➕ 新增日期 Add Date Field
           </button>
         ) : (
           <div className="date-picker-container">
-            <label>Select Date: </label>
+            <label>選擇日期 Select Date: </label>
             <input
               type="date"
               min={dateRange.min}
@@ -75,7 +75,7 @@ const DateInputForm = ({ courseType, onSubmit, loading, semester }) => {
               onClick={() => setShowDatePicker(false)}
               className="btn btn-secondary"
             >
-              Cancel
+              取消 Cancel
             </button>
           </div>
         )}
@@ -121,7 +121,7 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAtte
 
   const handleSaveEdit = () => {
     if (!editDate) {
-      alert('Please enter a valid date');
+      alert('請輸入有效日期 Please enter a valid date');
       return;
     }
     onUpdate(courseType, editingDate, editDate);
@@ -136,20 +136,20 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAtte
   
   return (
     <div className="session-dates-table">
-      <h3>{courseType === 'lecture' ? 'Lecture' : 'Discussion'} Dates ({dates.length})</h3>
+      <h3>{courseType === 'lecture' ? '正課日期 Lecture Dates' : '討論課日期 Discussion Dates'} ({dates.length})</h3>
       {loading ? (
-        <div className="loading">Loading...</div>
+        <div className="loading">載入中... Loading...</div>
       ) : dates.length === 0 ? (
-        <div className="no-data">No session dates set for this semester.</div>
+        <div className="no-data">本學期尚未設定課程日期 No session dates set for this semester.</div>
       ) : (
         <table className="sessions-table">
           <thead>
             <tr>
-              <th>Session #</th>
-              <th>Date</th>
-              <th>Day of Week</th>
-              <th>Attendance Status</th>
-              <th>Actions</th>
+              <th>場次 Session #</th>
+              <th>日期 Date</th>
+              <th>星期 Day of Week</th>
+              <th>點名狀態 Attendance Status</th>
+              <th>操作 Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -161,7 +161,7 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAtte
               
               return (
                 <tr key={currentDate} className={isActive ? 'active-session' : 'inactive-session'}>
-                  <td>Session {index + 1}</td>
+                  <td>{index + 1}</td>
                   <td>
                     {editingDate === currentDate ? (
                       <input
@@ -198,13 +198,13 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAtte
                           onClick={handleSaveEdit}
                           className="btn btn-success"
                         >
-                          Save
+                          儲存 Save
                         </button>
                         <button 
                           onClick={handleCancelEdit}
                           className="btn btn-secondary"
                         >
-                          Cancel
+                          取消 Cancel
                         </button>
                       </div>
                     ) : (
@@ -213,13 +213,13 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAtte
                           onClick={() => handleEditClick(session)}
                           className="btn btn-warning"
                         >
-                          Edit Date
+                          編輯日期 Edit Date
                         </button>
                         <button 
                           onClick={() => onDelete(courseType, currentDate)}
                           className="btn btn-danger"
                         >
-                          Delete
+                          刪除 Delete
                         </button>
                       </div>
                     )}
@@ -265,7 +265,7 @@ export default function SessionManagement({ semester }) {
         setDiscussionDates([]);
       }
     } catch (error) {
-      setMessage('Error loading session dates: ' + error.message);
+      setMessage('載入課程日期失敗 Error loading session dates: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -293,7 +293,7 @@ export default function SessionManagement({ semester }) {
     } else {
       return {
         isValid: false,
-        message: 'Invalid semester format'
+        message: '學期格式錯誤 Invalid semester format'
       };
     }
     
@@ -305,8 +305,8 @@ export default function SessionManagement({ semester }) {
     return {
       isValid,
       message: isValid 
-        ? 'Date is valid for this semester'
-        : `Date must be between ${startDate.toLocaleDateString()} and ${endDate.toLocaleDateString()} for semester ${academicYear}-${semesterNum}`,
+        ? '日期不符學期範圍 Date is valid for this semester'
+        : `本學期日期在${startDate.toLocaleDateString()}與${endDate.toLocaleDateString()}之間 Date must be between ${startDate.toLocaleDateString()} and ${endDate.toLocaleDateString()} for semester ${academicYear}-${semesterNum}`,
       semesterRange: {
         start: startDate.toLocaleDateString(),
         end: endDate.toLocaleDateString()
@@ -316,14 +316,14 @@ export default function SessionManagement({ semester }) {
 
   const handleSetDates = async (courseType, dates) => {
     if (!dates || dates.length === 0) {
-      setMessage('Please provide at least one date');
+      setMessage('請至少輸入一個日期 Please provide at least one date');
       return;
     }
 
     for (const date of dates) {
       const validation = validateDateForSemester(date, semester);
       if (!validation.isValid) {
-        setMessage(validation.message);
+        setMessage('日期不符學期範圍 Invalid date for semester: ' + validation.message);
         return;
       }
     }
@@ -341,17 +341,17 @@ export default function SessionManagement({ semester }) {
         const result = await response.json();
         if (courseType === 'lecture') {
           setLectureDates(result);
-          setMessage('Lecture dates set successfully');
+          setMessage('正課日期設定成功 Lecture dates set successfully');
         } else {
           setDiscussionDates(result);
-          setMessage('Discussion dates set successfully');
+          setMessage('討論課日期設定成功 Discussion dates set successfully');
         }
       } else {
         const error = await response.json();
-        setMessage('Error: ' + error.error);
+        setMessage('錯誤 Error: ' + error.error);
       }
     } catch (error) {
-      setMessage('Error setting dates: ' + error.message);
+      setMessage('設定日期失敗 Error setting dates: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -360,7 +360,7 @@ export default function SessionManagement({ semester }) {
   const handleUpdateDate = async (courseType, oldDate, newDate) => {
     const validation = validateDateForSemester(newDate, semester);
     if (!validation.isValid) {
-      setMessage(validation.message);
+      setMessage('日期不符學期範圍 Invalid date for semester: ' + validation.message);
       return;
     }
 
@@ -379,26 +379,26 @@ export default function SessionManagement({ semester }) {
           setLectureDates(lectureDates.map(d => 
             d.actual_date === oldDate ? updatedDate : d
           ));
-          setMessage('Date updated successfully');
+          setMessage('日期更新成功 Date updated successfully');
         } else {
           setDiscussionDates(discussionDates.map(d => 
             d.actual_date === oldDate ? updatedDate : d
           ));
-          setMessage('Discussion date updated successfully');
+          setMessage('討論課日期更新成功 Discussion date updated successfully');
         }
       } else {
         const error = await response.json();
-        setMessage('Error: ' + error.error);
+        setMessage('錯誤 Error: ' + error.error);
       }
     } catch (error) {
-      setMessage('Error updating date: ' + error.message);
+      setMessage('更新日期失敗 Error updating date: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteDate = async (courseType, actualDate) => {
-    if (!confirm('Are you sure you want to delete this session date?')) return;
+    if (!confirm('確定刪除此課程日期？Are you sure you want to delete this session date?')) return;
 
     setLoading(true);
     try {
@@ -410,17 +410,17 @@ export default function SessionManagement({ semester }) {
       if (response.ok) {
         if (courseType === 'lecture') {
           setLectureDates(lectureDates.filter(d => d.actual_date !== actualDate));
-          setMessage('Session date deleted successfully');
+          setMessage('課程日期刪除成功 Session date deleted successfully');
         } else {
           setDiscussionDates(discussionDates.filter(d => d.actual_date !== actualDate));
-          setMessage('Discussion session date deleted successfully');
+          setMessage('討論課日期刪除成功 Discussion session date deleted successfully');
         }
       } else {
         const error = await response.json();
-        setMessage('Error: ' + error.error);
+        setMessage('錯誤 Error: ' + error.error);
       }
     } catch (error) {
-      setMessage('Error deleting date: ' + error.message);
+      setMessage('刪除日期失敗 Error deleting date: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -448,19 +448,19 @@ export default function SessionManagement({ semester }) {
             d.actual_date === selectedDate ? updatedSession : d
           ));
         }
-        setMessage(`Attendance submission ${newStatus ? 'enabled' : 'disabled'} for Session ${selectedDate}`);
+        setMessage(`點名狀態已${newStatus ? '開啟' : '關閉'} Attendance submission ${newStatus ? 'enabled' : 'disabled'} for Session ${selectedDate}`);
       } else {
         const error = await response.json();
-        setMessage('Error: ' + error.error);
+        setMessage('錯誤 Error: ' + error.error);
       }
     } catch (error) {
-      setMessage('Error toggling attendance: ' + error.message);
+      setMessage('切換點名狀態失敗 Error toggling attendance: ' + error.message);
     } 
   };
 
   return (
     <div className="session-management">
-      <h2>Session Date Management - {semester}</h2>
+      <h2>課程日期管理 Session Date Management - {semester}</h2>
       
       {message && (
         <div className={`message ${message.includes('Error') ? 'error' : 'success'}`}>
@@ -473,13 +473,13 @@ export default function SessionManagement({ semester }) {
           onClick={() => setActiveTab('lecture')}
           className={`course-tab-button ${activeTab === 'lecture' ? 'active' : ''}`}
         >
-          正課 (Lecture)
+          正課 Lecture
         </button>
         <button
           onClick={() => setActiveTab('discussion')}
           className={`course-tab-button ${activeTab === 'discussion' ? 'active' : ''}`}
         >
-          討論課 (Discussion)
+          討論課 Discussion
         </button>
       </div>
 
