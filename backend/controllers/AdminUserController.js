@@ -11,7 +11,7 @@ const COOKIE_OPTIONS = {
 };
 
 export async function getMe(req, res) {
-  if (!req.user) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.user) return res.status(401).json({ error: '無權限 Not authenticated' });
   const { id, role } = req.user;
   let userInfo = { id, role };
   try {
@@ -27,7 +27,8 @@ export async function getMe(req, res) {
     }
     res.json({ user: userInfo });
   } catch (err) {
-    res.status(500).json({ error: '抓取使用者資訊失敗 Failed to fetch user info' });
+     console.error('抓取使用者資訊失敗 Failed to fetch user info:', err);
+     res.status(500).json({ error: '抓取使用者資訊失敗 Failed to fetch user info' });
   }
 }
 
@@ -37,7 +38,8 @@ export async function getTASemesters(req, res) {
     const semesters = await AdminUserModel.getTASemesters(taId);
     res.json({ semesters });
   } catch (err) {
-    res.status(500).json({ error: '抓取助教學期資訊失敗 Failed to fetch TA semesters' });
+     console.error('抓取助教學期資訊失敗 Failed to fetch TA semesters:', err);
+     res.status(500).json({ error: '抓取助教學期資訊失敗 Failed to fetch TA semesters' });
   }
 }
 
@@ -45,8 +47,16 @@ export async function login(req, res) {
   const { username, password } = req.body;
   const user = await AdminUserModel.findUserByUsername(username);
   if (!user) return res.status(401).json({ error: '無此帳號 Invalid credentials' });
+    if (!user) {
+      console.warn('登入失敗：無此帳號 Login failed: Invalid credentials');
+      return res.status(401).json({ error: '無此帳號 Invalid credentials' });
+    }
   const valid = await AdminUserModel.verifyPassword(user, password);
   if (!valid) return res.status(401).json({ error: '密碼錯誤 Invalid credentials' });
+    if (!valid) {
+      console.warn('登入失敗：密碼錯誤 Login failed: Invalid credentials');
+      return res.status(401).json({ error: '密碼錯誤 Invalid credentials' });
+    }
   let userInfo = { id: user.id, username: user.username, role: user.role, mustChangePassword: false };
 
   if (user.role === 'ta') {
@@ -79,7 +89,7 @@ export async function registerLecturer(req, res) {
 }
 
 export async function addTA(req, res) {
-  if (req.user.role !== 'lecturer') return res.status(403).json({ error: 'Forbidden' });
+  if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限操作 Forbidden' });
   const { username, password, name, semesters } = req.body;
   const user = await AdminUserModel.createUser({ username, password, role: 'ta' });
   if (!user) return res.status(400).json({ error: '此帳號已註冊 Username already exists' });
@@ -87,7 +97,8 @@ export async function addTA(req, res) {
  try {
     await AdminUserModel.addTAName({ ta_id: user.id, username, name });
   } catch (err) {
-    return res.status(500).json({ error: '存取助教名字失敗 Failed to save TA name' });
+   console.error('儲存助教名字失敗 Failed to save TA name:', err);
+   return res.status(500).json({ error: '存取助教名字失敗 Failed to save TA name' });
   }
 
   if (Array.isArray(semesters) && semesters.length > 0) {
@@ -98,17 +109,19 @@ export async function addTA(req, res) {
         )
       );
     } catch (err) {
-      return res.status(500).json({ error: '設定學期失敗 Failed to assign semesters' });
+        console.error('設定助教學期失敗 Failed to assign semesters:', err);
+        return res.status(500).json({ error: '設定學期失敗 Failed to assign semesters' });
     }
   }
   res.status(201).json({ user: { id: user.id, username: user.username, name, role: user.role, semesters } });
 }
 
 export async function deleteTA(req, res) {
-  if (req.user.role !== 'lecturer') return res.status(403).json({ error: 'Forbidden' });
+  if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限操作 Forbidden' });
   const { id } = req.params;
   const ta = await AdminUserModel.findUserById(id);
   if (!ta || ta.role !== 'ta') return res.status(404).json({ error: '查無此助教 TA not found' });
+
   await AdminUserModel.deleteTANames(id);
   await AdminUserModel.deleteTASemesters(id);
   await AdminUserModel.deleteUser(id);
@@ -116,19 +129,19 @@ export async function deleteTA(req, res) {
 }
 
 export async function getAllAdmins(req, res) {
-  if (req.user.role !== 'lecturer') return res.status(403).json({ error: 'Forbidden' });
+  if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限操作 Forbidden' });
   const users = await AdminUserModel.getAllUsers();
   res.json({ users: users.map(u => ({ id: u.id, username: u.username, role: u.role })) });
 }
 
 export async function getAllTADetails(req, res) {
-  if (req.user.role !== 'lecturer') return res.status(403).json({ error: 'Forbidden' });
+  if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限操作 Forbidden' });
   const tas = await AdminUserModel.getAllTADetails();
   res.json({ tas });
 }
 
 export async function updateTA(req, res) {
-  if (req.user.role !== 'lecturer') return res.status(403).json({ error: 'Forbidden' });
+  if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限操作 Forbidden' });
   const { id } = req.params;
   const { name, username, semesters } = req.body;
   
@@ -150,7 +163,8 @@ export async function updateTA(req, res) {
     const updatedTA = await AdminUserModel.findUserById(id);
     res.json({ ta: updatedTA });
   } catch (err) {
-    res.status(500).json(err);
+     console.error('更新助教失敗 Update TA failed:', err);
+     res.status(500).json(err);
   }
 }
 
@@ -167,6 +181,7 @@ export async function changePassword(req, res) {
     await AdminUserModel.updateUserPassword(req.user.id, newPassword);
     res.json({ message: '更新密碼成功 Password changed successfully' });
   } catch (err) {
-    res.status(500).json({ error: '更新密碼失敗 Failed to change password' });
+      console.error('更改密碼失敗 Failed to change password:', err);
+      res.status(500).json({ error: '更新密碼失敗 Failed to change password' });
   }
 }
