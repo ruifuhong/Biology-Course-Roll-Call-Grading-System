@@ -15,24 +15,19 @@ export const generateSemesterOptions = () => {
   
   const startYear = 113;
   
-  for (let year = startYear; year <= academicYear; year++) {
+  for (let year = academicYear; year >= startYear; year--) {
     const startSemester = 1;
     const endSemester = (year === academicYear) ? currentSemesterNum : 2;
-    
-    for (let sem = startSemester; sem <= endSemester; sem++) {
+    for (let sem = endSemester; sem >= startSemester; sem--) {
       const semesterCode = `${year}${sem}`;
       const semesterLabel = `${year}-${sem}`;
-      const seasonLabel = sem === 1 ? 'Fall' : 'Spring';
-      const calendarYear = year + 1911 + (sem === 1 ? 0 : 1);
-      
       options.push({
         value: semesterCode,
-        label: `${semesterLabel} (${seasonLabel} ${calendarYear})`
+        label: `${semesterLabel}`
       });
     }
   }
-  
-  return options.reverse();
+  return options;
 };
 
 export const academicToCalendarYear = (academicYear) => {
