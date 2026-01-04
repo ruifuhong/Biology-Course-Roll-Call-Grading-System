@@ -1,0 +1,50 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.mainpage-container {
+  margin: 30px 0;
+  padding: 20px;
+  border: 2px solid #007bff;
+  border-radius: 8px;
+}
+
+.mainpage-title {
+  color: #007bff;
+}
+
+.mainpage-links {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.mainpage-link {
+  padding: 10px 20px;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.mainpage-link.lecture {
+  background-color: #007bff;
+}
+
+.mainpage-link.discussion {
+  background-color: #28a745;
+}
+
+.mainpage-link.admin {
+  background-color: #6c757d;
+}
+
+.loading-user {
+  text-align: center;
+  margin-top: 40px;
+  font-size: 1.5rem;
+}

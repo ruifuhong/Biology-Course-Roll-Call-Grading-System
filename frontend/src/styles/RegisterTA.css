@@ -1,0 +1,438 @@
+.ta-action-btn.save-btn {
+  background: #1565c0;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ta-action-btn.save-btn:hover {
+  background: #42a5f5;
+}
+.ta-action-btn.cancel-btn {
+  background: #e0e0e0;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ta-action-btn.cancel-btn:hover {
+  background: #bdbdbd;
+}
+.ta-action-btn.edit-btn {
+  background: #2196f3;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ta-action-btn.edit-btn:hover {
+  background: #1565c0;
+}
+.ta-list-table {
+  width: 100%;
+  max-width: 800px;
+}
+
+.ta-list-empty {
+  padding: 8px;
+  color: #888;
+}
+
+.ta-semester-chip {
+  background: #28a745;
+  color: #fff;
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin: 2px 2px;
+  font-weight: bold;
+  font-size: 0.98em;
+  display: inline-block;
+}
+
+.ta-semester-none {
+  color: #888;
+}
+
+.ta-semester-toggle-btn {
+  background: #e0e0e0;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  margin: 2px 2px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.ta-semester-toggle-btn.selected {
+  background: #28a745;
+  color: #fff;
+}
+
+.ta-action-btn {
+  margin-right: 4px;
+}
+.ta-list-header {
+  display: flex;
+  font-weight: bold;
+  border-bottom: 1px solid #ccc;
+  padding: 6px 0;
+}
+
+.ta-list-row {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding: 6px 0;
+}
+
+.ta-list-name {
+  flex: 2;
+  margin-right: 8px;
+}
+
+.ta-list-username {
+  flex: 2;
+  margin-right: 8px;
+}
+
+.ta-list-semesters {
+  flex: 4;
+  margin-right: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ta-list-actions {
+  flex: 2;
+}
+.register-ta-container {
+  max-width: 900px;
+  min-width: 340px;
+  margin: 48px auto;
+  padding: 32px 32px 28px 32px;
+  border: none;
+  border-radius: 18px;
+  background: #f7fafc;
+  box-shadow: 0 2px 16px rgba(40,167,69,0.10), 0 1.5px 8px rgba(0,0,0,0.06);
+}
+.register-ta-container h2 {
+  color: #218838;
+  margin-bottom: 22px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.register-ta-form {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(40,167,69,0.07);
+  padding: 18px 16px 10px 16px;
+}
+.register-ta-input {
+  min-width: 120px;
+  flex: 2;
+  border: 1.5px solid #c3e6cb;
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 1rem;
+  background: #f9fdfb;
+  transition: border 0.2s;
+}
+.register-ta-input:focus {
+  border: 1.5px solid #28a745;
+  outline: none;
+  background: #fff;
+}
+.register-ta-semester-toggle-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 4;
+  min-width: 180px;
+  align-items: center;
+  background: #f3f7f4;
+  border-radius: 7px;
+  padding: 6px 8px 4px 8px;
+}
+.register-ta-semester-btn {
+  background: #e9ecef;
+  color: #218838;
+  border: 1.2px solid #c3e6cb;
+  border-radius: 5px;
+  padding: 2px 10px;
+  margin: 1px 1px;
+  font-size: 0.93em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+  line-height: 1.2;
+  min-width: 48px;
+  min-height: 26px;
+  box-sizing: border-box;
+}
+.register-ta-semester-btn.selected {
+  background: #28a745;
+  color: #fff;
+  border: 1.2px solid #218838;
+}
+.register-ta-semester-btn:hover {
+  background: #d4edda;
+  color: #155724;
+}
+.register-ta-submit-btn {
+  flex: 1;
+  min-width: 70px;
+  max-width: 110px;
+  background: #155724;
+  border: none;
+  border-radius: 7px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 0.98em;
+  padding: 6px 0;
+  box-shadow: 0 1px 4px rgba(40,167,69,0.10);
+  transition: background 0.18s, color 0.18s;
+}
+.register-ta-submit-btn:hover:not(:disabled) {
+  background: #0b3d1a;
+  color: #fff;
+}
+.register-ta-submit-btn:disabled {
+  background: #e2f4e2;
+  color: #b7dfb7;
+  cursor: not-allowed;
+}
+.delete-btn {
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  padding: 7px 12px;
+  min-width: 60px;
+  cursor: pointer;
+  transition: background 0.18s;
+  box-shadow: 0 1px 2px rgba(220,53,69,0.08);
+}
+.delete-btn:hover {
+  background: #b52a37;
+  color: #fff;
+}
+.ta-list-table {
+  margin-top: 18px;
+  width: 100%;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 8px rgba(40,167,69,0.07);
+  padding: 10px 0 10px 0;
+}
+.ta-list-header-row {
+  display: flex;
+  font-weight: bold;
+  border-bottom: 2px solid #c3e6cb;
+  padding: 8px 0 6px 0;
+  background: #f3f7f4;
+  border-radius: 10px 10px 0 0;
+}
+.ta-list-row {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #e9ecef;
+  padding: 8px 0 6px 0;
+  background: #f9fdfb;
+  border-radius: 7px;
+  margin-bottom: 2px;
+}
+.ta-list-name { flex: 2; margin-right: 8px; }
+.ta-list-semesters { flex: 4; margin-right: 8px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.ta-list-semester-toggle-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+.ta-list-semester-badge {
+  background: #28a745;
+  color: #fff;
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin: 2px 2px;
+  font-weight: bold;
+  font-size: 0.98em;
+  display: inline-block;
+  box-shadow: 0 1px 2px rgba(40,167,69,0.08);
+}
+.ta-list-no-semesters {
+  color: #888;
+}
+.ta-list-actions {
+  flex: 2;
+  display: flex;
+  gap: 8px;
+}
+.ta-list-edit-btn,
+.ta-list-save-btn,
+.ta-list-cancel-btn {
+  min-width: 60px;
+  padding: 7px 12px;
+  border-radius: 6px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  background: #007bff;
+  color: #fff;
+  transition: background 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.07);
+}
+.ta-list-save-btn { background: #28a745; }
+.ta-list-cancel-btn { background: #6c757d; }
+.ta-list-edit-btn:hover { background: #0056b3; }
+.ta-list-save-btn:hover { background: #218838; }
+.ta-list-cancel-btn:hover { background: #495057; }
+.ta-list-empty {
+  padding: 8px;
+}
+/* Registration form layout */
+.register-ta-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.register-ta-input {
+  min-width: 120px;
+  flex: 2;
+}
+.register-ta-username {}
+.register-ta-name {}
+.register-ta-semester-toggle-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 4;
+  min-width: 180px;
+  align-items: center;
+}
+.register-ta-semester-btn {
+  background: #e0e0e0;
+  color: #333;
+  border: none;
+  border-radius: 3px;
+  padding: 2px 7px;
+  margin: 1px 1px;
+  font-size: 0.92em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  line-height: 1.2;
+  min-width: 48px;
+  min-height: 26px;
+  box-sizing: border-box;
+}
+.register-ta-semester-btn.selected {
+  background: #28a745;
+  color: #fff;
+}
+.register-ta-submit-btn {
+  flex: 1;
+  min-width: 120px;
+}
+
+/* TA List Table */
+.ta-list-table {
+  margin-top: 18px;
+  width: 100%;
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  padding: 10px 0 10px 0;
+}
+.ta-list-header-row {
+  display: flex;
+  font-weight: bold;
+  border-bottom: 1px solid #ccc;
+  padding: 6px 0;
+}
+.ta-list-header-name { flex: 2; }
+.ta-list-header-semesters { flex: 4; }
+.ta-list-header-actions { flex: 2; }
+.ta-list-row {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding: 6px 0;
+}
+.ta-list-name { flex: 2; margin-right: 8px; }
+.ta-list-semesters { flex: 4; margin-right: 8px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.ta-list-semester-toggle-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+.ta-list-semester-badge {
+  background: #28a745;
+  color: #fff;
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin: 2px 2px;
+  font-weight: bold;
+  font-size: 0.98em;
+  display: inline-block;
+}
+.ta-list-no-semesters {
+  color: #888;
+}
+.ta-list-actions {
+  flex: 2;
+  display: flex;
+  gap: 8px;
+}
+.ta-list-edit-btn,
+.ta-list-save-btn,
+.ta-list-cancel-btn {
+  min-width: 60px;
+  padding: 7px 12px;
+  border-radius: 4px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  background: #007bff;
+  color: #fff;
+  transition: background 0.2s;
+}
+.ta-list-save-btn { background: #28a745; }
+.ta-list-cancel-btn { background: #6c757d; }
+.ta-list-edit-btn:hover { background: #0056b3; }
+.ta-list-save-btn:hover { background: #218838; }
+.ta-list-cancel-btn:hover { background: #495057; }
+.ta-list-empty {
+  padding: 8px;
+}
+
+@media (max-width: 900px) {
+  .register-ta-container {
+    max-width: 98vw;
+    padding: 18px 2vw 18px 2vw;
+  }
+  .ta-list-table {
+    font-size: 0.98rem;
+    padding: 4px 0 4px 0;
+  }
+}

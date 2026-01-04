@@ -1,0 +1,64 @@
+.register-lecturer-container {
+  max-width: 350px;
+  margin: 60px auto;
+  padding: 30px;
+  border: 2px solid #ff9800;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.register-lecturer-container h2 {
+  color: #ff9800;
+  margin-bottom: 20px;
+}
+.register-lecturer-container label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+.register-lecturer-container input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.register-lecturer-container .error {
+  color: #d32f2f;
+  margin-bottom: 12px;
+}
+.register-lecturer-container .success {
+  color: #388e3c;
+  margin-bottom: 12px;
+}
+.register-lecturer-container button {
+  width: 100%;
+  padding: 10px;
+  background: #ff9800;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.register-lecturer-container button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.login-link-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.login-link-btn:hover {
+  background: #339cff;
+}
