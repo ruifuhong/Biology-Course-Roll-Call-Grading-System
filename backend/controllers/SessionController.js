@@ -11,6 +11,12 @@ export async function setDiscussionDates(req, res) {
         error: 'semester and non-empty dates array are required'
       });
     }
+    
+    if (req.user && req.user.role === 'ta') {
+      if (!req.user.assignedSemesters || !req.user.assignedSemesters.includes(semester)) {
+        return res.status(403).json({ error: 'Access denied for this semester' });
+      }
+    }
 
     const createdDates = [];
     for (const date of dates) {
@@ -56,6 +62,12 @@ export async function setLectureDates(req, res) {
       });
     }
     
+    if (req.user && req.user.role === 'ta') {
+      if (!req.user.assignedSemesters || !req.user.assignedSemesters.includes(semester)) {
+        return res.status(403).json({ error: 'Access denied for this semester' });
+      }
+    }
+    
     const createdDates = [];
     for (const date of dates) {
       try {
@@ -96,6 +108,12 @@ export async function getDiscussionDates(req, res) {
     if (!semester) {
       return res.status(400).json({ error: 'semester parameter is required' });
     }
+    
+    if (req.user && req.user.role === 'ta') {
+      if (!req.user.assignedSemesters || !req.user.assignedSemesters.includes(semester)) {
+        return res.status(403).json({ error: 'Access denied for this semester' });
+      }
+    }
 
     const dates = await SessionDateModel.getDiscussionDatesBySemester(semester);
 
@@ -122,6 +140,12 @@ export async function getLectureDates(req, res) {
       return res.status(400).json({ error: 'semester parameter is required' });
     }
     
+    if (req.user && req.user.role === 'ta') {
+      if (!req.user.assignedSemesters || !req.user.assignedSemesters.includes(semester)) {
+        return res.status(403).json({ error: 'Access denied for this semester' });
+      }
+    }
+    
     const dates = await SessionDateModel.getLectureDatesBySemester(semester);
     
     const datesWithOrder = dates
@@ -143,6 +167,11 @@ export async function updateLectureDate(req, res) {
     const { semester, oldDate } = req.params;
     const { actualDate } = req.body;
     
+    if (req.user && req.user.role === 'ta') {
+      if (!req.user.assignedSemesters || !req.user.assignedSemesters.includes(semester)) {
+        return res.status(403).json({ error: 'Access denied for this semester' });
+      }
+    }
     if (!actualDate) {
       return res.status(400).json({ error: 'actualDate is required' });
     }
@@ -164,7 +193,12 @@ export async function updateDiscussionDate(req, res) {
   try {
     const { semester, oldDate } = req.params;
     const { actualDate } = req.body;
-
+    
+    if (req.user && req.user.role === 'ta') {
+      if (!req.user.assignedSemesters || !req.user.assignedSemesters.includes(semester)) {
+        return res.status(403).json({ error: 'Access denied for this semester' });
+      }
+    }
     if (!actualDate) {
       return res.status(400).json({ error: 'actualDate is required' });
     }
@@ -186,12 +220,15 @@ export async function deleteLectureDate(req, res) {
   try {
     const { semester, actualDate } = req.params;
     
+    if (req.user && req.user.role === 'ta') {
+      if (!req.user.assignedSemesters || !req.user.assignedSemesters.includes(semester)) {
+        return res.status(403).json({ error: 'Access denied for this semester' });
+      }
+    }
     const deletedDate = await SessionDateModel.deleteLectureDate(semester, actualDate);
-    
     if (!deletedDate) {
       return res.status(404).json({ error: 'Lecture date not found' });
     }
-    
     res.json({ message: 'Lecture date deleted successfully', date: deletedDate });
   } catch (error) {
     console.error('SessionController deleteLectureDate error:', error);
@@ -202,13 +239,16 @@ export async function deleteLectureDate(req, res) {
 export async function deleteDiscussionDate(req, res) {
   try {
     const { semester, actualDate } = req.params;
-
+    
+    if (req.user && req.user.role === 'ta') {
+      if (!req.user.assignedSemesters || !req.user.assignedSemesters.includes(semester)) {
+        return res.status(403).json({ error: 'Access denied for this semester' });
+      }
+    }
     const deletedDate = await SessionDateModel.deleteDiscussionDate(semester, actualDate);
-
     if (!deletedDate) {
       return res.status(404).json({ error: 'Discussion date not found' });
     }
-
     res.json({ message: 'Discussion date deleted successfully', date: deletedDate });
   } catch (error) {
     console.error('SessionController deleteDiscussionDate error:', error);
@@ -220,21 +260,23 @@ export async function toggleLectureAttendance(req, res) {
   try {
     const { semester, selectedDate } = req.params;
     const { isActive } = req.body;
-
+    
+    if (req.user && req.user.role === 'ta') {
+      if (!req.user.assignedSemesters || !req.user.assignedSemesters.includes(semester)) {
+        return res.status(403).json({ error: 'Access denied for this semester' });
+      }
+    }
     if (typeof isActive !== 'boolean') {
       return res.status(400).json({ error: 'isActive must be a boolean value' });
     }
-
     const updatedDate = await SessionDateModel.toggleLectureAttendance(
       semester,
       selectedDate,
       isActive
     );
-
     if (!updatedDate) {
       return res.status(404).json({ error: 'Lecture date not found' });
     }
-
     res.json(updatedDate);
 
   } catch (error) {
@@ -247,17 +289,19 @@ export async function toggleDiscussionAttendance(req, res) {
   try {
     const { semester, selectedDate } = req.params;
     const { isActive } = req.body;
-
+    
+    if (req.user && req.user.role === 'ta') {
+      if (!req.user.assignedSemesters || !req.user.assignedSemesters.includes(semester)) {
+        return res.status(403).json({ error: 'Access denied for this semester' });
+      }
+    }
     if (typeof isActive !== 'boolean') {
       return res.status(400).json({ error: 'isActive must be a boolean value' });
     }
-
     const updatedDate = await SessionDateModel.toggleDiscussionAttendance(semester, selectedDate, isActive);
-
     if (!updatedDate) {
       return res.status(404).json({ error: 'Discussion date not found' });
     }
-
     res.json(updatedDate);
   } catch (error) {
     console.error('SessionController toggleDiscussionDate error:', error);
