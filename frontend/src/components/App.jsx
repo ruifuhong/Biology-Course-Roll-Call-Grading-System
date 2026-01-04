@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import RegisterLecturer from './RegisterLecturer';
 import LectureRollcall from './LectureRollcall';
@@ -23,9 +22,6 @@ function MainPage() {
   )
 }
 
-
-
-import { useEffect } from 'react';
 
 const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
