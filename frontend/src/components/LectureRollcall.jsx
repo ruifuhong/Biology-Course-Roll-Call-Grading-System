@@ -231,7 +231,7 @@ export default function LectureRollcall() {
           })}</p>
           <p><strong>學期 Semester:</strong> {sessionInfo.semester}</p>
           {sessionInfo.isUpcoming && (
-            <p style={{ color: '#856404', fontWeight: 'bold' }}>
+            <p className="upcoming-session-warning">
               注意：這是即將到來的課程。點名尚未開放。Note: This is an upcoming session. Attendance submission may not be available yet.
             </p>
           )}

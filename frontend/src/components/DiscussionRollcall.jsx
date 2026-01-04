@@ -231,7 +231,7 @@ export default function DiscussionRollcall() {
           })}</p>
           <p><strong>學期 Semester:</strong> {sessionInfo.semester}</p>
           {sessionInfo.isUpcoming && (
-            <p style={{ color: '#856404', fontWeight: 'bold' }}>
+            <p className="upcoming-session-warning">
               注意：這是即將到來的課程。點名尚未開放。Note: This is an upcoming session. Attendance submission may not be available yet.
             </p>
           )}
@@ -270,7 +270,7 @@ export default function DiscussionRollcall() {
             autoFocus
           />
           {lookupLoading && (
-            <small style={{ color: '#007bff', marginTop: '5px', display: 'block' }}>
+            <small className="lookup-loading">
               查詢學生資訊中... Looking up student information...
             </small>
           )}
@@ -286,10 +286,7 @@ export default function DiscussionRollcall() {
             value={studentInfo.department}
             placeholder="系級將自動顯示 Department will auto-populate"
             disabled
-            style={{ 
-              backgroundColor: '#f8f9fa', 
-              color: studentInfo.department ? '#333' : '#999'
-            }}
+            className={studentInfo.department ? "input-filled department-input" : "input-empty department-input"}
           />
         </div>
 

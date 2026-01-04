@@ -1,3 +1,29 @@
+/* Inline styles moved from LectureRollcall.jsx */
+.upcoming-session-warning {
+  color: #856404;
+  font-weight: bold;
+}
+/* Inline styles moved from DiscussionRollcall.jsx */
+.upcoming-session-warning {
+  color: #856404;
+  font-weight: bold;
+}
+
+.lookup-loading {
+  color: #007bff;
+  margin-top: 5px;
+  display: block;
+}
+
+.department-input {
+  background-color: #f8f9fa;
+}
+.department-input.input-filled {
+  color: #333;
+}
+.department-input.input-empty {
+  color: #999;
+}
 .rollcall-page {
   max-width: 600px;
   margin: 0 auto;

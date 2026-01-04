@@ -95,7 +95,7 @@ export default function AttendanceView({ semester }) {
         </div>
       )}
 
-      <div className="course-type-tabs" style={{ marginBottom: '20px' }}>
+      <div className="course-type-tabs margin-bottom-20">
         <button
           onClick={() => setCourseType('lecture')}
           className={`btn ${courseType === 'lecture' ? 'btn-primary' : 'btn-secondary'}`}

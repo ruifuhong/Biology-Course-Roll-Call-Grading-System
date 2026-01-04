@@ -193,7 +193,7 @@ export default function StudentList({ semester }) {
         </div>
       )}
 
-      <div className="action-buttons" style={{ marginBottom: '20px' }}>
+      <div className="action-buttons margin-bottom-20">
         <button 
           onClick={() => {
             setShowAddForm(!showAddForm);

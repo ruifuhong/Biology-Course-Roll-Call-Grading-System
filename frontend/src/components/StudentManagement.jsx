@@ -10,7 +10,7 @@ export default function StudentManagement({ semester }) {
     <div className="student-management">
       <h2>學生管理 - {semester} Student Management - {semester}</h2>
       
-      <div className="view-mode-tabs" style={{ marginBottom: '20px' }}>
+      <div className="view-mode-tabs margin-bottom-20">
       <button
           onClick={() => setViewMode('attendance')}
           className={`btn ${viewMode === 'attendance' ? 'btn-primary' : 'btn-secondary'}`}
