@@ -24,7 +24,7 @@ export async function markLectureAttendance(semester, studentId, actual_date, st
   const resultActive = await pool.query(queryActive, [semester, actual_date]);
   const isActive = resultActive.rows[0]?.is_active || false;
   if (!isActive) {
-    throw new Error('Attendance submission is not currently open for this session');
+    throw new Error('尚未開放點名 Attendance submission is not currently open for this session');
   }
 
   const checkQuery = `
@@ -33,7 +33,7 @@ export async function markLectureAttendance(semester, studentId, actual_date, st
   `;
   const checkResult = await pool.query(checkQuery, [semester, studentId, actual_date]);
   if (checkResult.rows.length > 0) {
-    throw new Error('Attendance has already been submitted for this session');
+    throw new Error('出席已提交 Attendance has already been submitted for this session');
   }
 
   const query = `
@@ -48,7 +48,7 @@ export async function markLectureAttendance(semester, studentId, actual_date, st
 export async function markDiscussionAttendance(semester, studentId, actual_date, status = 'present') {
   const isActive = await isDiscussionAttendanceActive(semester, actual_date);
   if (!isActive) {
-    throw new Error('Attendance submission is not currently open for this session');
+    throw new Error('尚未開放點名 Attendance submission is not currently open for this session');
   }
 
   const checkQuery = `
@@ -57,7 +57,7 @@ export async function markDiscussionAttendance(semester, studentId, actual_date,
   `;
   const checkResult = await pool.query(checkQuery, [semester, studentId, actual_date]);
   if (checkResult.rows.length > 0) {
-    throw new Error('Attendance has already been submitted for this session');
+    throw new Error('出席已提交 Attendance has already been submitted for this session');
   }
 
   const query = `

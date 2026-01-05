@@ -148,14 +148,14 @@ export async function createLectureFeedback(feedbackData) {
   try {
     const { studentId, name, semester, actual_date, feedback } = feedbackData;
     if (!studentId || !name || !semester || !actual_date) {
-      throw new Error('All fields are required: studentId, name, semester, actual_date');
+      throw new Error('所有欄位皆須填寫 All fields are required: studentId, name, semester, actual_date');
     }
 
     const database = await connectToMongoDB();
 
     const existing = await database.collection('lecture-feedback').findOne({ studentId, semester, actual_date });
     if (existing) {
-      throw new Error('Feedback has already been submitted for this session');
+      throw new Error('回饋已提交 Feedback has already been submitted for this session');
     }
 
     const doc = {
@@ -185,14 +185,14 @@ export async function createDiscussionFeedback(feedbackData) {
   try {
     const { studentId, name, semester, actual_date, feedback } = feedbackData;
     if (!studentId || !name || !semester || !actual_date) {
-      throw new Error('All fields are required: studentId, name, semester, actual_date');
+      throw new Error('所有欄位皆須填寫 All fields are required: studentId, name, semester, actual_date');
     }
 
     const database = await connectToMongoDB();
 
     const existing = await database.collection('discussion-feedback').findOne({ studentId, semester, actual_date });
     if (existing) {
-      throw new Error('Feedback has already been submitted for this session');
+      throw new Error('回饋已提交 Feedback has already been submitted for this session');
     }
 
     const doc = {

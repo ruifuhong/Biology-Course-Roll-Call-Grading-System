@@ -8,7 +8,7 @@ export async function createLectureDate(semester, actualDate) {
     );
     
     if (existingDate.rows.length > 0) {
-      throw new Error(`Date ${actualDate} already exists for semester ${semester}`);
+      throw new Error(`該學期已存在此日期 Date ${actualDate} already exists for semester ${semester}`);
     }
 
     const result = await pool.query(
@@ -31,7 +31,7 @@ export async function createDiscussionDate(semester, actualDate) {
     );
 
     if (existingDate.rows.length > 0) {
-      throw new Error(`Discussion date ${actualDate} already exists for semester ${semester}`);
+      throw new Error(`該學期已存在此討論日期 Discussion date ${actualDate} already exists for semester ${semester}`);
     }
 
     const result = await pool.query(
