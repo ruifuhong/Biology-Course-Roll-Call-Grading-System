@@ -62,10 +62,10 @@ export async function createUser({ username, password, role }) {
   return result.rows[0];
 }
 
-export async function addTAName({ ta_id, username, name }) {
+export async function addTAName({ ta_id, name }) {
   await pool.query(
-    'INSERT INTO "Roll-Call".ta_names (ta_id, username, name) VALUES ($1, $2, $3)',
-    [ta_id, username, name]
+    'INSERT INTO "Roll-Call".ta_names (ta_id, name) VALUES ($1, $2)',
+    [ta_id, name]
   );
 }
 
@@ -105,13 +105,13 @@ export async function deleteTASemesters(ta_id) {
   await pool.query('DELETE FROM "Roll-Call".ta_semesters WHERE ta_id = $1', [ta_id]);
 }
 
-export async function updateTAName({ ta_id, username, name }) {
-  const result = await pool.query('SELECT username, name FROM "Roll-Call".ta_names WHERE ta_id = $1', [ta_id]);
+export async function updateTAName({ ta_id, name }) {
+  const result = await pool.query('SELECT name FROM "Roll-Call".ta_names WHERE ta_id = $1', [ta_id]);
   const old = result.rows[0] || {};
   if (old.name !== name) {
     await pool.query(
-      'UPDATE "Roll-Call".ta_names SET username = $1, name = $2 WHERE ta_id = $3',
-      [username, name, ta_id]
+      'UPDATE "Roll-Call".ta_names SET name = $1 WHERE ta_id = $2',
+      [name, ta_id]
     );
   }
 }
@@ -119,11 +119,6 @@ export async function updateTAName({ ta_id, username, name }) {
 export async function updateTAUsername(id, username) {
   await pool.query(
     'UPDATE "Roll-Call".admin_users SET username = $1 WHERE id = $2',
-    [username, id]
-  );
- 
-  await pool.query(
-    'UPDATE "Roll-Call".ta_names SET username = $1 WHERE ta_id = $2',
     [username, id]
   );
 }

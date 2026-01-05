@@ -93,14 +93,12 @@ export async function addTA(req, res) {
   const { username, password, name, semesters } = req.body;
   const user = await AdminUserModel.createUser({ username, password, role: 'ta' });
   if (!user) return res.status(400).json({ error: '此帳號已註冊 Username already exists' });
-  
- try {
-    await AdminUserModel.addTAName({ ta_id: user.id, username, name });
+  try {
+    await AdminUserModel.addTAName({ ta_id: user.id, name });
   } catch (err) {
-   console.error('儲存助教名字失敗 Failed to save TA name:', err);
-   return res.status(500).json({ error: '存取助教名字失敗 Failed to save TA name' });
+    console.error('儲存助教名字失敗 Failed to save TA name:', err);
+    return res.status(500).json({ error: '存取助教名字失敗 Failed to save TA name' });
   }
-
   if (Array.isArray(semesters) && semesters.length > 0) {
     try {
       await Promise.all(
@@ -109,8 +107,8 @@ export async function addTA(req, res) {
         )
       );
     } catch (err) {
-        console.error('設定助教學期失敗 Failed to assign semesters:', err);
-        return res.status(500).json({ error: '設定學期失敗 Failed to assign semesters' });
+      console.error('設定助教學期失敗 Failed to assign semesters:', err);
+      return res.status(500).json({ error: '設定學期失敗 Failed to assign semesters' });
     }
   }
   res.status(201).json({ user: { id: user.id, username: user.username, name, role: user.role, semesters } });
@@ -144,27 +142,23 @@ export async function updateTA(req, res) {
   if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限操作 Forbidden' });
   const { id } = req.params;
   const { name, username, semesters } = req.body;
-  
   const ta = await AdminUserModel.findUserById(id);
   if (!ta || ta.role !== 'ta') return res.status(404).json({ error: '查無此助教 TA not found' });
   try {
     if (username && username !== ta.username) {
       await AdminUserModel.updateTAUsername(id, username);
     }
-
     if (name) {
-      await AdminUserModel.updateTAName({ta_id: id, username, name});
+      await AdminUserModel.updateTAName({ ta_id: id, name });
     }
-
     if (Array.isArray(semesters)) {
       await AdminUserModel.setTASemesters(id, semesters);
     }
-
     const updatedTA = await AdminUserModel.findUserById(id);
     res.json({ ta: updatedTA });
   } catch (err) {
-     console.error('更新助教失敗 Update TA failed:', err);
-     res.status(500).json(err);
+    console.error('更新助教失敗 Update TA failed:', err);
+    res.status(500).json(err);
   }
 }
 
