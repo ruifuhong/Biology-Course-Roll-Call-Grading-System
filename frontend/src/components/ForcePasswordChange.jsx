@@ -99,6 +99,9 @@ export default function ForcePasswordChange({ onChanged }) {
           {loading ? '密碼更新中... Password Changing...' : '更新密碼 Change Password'}
         </button>
       </form>
+      <button className="mainpage-link-btn" onClick={() => navigate('/')}>
+        回首頁 Go to Main Page
+      </button>
     </div>
   );
 }
