@@ -26,10 +26,6 @@ app.use('/attendance', attendanceRouter);
 app.use('/feedback', feedbackRouter);
 app.use('/api/admin', adminRouter);
 
-app.get('/hello', (req, res) => {
-  res.json({ message: 'Hello, world!' });
-});
-
 app.listen(port, () => {
   console.log(`Backend listening on http://localhost:${port}`);
 });
