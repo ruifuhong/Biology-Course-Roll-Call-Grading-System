@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { v4 as uuidv4 } from 'uuid';
+import { v7 as uuidv7 } from 'uuid';
 import { pool } from './database.js';
 
 const TABLE = '"Roll-Call".admin_users';
@@ -53,7 +53,7 @@ export async function findUserById(id) {
 export async function createUser({ username, password, role }) {
   const exists = await findUserByUsername(username);
   if (exists) return null;
-  const id = uuidv4();
+  const id = uuidv7();
   const password_hash = await bcrypt.hash(password, 10); // Set salt rounds to 10
   const result = await pool.query(
     `INSERT INTO ${TABLE} (id, username, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING *`,
