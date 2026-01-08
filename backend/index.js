@@ -14,7 +14,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://biology-attendence-new-ui.onrender.com'],
+  origin: ['http://localhost:5173', 'https://biology-attendence-new-ui.onrender.com', 'https://biology-attendence-new-static-frontend.onrender.com'],
   credentials: true
 }));
 
