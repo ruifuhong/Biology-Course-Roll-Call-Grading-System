@@ -3,11 +3,13 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 const COOKIE_NAME = 'admin_token';
+
+const isProduction = process.env.NODE_ENV === 'production';
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict',
-  maxAge: 1 * 24 * 60 * 60 * 1000 //1 day
+  secure: isProduction,
+  sameSite: isProduction ? 'none' : 'lax',
+  maxAge: 1 * 24 * 60 * 60 * 1000 // 1 day
 };
 
 export async function getMe(req, res) {
