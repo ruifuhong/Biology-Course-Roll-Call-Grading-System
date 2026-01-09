@@ -1,0 +1,131 @@
+.main-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.main-header {
+  margin-bottom: 50px;
+}
+
+.main-header h1 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 2.5em;
+}
+
+.main-header .subtitle {
+  color: #666;
+  font-size: 1.2em;
+}
+
+.course-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.course-card {
+  background-color: #f8f9fa;
+  border: 2px solid #dee2e6;
+  border-radius: 10px;
+  padding: 30px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.course-card:hover {
+  border-color: #007bff;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.course-card h2 {
+  color: #007bff;
+  margin-bottom: 15px;
+  font-size: 1.8em;
+}
+
+.course-card p {
+  color: #666;
+  margin: 10px 0;
+  line-height: 1.5;
+}
+
+.course-card .time-info {
+  background-color: white;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 15px;
+  font-weight: 500;
+  color: #495057;
+}
+
+.admin-section {
+  margin-top: 30px;
+  padding-top: 30px;
+  border-top: 1px solid #dee2e6;
+}
+
+.admin-link {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #6c757d;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  font-weight: 500;
+}
+
+.admin-link:hover {
+  background-color: #545b62;
+  color: white;
+}
+
+.info-section {
+  background-color: #e7f3ff;
+  border: 1px solid #b8daff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 30px;
+}
+
+.info-section h3 {
+  color: #004085;
+  margin-bottom: 15px;
+}
+
+.info-section ul {
+  text-align: left;
+  margin: 15px 0;
+  padding-left: 20px;
+}
+
+.info-section li {
+  margin: 8px 0;
+  color: #004085;
+}
+
+@media (max-width: 768px) {
+  .course-options {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .main-header h1 {
+    font-size: 2em;
+  }
+  
+  .course-card {
+    padding: 20px;
+  }
+}

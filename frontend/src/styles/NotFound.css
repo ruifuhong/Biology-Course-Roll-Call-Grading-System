@@ -1,0 +1,18 @@
+.notfound-container {
+  text-align: center;
+  margin-top: 80px;
+  font-size: 2rem;
+  color: #d9534f;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+
+.notfound-title {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.notfound-desc {
+  font-size: 1.2rem;
+  color: #555;
+}

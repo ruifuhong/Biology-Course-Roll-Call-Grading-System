@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -12,4 +11,29 @@ export default defineConfig({
       interval: 100,
     },
   },
+  test: {
+  environment: 'jsdom',
+  globals: true,
+  setupFiles: ['./src/test/setup.js'],
+  coverage: {
+    provider: 'v8',
+    reporter: ['text', 'html'],
+    reportsDirectory: './coverage',
+    include: [
+      'src/utils/*',
+      'src/components/*'
+    ],
+    exclude: [
+      'node_modules/**',
+      'src/__tests__/**',
+      'src/**/*.test.*',
+      'src/**/*.spec.*',
+      'src/main.jsx'
+    ],
+    all: false,
+    clean: true,
+    enabled: true, 
+    allowExternal: true,
+  },
+},
 })
