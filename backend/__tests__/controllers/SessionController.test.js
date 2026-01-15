@@ -69,7 +69,7 @@ describe('SessionController - Add Session Date Tests', () => {
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'semester and non-empty dates array are required'
+        error: '缺少學期或日期陣列 semester and non-empty dates array are required'
       });
       expect(mockCreateLectureDate).not.toHaveBeenCalled();
     });
@@ -81,7 +81,7 @@ describe('SessionController - Add Session Date Tests', () => {
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'semester and non-empty dates array are required'
+        error: '缺少學期或日期陣列 semester and non-empty dates array are required'
       });
     });
 
@@ -98,7 +98,7 @@ describe('SessionController - Add Session Date Tests', () => {
 
       expect(res.status).toHaveBeenCalledWith(409);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Date 2024-10-15 already exists for semester 1131'
+        error: expect.stringContaining('日期已存在 Date already exists:')
       });
     });
 
@@ -115,7 +115,7 @@ describe('SessionController - Add Session Date Tests', () => {
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Failed to set lecture dates',
+        error: '設定正課日期失敗 Failed to set lecture dates',
         details: 'Database connection failed',
         code: undefined
       });
@@ -158,7 +158,7 @@ describe('SessionController - setDiscussionDates', () => {
       await SessionController.setDiscussionDates(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'semester and non-empty dates array are required' });
+      expect(res.json).toHaveBeenCalledWith({ error: '缺少學期或日期陣列 semester and non-empty dates array are required' });
       expect(mockCreateDiscussionDate).not.toHaveBeenCalled();
     });
 
@@ -169,7 +169,7 @@ describe('SessionController - setDiscussionDates', () => {
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-      error: 'semester and non-empty dates array are required'
+        error: '缺少學期或日期陣列 semester and non-empty dates array are required'
       });
     });
 
@@ -183,7 +183,7 @@ describe('SessionController - setDiscussionDates', () => {
       await SessionController.setDiscussionDates(req, res);
 
       expect(res.status).toHaveBeenCalledWith(409);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Date 2024-10-16 already exists for semester 1131' });
+      expect(res.json).toHaveBeenCalledWith({ error: expect.stringContaining('日期已存在 Date already exists:') });
     });
 
     it('should handle general database errors', async () => {
@@ -196,7 +196,7 @@ describe('SessionController - setDiscussionDates', () => {
       await SessionController.setDiscussionDates(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Failed to set discussion dates', details: 'Database connection failed', code: undefined });
+      expect(res.json).toHaveBeenCalledWith({ error: '設定討論課日期失敗 Failed to set discussion dates', details: 'Database connection failed', code: undefined });
     });
   });
 });
@@ -236,7 +236,7 @@ describe('SessionController - getLectureDates', () => {
       await SessionController.getLectureDates(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'semester parameter is required' });
+      expect(res.json).toHaveBeenCalledWith({ error: '缺少學期參數 semester parameter is required' });
     });
 
     it('should return 500 if model throws unexpected error', async () => {
@@ -247,7 +247,7 @@ describe('SessionController - getLectureDates', () => {
       await SessionController.getLectureDates(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Unexpected DB error' });
+      expect(res.json).toHaveBeenCalledWith({ error: '取得正課日期失敗 Failed to get lecture dates: Unexpected DB error' });
     });
   });
 });
@@ -286,7 +286,7 @@ describe('SessionController - getDiscussionDates', () => {
       await SessionController.getDiscussionDates(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'semester parameter is required' });
+      expect(res.json).toHaveBeenCalledWith({ error: '缺少學期參數 semester parameter is required' });
     });
 
     it('should return 500 if model throws unexpected error', async () => {
@@ -297,7 +297,7 @@ describe('SessionController - getDiscussionDates', () => {
       await SessionController.getDiscussionDates(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Unexpected DB error' });
+      expect(res.json).toHaveBeenCalledWith({ error: '取得討論課日期失敗 Failed to get discussion dates: Unexpected DB error' });
     });
   });
 });
@@ -335,7 +335,7 @@ describe('SessionController - updateLectureDate', () => {
       await SessionController.updateLectureDate(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Lecture date not found' });
+      expect(res.json).toHaveBeenCalledWith({ error: '查無此正課日期 Lecture date not found' });
     });
 
     it('should return 400 if actualDate missing', async () => {
@@ -346,7 +346,7 @@ describe('SessionController - updateLectureDate', () => {
       await SessionController.updateLectureDate(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'actualDate is required' });
+      expect(res.json).toHaveBeenCalledWith({ error: '缺少日期 actualDate is required' });
     });
 
     it('should return 500 if model throws error', async () => {
@@ -360,7 +360,7 @@ describe('SessionController - updateLectureDate', () => {
       await SessionController.updateLectureDate(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Unexpected DB error' });
+      expect(res.json).toHaveBeenCalledWith({ error: '更新正課日期失敗 Failed to update lecture date: Unexpected DB error' });
     });
   });
 });
@@ -398,7 +398,7 @@ describe('SessionController - updateDiscussionDate', () => {
       await SessionController.updateDiscussionDate(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Discussion date not found' });
+      expect(res.json).toHaveBeenCalledWith({ error: '查無此討論課日期 Discussion date not found' });
     });
 
     it('should return 400 if actualDate missing', async () => {
@@ -408,7 +408,7 @@ describe('SessionController - updateDiscussionDate', () => {
       await SessionController.updateDiscussionDate(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'actualDate is required' });
+      expect(res.json).toHaveBeenCalledWith({ error: '缺少日期 actualDate is required' });
     });
 
     it('should return 500 if model throws error', async () => {
@@ -422,7 +422,7 @@ describe('SessionController - updateDiscussionDate', () => {
       await SessionController.updateDiscussionDate(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Unexpected DB error' });
+      expect(res.json).toHaveBeenCalledWith({ error: '更新討論課日期失敗 Failed to update discussion date: Unexpected DB error' });
     });
   });
 });
@@ -447,7 +447,7 @@ describe('SessionController - deleteLectureDate', () => {
 
       await SessionController.deleteLectureDate(req, res);
 
-      expect(res.json).toHaveBeenCalledWith({ message: 'Lecture date deleted successfully', date: mockDeleted });
+      expect(res.json).toHaveBeenCalledWith({ message: '正課日期刪除成功 Lecture date deleted successfully', date: mockDeleted });
     });
 
     it('should return 404 if not found', async () => {
@@ -458,7 +458,7 @@ describe('SessionController - deleteLectureDate', () => {
       await SessionController.deleteLectureDate(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Lecture date not found' });
+      expect(res.json).toHaveBeenCalledWith({ error: '查無此正課日期 Lecture date not found' });
     });
 
     it('should return 500 if model throws error', async () => {
@@ -471,7 +471,7 @@ describe('SessionController - deleteLectureDate', () => {
       await SessionController.deleteLectureDate(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Unexpected DB error' });
+      expect(res.json).toHaveBeenCalledWith({ error: '刪除正課日期失敗 Failed to delete lecture date: Unexpected DB error' });
     });
   });
 });
@@ -496,7 +496,7 @@ describe('SessionController - deleteDiscussionDate', () => {
 
       await SessionController.deleteDiscussionDate(req, res);
 
-      expect(res.json).toHaveBeenCalledWith({ message: 'Discussion date deleted successfully', date: mockDeleted });
+      expect(res.json).toHaveBeenCalledWith({ message: '討論課日期刪除成功 Discussion date deleted successfully', date: mockDeleted });
     });
 
     it('should return 404 if not found', async () => {
@@ -507,7 +507,7 @@ describe('SessionController - deleteDiscussionDate', () => {
       await SessionController.deleteDiscussionDate(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Discussion date not found' });
+      expect(res.json).toHaveBeenCalledWith({ error: '查無此討論課日期 Discussion date not found' });
     });
 
     it('should return 500 if model throws error', async () => {
@@ -520,7 +520,7 @@ describe('SessionController - deleteDiscussionDate', () => {
       await SessionController.deleteDiscussionDate(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Unexpected DB error' });
+      expect(res.json).toHaveBeenCalledWith({ error: '刪除討論課日期失敗 Failed to delete discussion date: Unexpected DB error' });
     });
   });
 });
@@ -556,7 +556,7 @@ describe('SessionController - toggleLectureAttendance', () => {
       await SessionController.toggleLectureAttendance(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'isActive must be a boolean value' });
+      expect(res.json).toHaveBeenCalledWith({ error: 'isActive 必須為布林值 isActive must be a boolean value' });
     });
 
     it('should return 404 if not found', async () => {
@@ -568,7 +568,7 @@ describe('SessionController - toggleLectureAttendance', () => {
       await SessionController.toggleLectureAttendance(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Lecture date not found' });
+      expect(res.json).toHaveBeenCalledWith({ error: '查無此正課日期 Lecture date not found' });
     });
 
     it('should return 500 if model throws error', async () => {
@@ -582,7 +582,7 @@ describe('SessionController - toggleLectureAttendance', () => {
       await SessionController.toggleLectureAttendance(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Unexpected DB error' });
+      expect(res.json).toHaveBeenCalledWith({ error: '切換正課點名狀態失敗 Failed to toggle lecture attendance: Unexpected DB error' });
     });
   });
 });
@@ -618,7 +618,7 @@ describe('SessionController - toggleDiscussionAttendance', () => {
       await SessionController.toggleDiscussionAttendance(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'isActive must be a boolean value' });
+      expect(res.json).toHaveBeenCalledWith({ error: 'isActive 必須為布林值 isActive must be a boolean value' });
     });
 
     it('should return 404 if not found', async () => {
@@ -630,7 +630,7 @@ describe('SessionController - toggleDiscussionAttendance', () => {
       await SessionController.toggleDiscussionAttendance(req, res);
       
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Discussion date not found' });
+      expect(res.json).toHaveBeenCalledWith({ error: '查無此討論課日期 Discussion date not found' });
     });
 
     it('should return 500 if model throws error', async () => {
@@ -644,7 +644,7 @@ describe('SessionController - toggleDiscussionAttendance', () => {
       await SessionController.toggleDiscussionAttendance(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Unexpected DB error' });
+      expect(res.json).toHaveBeenCalledWith({ error: '切換討論課點名狀態失敗 Failed to toggle discussion attendance: Unexpected DB error' });
     });
   });
 });

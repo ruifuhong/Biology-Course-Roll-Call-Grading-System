@@ -51,7 +51,7 @@ describe('AttendanceController - submitLectureAttendance', () => {
     expect(mockMarkLectureAttendance).toHaveBeenCalledWith('1131', 'B100000001', '2024-10-15', 'present');
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
-      message: 'Lecture attendance recorded successfully',
+      message: '正課出席紀錄成功 Lecture attendance recorded successfully',
       attendance: mockAttendance,
       student: { student_id: 'B100000001', name: 'Alice' }
     });
@@ -63,7 +63,7 @@ describe('AttendanceController - submitLectureAttendance', () => {
     await AttendanceController.submitLectureAttendance(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Semester, student ID, and actual_date are required' });
+    expect(res.json).toHaveBeenCalledWith({ error: '缺少學期、學號或日期 Semester, student ID, and actual_date are required' });
     expect(mockFindStudentById).not.toHaveBeenCalled();
   });
 
@@ -75,7 +75,7 @@ describe('AttendanceController - submitLectureAttendance', () => {
     await AttendanceController.submitLectureAttendance(req, res);
 
     expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Student not found' });
+    expect(res.json).toHaveBeenCalledWith({ error: '查無此學生 Student not found' });
   });
 
   it('should handle model/database errors', async () => {
@@ -86,7 +86,7 @@ describe('AttendanceController - submitLectureAttendance', () => {
     await AttendanceController.submitLectureAttendance(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Failed to submit lecture attendance', details: 'DB error' });
+    expect(res.json).toHaveBeenCalledWith({ error: '提交正課出席失敗 Failed to submit lecture attendance', details: 'DB error' });
   });
 });
 
@@ -118,7 +118,7 @@ describe('AttendanceController - submitDiscussionAttendance', () => {
     expect(mockMarkDiscussionAttendance).toHaveBeenCalledWith('1131', 'B100000001', '2024-10-16', 'present');
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
-      message: 'Lecture attendance recorded successfully',
+      message: '討論課出席紀錄成功 Discussion attendance recorded successfully',
       attendance: mockAttendance,
       student: { student_id: 'B100000001', name: 'Alice' }
     });
@@ -130,7 +130,7 @@ describe('AttendanceController - submitDiscussionAttendance', () => {
     await AttendanceController.submitDiscussionAttendance(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Semester, student ID, and actual_date are required' });
+    expect(res.json).toHaveBeenCalledWith({ error: '缺少學期、學號或日期 Semester, student ID, and actual_date are required' });
     expect(mockFindStudentById).not.toHaveBeenCalled();
   });
 
@@ -142,7 +142,7 @@ describe('AttendanceController - submitDiscussionAttendance', () => {
     await AttendanceController.submitDiscussionAttendance(req, res);
 
     expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Student not found' });
+    expect(res.json).toHaveBeenCalledWith({ error: '查無此學生 Student not found' });
   });
 
   it('should handle model/database errors', async () => {
@@ -153,7 +153,7 @@ describe('AttendanceController - submitDiscussionAttendance', () => {
     await AttendanceController.submitDiscussionAttendance(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Failed to submit lecture attendance', details: 'DB error' });
+    expect(res.json).toHaveBeenCalledWith({ error: '提交討論課出席失敗 Failed to submit discussion attendance', details: 'DB error' });
   });
 });
 
@@ -191,7 +191,7 @@ describe('AttendanceController - getStudentLectureAttendance', () => {
     await AttendanceController.getStudentLectureAttendance(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Failed to get student lecture attendance' });
+    expect(res.json).toHaveBeenCalledWith({ error: '取得正課出席失敗 Failed to get student lecture attendance' });
   });
 });
 
@@ -229,7 +229,7 @@ describe('AttendanceController - getStudentDiscussionAttendance', () => {
     await AttendanceController.getStudentDiscussionAttendance(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Failed to get student discussion attendance' });
+    expect(res.json).toHaveBeenCalledWith({ error: '取得討論課出席失敗 Failed to get student discussion attendance' });
   });
 });
 
@@ -270,7 +270,7 @@ describe('AttendanceController - getAllLectureAttendance', () => {
     await AttendanceController.getAllLectureAttendance(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Failed to get all lecture attendance' });
+    expect(res.json).toHaveBeenCalledWith({ error: '取得所有正課出席失敗 Failed to get all lecture attendance' });
   });
 });
 
@@ -311,6 +311,6 @@ describe('AttendanceController - getAllDiscussionAttendance', () => {
     await AttendanceController.getAllDiscussionAttendance(req, res);
     
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Failed to get all discussion attendance' });
+    expect(res.json).toHaveBeenCalledWith({ error: '取得所有討論課出席失敗 Failed to get all discussion attendance' });
   });
 });

@@ -51,7 +51,7 @@ describe('StudentController - createStudent', () => {
     await StudentController.createStudent(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ error: 'student_id, semester, department, and name are required' });
+    expect(res.json).toHaveBeenCalledWith({ error: '缺少必要欄位：學號、學期、系級、姓名 student_id, semester, department, and name are required' });
     expect(mockCreateStudent).not.toHaveBeenCalled();
   });
 
@@ -71,7 +71,7 @@ describe('StudentController - createStudent', () => {
     await StudentController.createStudent(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'DB error' });
+    expect(res.json).toHaveBeenCalledWith({ error: '新增學生失敗 Failed to create student: DB error' });
   });
 });
 
@@ -107,7 +107,7 @@ describe('StudentController - getStudentsBySemester', () => {
     await StudentController.getStudentsBySemester(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ error: 'semester parameter is required' });
+    expect(res.json).toHaveBeenCalledWith({ error: '缺少學期參數 semester parameter is required' });
   });
 
   it('should handle model/database errors', async () => {
@@ -120,7 +120,7 @@ describe('StudentController - getStudentsBySemester', () => {
     await StudentController.getStudentsBySemester(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'DB error' });
+    expect(res.json).toHaveBeenCalledWith({ error: '取得學生清單失敗 Failed to get students: DB error' });
   });
 });
 
@@ -155,7 +155,7 @@ describe('StudentController - getStudentById', () => {
     await StudentController.getStudentById(req, res);
 
     expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Student not found' });
+    expect(res.json).toHaveBeenCalledWith({ error: '查無此學生 Student not found' });
   });
 
   it('should handle model/database errors', async () => {
@@ -168,7 +168,7 @@ describe('StudentController - getStudentById', () => {
     await StudentController.getStudentById(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'DB error' });
+    expect(res.json).toHaveBeenCalledWith({ error: '查詢學生失敗 Failed to get student: DB error' });
   });
 });
 
@@ -204,7 +204,6 @@ describe('StudentController - updateStudent', () => {
 
   it('should return 404 if student not found', async () => {
     req.params = { semester: '1131', studentId: 'S999' };
-
     req.body = {
       student_id: 'S999',
       department: 'Bio',
@@ -217,12 +216,11 @@ describe('StudentController - updateStudent', () => {
     await StudentController.updateStudent(req, res);
 
     expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Student not found' });
+    expect(res.json).toHaveBeenCalledWith({ error: '查無此學生 Student not found' });
   });
 
   it('should handle model/database errors', async () => {
     req.params = { semester: '1131', studentId: 'B100000001' };
-
     req.body = {
       student_id: 'B100000001',
       department: 'Bio',
@@ -237,7 +235,7 @@ describe('StudentController - updateStudent', () => {
     await StudentController.updateStudent(req, res);
     
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'DB error' });
+    expect(res.json).toHaveBeenCalledWith({ error: '更新學生失敗 Failed to update student: DB error' });
   });
 });
 
@@ -253,39 +251,28 @@ describe('StudentController - deleteStudent', () => {
 
   it('should delete student if found', async () => {
     req.params = { semester: '1131', studentId: 'B100000001' };
-
     const mockDeleted = { student_id: 'B100000001', semester: '1131', name: 'Alice' };
-
     mockDeleteStudent.mockResolvedValueOnce(mockDeleted);
-
     await StudentController.deleteStudent(req, res);
-
     expect(mockDeleteStudent).toHaveBeenCalledWith('1131', 'B100000001');
-    expect(res.json).toHaveBeenCalledWith({ message: 'Student deleted successfully', student: mockDeleted });
+    expect(res.json).toHaveBeenCalledWith({ message: '學生刪除成功 Student deleted successfully', student: mockDeleted });
   });
 
   it('should return 404 if not found', async () => {
     req.params = { semester: '1131', studentId: 'S999' };
-
     mockDeleteStudent.mockResolvedValueOnce(undefined);
-
     await StudentController.deleteStudent(req, res);
-
     expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Student not found' });
+    expect(res.json).toHaveBeenCalledWith({ error: '查無此學生 Student not found' });
   });
 
   it('should handle model/database errors', async () => {
     req.params = { semester: '1131', studentId: 'B100000001' };
-
     const dbError = new Error('DB error');
-
     mockDeleteStudent.mockRejectedValueOnce(dbError);
-
     await StudentController.deleteStudent(req, res);
-
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'DB error' });
+    expect(res.json).toHaveBeenCalledWith({ error: '刪除學生失敗 Failed to delete student: DB error' });
   });
 });
 
@@ -313,7 +300,7 @@ describe('StudentController - uploadStudentsCSV', () => {
     expect(mockCreateStudent).toHaveBeenCalledTimes(2);
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-      message: 'CSV upload processed',
+      message: 'CSV上傳處理完成 CSV upload processed',
       summary: expect.objectContaining({ created: 2 })
     }));
   });
@@ -324,7 +311,7 @@ describe('StudentController - uploadStudentsCSV', () => {
     await StudentController.uploadStudentsCSV(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ error: 'csvData and semester are required' });
+    expect(res.json).toHaveBeenCalledWith({ error: '缺少csv資料或學期 csvData and semester are required' });
   });
 
   it('should return 400 if required headers missing', async () => {
@@ -336,7 +323,7 @@ describe('StudentController - uploadStudentsCSV', () => {
     await StudentController.uploadStudentsCSV(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ error: expect.stringContaining('Missing required headers') });
+    expect(res.json).toHaveBeenCalledWith({ error: expect.stringContaining('缺少必要欄位 Missing required headers') });
   });
 
   it('should report parse errors for malformed rows', async () => {
@@ -365,7 +352,7 @@ describe('StudentController - uploadStudentsCSV', () => {
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-      error: 'No valid student rows found',
+      error: '無有效學生資料 No valid student rows found',
       errors: expect.objectContaining({ parseErrors: expect.any(Array) })
     }));
   });
@@ -377,7 +364,7 @@ describe('StudentController - uploadStudentsCSV', () => {
 
   expect(res.status).toHaveBeenCalledWith(500);
   expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-    error: expect.any(String)
+    error: expect.stringContaining('CSV上傳失敗 Failed to upload CSV:')
   }));
 });
 });
