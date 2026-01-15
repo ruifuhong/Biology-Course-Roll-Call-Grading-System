@@ -1,14 +1,15 @@
 import { jest } from '@jest/globals';
 
-const mockFindAllLectureFeedback = jest.fn();
+
+const mockFindLectureFeedbackBySemester = jest.fn();
 const mockCreateLectureFeedback = jest.fn();
-const mockFindAllDiscussionFeedback = jest.fn();
+const mockFindDiscussionFeedbackBySemester = jest.fn();
 const mockCreateDiscussionFeedback = jest.fn();
 
 jest.unstable_mockModule('../../models/FeedbackModel.js', () => ({
-  findAllLectureFeedback: mockFindAllLectureFeedback,
+  findLectureFeedbackBySemester: mockFindLectureFeedbackBySemester,
   createLectureFeedback: mockCreateLectureFeedback,
-  findAllDiscussionFeedback: mockFindAllDiscussionFeedback,
+  findDiscussionFeedbackBySemester: mockFindDiscussionFeedbackBySemester,
   createDiscussionFeedback: mockCreateDiscussionFeedback,
 }));
 
@@ -21,10 +22,10 @@ describe('FeedbackController', () => {
 
   describe('getAllLectureFeedback', () => {
     it('returns all feedbacks (200)', async () => {
-      const req = {}, res = { json: jest.fn() };
+      const req = { params: { semester: '1131' } }, res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
       const fakeFeedbacks = [{ _id: '1' }, { _id: '2' }];
 
-      mockFindAllLectureFeedback.mockResolvedValueOnce(fakeFeedbacks);
+      mockFindLectureFeedbackBySemester.mockResolvedValueOnce(fakeFeedbacks);
 
       await FeedbackController.getAllLectureFeedback(req, res);
 
@@ -32,14 +33,14 @@ describe('FeedbackController', () => {
     });
 
     it('returns 500 on error', async () => {
-      const req = {}, res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+      const req = { params: { semester: '1131' } }, res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
 
-      mockFindAllLectureFeedback.mockRejectedValueOnce(new Error('fail'));
+      mockFindLectureFeedbackBySemester.mockRejectedValueOnce(new Error('fail'));
 
       await FeedbackController.getAllLectureFeedback(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'fail' });
+      expect(res.json).toHaveBeenCalledWith({ error: expect.stringContaining('取得正課回饋失敗 Failed to get lecture feedback: fail') });
     });
   });
 
@@ -69,6 +70,7 @@ describe('FeedbackController', () => {
         await FeedbackController.createLectureFeedback({ body: bad }, res);
 
         expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: '缺少必要欄位（學號、姓名、學期、日期）All fields are required: studentId, name, semester, actual_date' });
       }
     });
 
@@ -79,8 +81,8 @@ describe('FeedbackController', () => {
         const bad = { ...valid, [field]: '' };
 
         await FeedbackController.createLectureFeedback({ body: bad }, res);
-        
         expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: '缺少必要欄位（學號、姓名、學期、日期）All fields are required: studentId, name, semester, actual_date' });
       }
     });
 
@@ -92,16 +94,16 @@ describe('FeedbackController', () => {
       await FeedbackController.createLectureFeedback(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'fail' });
+      expect(res.json).toHaveBeenCalledWith({ error: expect.stringContaining('新增正課回饋失敗 Failed to create lecture feedback: fail') });
     });
   });
 
   describe('getAllDiscussionFeedback', () => {
     it('returns all feedbacks (200)', async () => {
-      const req = {}, res = { json: jest.fn() };
+      const req = { params: { semester: '1131' } }, res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
       const fakeFeedbacks = [{ _id: '1' }, { _id: '2' }];
 
-      mockFindAllDiscussionFeedback.mockResolvedValueOnce(fakeFeedbacks);
+      mockFindDiscussionFeedbackBySemester.mockResolvedValueOnce(fakeFeedbacks);
 
       await FeedbackController.getAllDiscussionFeedback(req, res);
 
@@ -109,14 +111,14 @@ describe('FeedbackController', () => {
     });
 
     it('returns 500 on error', async () => {
-      const req = {}, res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+      const req = { params: { semester: '1131' } }, res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
 
-      mockFindAllDiscussionFeedback.mockRejectedValueOnce(new Error('fail'));
+      mockFindDiscussionFeedbackBySemester.mockRejectedValueOnce(new Error('fail'));
 
       await FeedbackController.getAllDiscussionFeedback(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'fail' });
+      expect(res.json).toHaveBeenCalledWith({ error: expect.stringContaining('取得討論課回饋失敗 Failed to get discussion feedback: fail') });
     });
   });
 
@@ -145,6 +147,7 @@ describe('FeedbackController', () => {
         await FeedbackController.createDiscussionFeedback({ body: bad }, res);
 
         expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: '缺少必要欄位（學號、姓名、學期、日期）All fields are required: studentId, name, semester, actual_date' });
       }
     });
 
@@ -155,8 +158,8 @@ describe('FeedbackController', () => {
         const bad = { ...valid, [field]: '' };
 
         await FeedbackController.createDiscussionFeedback({ body: bad }, res);
-
         expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: '缺少必要欄位（學號、姓名、學期、日期）All fields are required: studentId, name, semester, actual_date' });
       }
     });
 
@@ -168,7 +171,7 @@ describe('FeedbackController', () => {
       await FeedbackController.createDiscussionFeedback(req, res);
       
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'fail' });
+      expect(res.json).toHaveBeenCalledWith({ error: expect.stringContaining('新增討論課回饋失敗 Failed to create discussion feedback: fail') });
     });
   });
 });
