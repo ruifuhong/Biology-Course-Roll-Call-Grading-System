@@ -7,7 +7,6 @@ export default function DiscussionRollcall() {
     name: '',
     department: ''
   });
-  const [feedback, setFeedback] = useState('');
   const [loading, setLoading] = useState(false);
   const [lookupLoading, setLookupLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -168,33 +167,15 @@ export default function DiscussionRollcall() {
         })
       });
 
-      let feedbackPromise = Promise.resolve({ ok: true });
-      if (feedback && feedback.trim() !== '') {
-        feedbackPromise = fetch(`${apiBase}/feedback/discussion`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            studentId,
-            name: studentInfo.name,
-            semester: sessionInfo.semester,
-            actual_date: sessionInfo.actual_date,
-            feedback
-          })
-        });
-      }
-
-      const [attendanceRes, feedbackRes] = await Promise.all([attendancePromise, feedbackPromise]);
-
-      if (attendanceRes.ok && feedbackRes.ok) {
+      const attendanceRes = await attendancePromise;
+      if (attendanceRes.ok) {
         setMessage('提交成功！Submitted successfully!');
         setStudentId('');
         setStudentInfo({ name: '', department: '' });
-        setFeedback('');
       } else {
-        const attendanceError = attendanceRes.ok ? null : await attendanceRes.json();
-        const feedbackError = feedbackRes.ok ? null : await feedbackRes.json();
+        const attendanceError = await attendanceRes.json();
         setMessage(
-          `提交失敗 Error: ${attendanceError?.error || ''} ${feedbackError?.error || ''}`.trim()
+          `提交失敗 Error: ${attendanceError?.error || ''}`.trim()
         );
       }
     } catch (error) {
@@ -303,21 +284,6 @@ export default function DiscussionRollcall() {
             className={studentInfo.name ? "input-filled" : "input-empty"}
           />
         </div>
-
-          <div className="form-field">
-            <label htmlFor="feedback">
-              意見回饋 Feedback
-            </label>
-            <textarea
-              id="feedback"
-              value={feedback}
-              onChange={e => setFeedback(e.target.value)}
-              placeholder="輸入回饋（非必填） Enter feedback (optional)"
-              rows={3}
-              className="feedback-textarea"
-              disabled={loading}
-            />
-          </div>
           <button 
             type="submit" 
             className="submit-btn"
@@ -330,7 +296,10 @@ export default function DiscussionRollcall() {
       </form>
 
       <div className="back-link">
-        <a href="/">← 返回主頁 Back to Main Page</a>
+        <a href="/" className="mainpage-back-link">← 返回主頁 Back to Main Page</a>
+        <button type="button" className="switch-page-btn" onClick={() => window.location.href='/review'}>
+          → 組內/組間互評 Group Review
+        </button>
       </div>
     </div>
   );

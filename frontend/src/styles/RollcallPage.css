@@ -1,3 +1,18 @@
+.switch-page-btn {
+  margin: 0 0.5rem;
+  padding: 8px 18px;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.switch-page-btn:hover {
+  background: #0d47a1;
+}
 /* Inline styles moved from LectureRollcall.jsx */
 .upcoming-session-warning {
   color: #856404;
@@ -207,6 +222,16 @@
 
 .back-link a:hover {
   text-decoration: underline;
+}
+.discussion-to-review-link {
+  margin-left: 1.5rem;
+  color: #1976d2;
+  text-decoration: underline;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+.discussion-to-review-link:hover {
+  color: #0d47a1;
 }
 
 /* Attendance Status Styles */
