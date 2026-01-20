@@ -1,3 +1,12 @@
+/* Denominator input field width */
+.denominator-input {
+  width: 50px;
+}
+
+/* Edit denominator button left margin */
+.edit-denominator-btn {
+  margin-left: 4px;
+}
 /* Inline styles moved from AttendanceView.jsx */
 .margin-bottom-20 {
   margin-bottom: 20px;

@@ -3,6 +3,9 @@ import * as ReviewController from '../controllers/ReviewController.js';
 
 const router = express.Router();
 
+router.get('/denominator/:semester', ReviewController.getDenominators);
+router.put('/denominator', ReviewController.putDenominator);
+
 router.get('/:semester/:studentId', ReviewController.getReviewInfo);
 
 router.post('/intra', ReviewController.submitIntraReviews);

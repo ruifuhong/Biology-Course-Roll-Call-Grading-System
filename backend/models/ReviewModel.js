@@ -92,3 +92,22 @@ export async function getDiscussionAttendanceStatus(semester, actual_date, stude
   }
   return statusMap;
 }
+
+export async function getDenominatorsBySemester(semester) {
+  const result = await pool.query(
+    `SELECT student_id, denominator FROM "Roll-Call".session_denominator WHERE semester = $1`,
+    [semester]
+  );
+  return result.rows;
+}
+
+export async function upsertDenominator(semester, student_id, denominator) {
+  const result = await pool.query(
+    `INSERT INTO "Roll-Call".session_denominator (semester, student_id, denominator)
+     VALUES ($1, $2, $3)
+     ON CONFLICT (semester, student_id)
+     DO UPDATE SET denominator = EXCLUDED.denominator, updated_at = CURRENT_TIMESTAMP`,
+    [semester, student_id, denominator]
+  );
+  return result.rowCount;
+}

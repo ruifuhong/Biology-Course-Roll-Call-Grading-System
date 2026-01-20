@@ -107,3 +107,26 @@ export async function getInterReviewSummary(req, res) {
     res.status(500).json({ error: '伺服器錯誤 Server error', details: err.message });
   }
 }
+
+export async function getDenominators(req, res) {
+  try {
+    const { semester } = req.params;
+    const rows = await ReviewModel.getDenominatorsBySemester(semester);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: '取得應出席次數失敗 Failed to fetch denominators', details: err.message });
+  }
+}
+
+export async function putDenominator(req, res) {
+  try {
+    const { semester, student_id, denominator } = req.body;
+    if (!semester || !student_id || !denominator || denominator < 1) {
+      return res.status(400).json({ error: '輸入資料無效 Invalid input' });
+    }
+    await ReviewModel.upsertDenominator(semester, student_id, denominator);
+    res.json({ success: true, message: '應出席次數已更新 Required sessions updated' });
+  } catch (err) {
+    res.status(500).json({ error: '更新應出席次數失敗 Failed to upsert denominator', details: err.message });
+  }
+}
