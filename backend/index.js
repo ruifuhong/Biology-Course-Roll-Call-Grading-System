@@ -6,6 +6,7 @@ import sessionsRouter from './routes/sessions.js';
 import attendanceRouter from './routes/attendance.js';
 import feedbackRouter from './routes/feedback.js';
 import adminRouter from './routes/admin.js';
+import reviewRouter from './routes/review.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -25,6 +26,7 @@ app.use('/sessions', sessionsRouter);
 app.use('/attendance', attendanceRouter);
 app.use('/feedback', feedbackRouter);
 app.use('/api/admin', adminRouter);
+app.use('/review', reviewRouter);
 
 app.listen(port, () => {
   console.log(`Backend listening on http://localhost:${port}`);
