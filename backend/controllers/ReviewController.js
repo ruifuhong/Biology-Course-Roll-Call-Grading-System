@@ -11,7 +11,7 @@ export async function getReviewInfo(req, res) {
     }
 
     let actual_date = new Date().toISOString().split('T')[0];
-    const hasAttendance = await hasDiscussionAttendance(semester, actual_date, studentId);
+    const hasAttendance = await ReviewModel.hasDiscussionAttendance(semester, actual_date, studentId);
     if (!hasAttendance) {
       return res.json({
         student,
@@ -33,7 +33,7 @@ export async function getReviewInfo(req, res) {
     const otherGroups = await StudentModel.findGroupsWithMembers(semester, groupSet.filter(g => g !== group_name));
 
     const groupMemberIds = groupMembers.map(m => m.student_id);
-    const attendanceStatusMap = await getDiscussionAttendanceStatus(semester, actual_date, groupMemberIds);
+    const attendanceStatusMap = await ReviewModel.getDiscussionAttendanceStatus(semester, actual_date, groupMemberIds);
     const groupMembersWithAttendance = groupMembers.map(m => ({
       ...m,
       attendance_status: attendanceStatusMap[m.student_id] || 'absent'
