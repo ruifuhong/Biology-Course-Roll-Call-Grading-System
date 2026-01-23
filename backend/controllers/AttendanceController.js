@@ -1,5 +1,4 @@
 import * as AttendanceModel from '../models/AttendanceModel.js';
-import * as StudentModel from '../models/StudentModel.js';
 
 export const submitLectureAttendance = async (req, res) => {
   try {
