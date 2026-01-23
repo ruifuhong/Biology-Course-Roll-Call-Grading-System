@@ -1,4 +1,3 @@
-
 import { pool } from './database.js';
 
 export async function isLectureAttendanceActive(semester, actual_date) {
