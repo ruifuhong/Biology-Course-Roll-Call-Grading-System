@@ -149,13 +149,14 @@ export default function DiscussionRollcall() {
       return;
     }
 
-    if (!sessionInfo.is_active) {
+    if (sessionInfo === 'closed') {
       setMessage('此課程點名已關閉 Attendance submission is currently closed for this session');
       return;
     }
 
     setLoading(true);
     try {
+      const attendanceStatus = sessionInfo.status === 'late' ? 'late' : 'present';
       const attendancePromise = fetch(`${apiBase}/attendance/discussion`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -163,7 +164,7 @@ export default function DiscussionRollcall() {
           semester: sessionInfo.semester,
           studentId: studentId,
           actual_date: sessionInfo.actual_date,
-          status: 'present'
+          status: attendanceStatus
         })
       });
 
@@ -196,10 +197,12 @@ export default function DiscussionRollcall() {
       {sessionInfo && (
         <div className="session-info">
           <h3>課程資訊 Session Information</h3>
-          <div className={`attendance-status ${sessionInfo.is_active ? 'open' : 'closed'}`}>
+          <div className={`attendance-status ${sessionInfo.status === 'open' ? 'open' : sessionInfo.status === 'late' ? 'late' : 'closed'}`}>
             <strong>點名狀態 Attendance Status: </strong>
-            {sessionInfo.is_active ? (
+            {sessionInfo.status === 'open' ? (
               <span className="status-open">🟢 開放中 Open</span>
+            ) : sessionInfo.status === 'late' ? (
+              <span className="status-late">🟠 遲到 Late</span>
             ) : (
               <span className="status-closed">🔴 已關閉 Closed</span>
             )}
@@ -287,11 +290,20 @@ export default function DiscussionRollcall() {
           <button 
             type="submit" 
             className="submit-btn"
-            disabled={loading || !sessionInfo || !studentInfo.name || !sessionInfo?.is_active}
+            disabled={
+              loading ||
+              !sessionInfo ||
+              !studentInfo.name ||
+              sessionInfo.status === 'closed'
+            }
           >
-            {loading ? '提交中... Submitting...' : 
-             !sessionInfo?.is_active ? '點名已關閉 Attendance Closed' :
-             '提交出席 Submit Attendance'}
+            {loading
+              ? '提交中... Submitting...'
+              : !sessionInfo || sessionInfo.status === 'closed'
+                ? '點名已關閉 Attendance Closed'
+                : sessionInfo.status === 'late'
+                  ? '提交出席（以遲到計算） Submit (Late)'
+                  : '提交出席 Submit Attendance'}
           </button>
       </form>
 

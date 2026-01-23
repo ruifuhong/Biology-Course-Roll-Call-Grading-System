@@ -255,7 +255,7 @@ function GroupReviewInput() {
                         <li key={member.student_id || idx} className="review-member-item">
                           {member.name} ({member.student_id})
                           <div className="review-dropdown-row">
-                            {member.attendance_status === 'present' ? (
+                            {(member.attendance_status === 'present' || member.attendance_status === 'late') ? (
                               <select className="review-dropdown" defaultValue="">
                                 <option value="" disabled>請選擇 Please select</option>
                                 {[60,70,80,90,100].map(val => (

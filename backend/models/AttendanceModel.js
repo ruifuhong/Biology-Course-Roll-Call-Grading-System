@@ -1,11 +1,12 @@
 
 import { pool } from './database.js';
 
-export async function isLectureAttendanceActive(semester, sessionOrder) {
+export async function isLectureAttendanceActive(semester, actual_date) {
   try {
-    const query = `SELECT is_active FROM "Roll-Call".lecture_dates WHERE semester = $1 AND session_order = $2;`;
-    const result = await pool.query(query, [semester, sessionOrder]);
-    return result.rows[0]?.is_active || false;
+    const query = `SELECT status FROM "Roll-Call".lecture_dates WHERE semester = $1 AND actual_date = $2;`;
+    const result = await pool.query(query, [semester, actual_date]);
+    const status = result.rows[0]?.status;
+    return status === 'open';
   } catch (err) {
     console.error('AttendanceModel isLectureAttendanceActive error:', err);
     throw err;
@@ -14,9 +15,13 @@ export async function isLectureAttendanceActive(semester, sessionOrder) {
 
 export async function isDiscussionAttendanceActive(semester, actual_date) {
   try {
-    const query = `SELECT is_active FROM "Roll-Call".discussion_dates WHERE semester = $1 AND actual_date = $2;`;
+    const query = `SELECT status FROM "Roll-Call".discussion_dates WHERE semester = $1 AND actual_date = $2;`;
     const result = await pool.query(query, [semester, actual_date]);
-    return result.rows[0]?.is_active || false;
+    const status = result.rows[0]?.status;
+    if (status === 'open' || status === 'late') {
+      return true;
+    }
+    return false;
   } catch (err) {
     console.error('AttendanceModel isDiscussionAttendanceActive error:', err);
     throw err;
@@ -25,9 +30,11 @@ export async function isDiscussionAttendanceActive(semester, actual_date) {
 
 export async function markLectureAttendance(semester, studentId, actual_date, status = 'present') {
   try {
-    const queryActive = `SELECT is_active FROM "Roll-Call".lecture_dates WHERE semester = $1 AND actual_date = $2;`;
-    const resultActive = await pool.query(queryActive, [semester, actual_date]);
-    const isActive = resultActive.rows[0]?.is_active || false;
+    if (status !== 'present') {
+      throw new Error('無效的出席狀態 Invalid attendance status');
+    }
+
+    const isActive = await isLectureAttendanceActive(semester, actual_date);
     if (!isActive) {
       throw new Error('尚未開放點名 Attendance submission is not currently open for this session');
     }
@@ -47,8 +54,12 @@ export async function markLectureAttendance(semester, studentId, actual_date, st
   }
 }
 
-export async function markDiscussionAttendance(semester, studentId, actual_date, status = 'present') {
+export async function markDiscussionAttendance(semester, studentId, actual_date, status) {
   try {
+    if (status !== 'present' && status !== 'late') {
+      throw new Error('無效的出席狀態 Invalid attendance status');
+    }
+
     const isActive = await isDiscussionAttendanceActive(semester, actual_date);
     if (!isActive) {
       throw new Error('尚未開放點名 Attendance submission is not currently open for this session');

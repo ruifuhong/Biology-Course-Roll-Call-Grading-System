@@ -140,14 +140,21 @@ function AttendanceTable({ attendanceData, sessionDates, courseType, loading, on
     return Object.values(grouped);
   };
 
-  const calculateAttendanceStats = (attendanceMap) => {
+  const calculateAttendanceStats = (attendanceMap, sessionDates) => {
     let present = 0;
     let absent = 0;
-    Object.values(attendanceMap).forEach(status => {
-      if (status === 'present') present++;
-      else if (status === 'absent') absent++;
+    let late = 0;
+    sessionDates.forEach(session => {
+      const status = attendanceMap[session.actual_date];
+      if (status === 'present') {
+        present++;
+      } else if (status === 'late') {
+        late++;
+      } else {
+        absent++;
+      }
     });
-    return { present, absent };
+    return { present, absent, late };
   };
 
   const groupedStudents = groupAttendanceByStudent();
@@ -173,7 +180,10 @@ function AttendanceTable({ attendanceData, sessionDates, courseType, loading, on
                 <th rowSpan="2">系級 Department</th>
                 <th rowSpan="2">姓名 Name</th>
                 <th colSpan={sessionDates.length}>課程日期 Session Dates</th>
-                <th rowSpan="2">出席次數 Present</th>
+                <th rowSpan="2">{courseType === 'lecture' ? '出席次數 Present' : '準時次數 On Time'}</th>
+                {courseType === 'discussion' && (
+                  <th rowSpan="2">遲到次數 Late</th>
+                )}
                 <th rowSpan="2">缺席次數 Absent</th>
               </tr>
               <tr>
@@ -186,7 +196,7 @@ function AttendanceTable({ attendanceData, sessionDates, courseType, loading, on
             </thead>
             <tbody>
               {groupedStudents.map(student => {
-                const stats = calculateAttendanceStats(student.attendance);
+                const stats = calculateAttendanceStats(student.attendance, sessionDates);
                 return (
                   <tr key={student.student_id}>
                     <td>{student.group_name || 'N/A'}</td>
@@ -197,11 +207,14 @@ function AttendanceTable({ attendanceData, sessionDates, courseType, loading, on
                       const status = student.attendance[session.actual_date];
                       return (
                         <td key={session.actual_date} className={`attendance-cell ${status}`}>
-                          {status === 'present' ? '✓' : status === 'absent' ? '✗' : '-'}
+                          {status === 'present' ? '✓' : status === 'late' ? '⧗' : '-'}
                         </td>
                       );
                     })}
                     <td className="stats-cell present">{stats.present}</td>
+                    {courseType === 'discussion' && (
+                      <td className="stats-cell late">{stats.late}</td>
+                    )}
                     <td className="stats-cell absent">{stats.absent}</td>
                   </tr>
                 );

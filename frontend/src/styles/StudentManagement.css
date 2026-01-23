@@ -316,7 +316,12 @@
   color: #721c24;
 }
 
-.attendance-cell:not(.present):not(.absent) {
+.attendance-cell.late {
+  background-color: #f5f4f0;
+  color: #856404;
+}
+
+.attendance-cell:not(.present):not(.absent):not(.late) {
   background-color: #e2e3e5;
   color: #6c757d;
 }

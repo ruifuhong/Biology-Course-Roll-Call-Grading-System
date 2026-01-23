@@ -134,7 +134,6 @@ export async function getDiscussionDates(req, res) {
 export async function getLectureDates(req, res) {
   try {
     const { semester } = req.params;
-
     
     if (!semester) {
       return res.status(400).json({ error: '缺少學期參數 semester parameter is required' });
@@ -259,20 +258,20 @@ export async function deleteDiscussionDate(req, res) {
 export async function toggleLectureAttendance(req, res) {
   try {
     const { semester, selectedDate } = req.params;
-    const { isActive } = req.body;
-    
+    const { status } = req.body;
+
     if (req.user && req.user.role === 'ta') {
       if (!req.user.assignedSemesters || !req.user.assignedSemesters.includes(semester)) {
         return res.status(403).json({ error: '無權限存取此學期 Access denied for this semester' });
       }
     }
-    if (typeof isActive !== 'boolean') {
-      return res.status(400).json({ error: 'isActive 必須為布林值 isActive must be a boolean value' });
+    if (!['open', 'closed'].includes(status)) {
+      return res.status(400).json({ error: "status 必須為 'open' 或 'closed' status must be 'open' or 'closed'" });
     }
     const updatedDate = await SessionDateModel.toggleLectureAttendance(
       semester,
       selectedDate,
-      isActive
+      status
     );
     if (!updatedDate) {
       return res.status(404).json({ error: '查無此正課日期 Lecture date not found' });
@@ -288,17 +287,17 @@ export async function toggleLectureAttendance(req, res) {
 export async function toggleDiscussionAttendance(req, res) {
   try {
     const { semester, selectedDate } = req.params;
-    const { isActive } = req.body;
-    
+    const { status } = req.body;
+
     if (req.user && req.user.role === 'ta') {
       if (!req.user.assignedSemesters || !req.user.assignedSemesters.includes(semester)) {
         return res.status(403).json({ error: '無權限存取此學期 Access denied for this semester' });
       }
     }
-    if (typeof isActive !== 'boolean') {
-      return res.status(400).json({ error: 'isActive 必須為布林值 isActive must be a boolean value' });
+    if (!['open', 'late', 'closed'].includes(status)) {
+      return res.status(400).json({ error: "status 必須為 'open', 'late', 或 'closed' status must be 'open', 'late', or 'closed'" });
     }
-    const updatedDate = await SessionDateModel.toggleDiscussionAttendance(semester, selectedDate, isActive);
+    const updatedDate = await SessionDateModel.toggleDiscussionAttendance(semester, selectedDate, status);
     if (!updatedDate) {
       return res.status(404).json({ error: '查無此討論課日期 Discussion date not found' });
     }

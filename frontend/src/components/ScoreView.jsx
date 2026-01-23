@@ -167,11 +167,11 @@ export default function ScoreView({ semester }) {
                   {new Date(session.actual_date).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })}
                 </th>
               ))}
+              <th rowSpan="2">缺席<br/>Absent</th>
+              <th rowSpan="2">遲到<br/>Late</th>
               <th rowSpan="2">應出席次數<br/>Required Sessions</th>
               <th rowSpan="2">個人學期平均<br/>Personal Total Avg</th>
               <th rowSpan="2">小組學期平均<br/>Group Total Avg</th>
-              <th rowSpan="2">缺席<br/>Absent</th>
-              <th rowSpan="2">遲到<br/>Late</th>
             </tr>
             <tr>
               {sessionDates.map((session) => [
@@ -200,6 +200,8 @@ export default function ScoreView({ semester }) {
                       {student.scores?.[session.actual_date]?.group}
                     </td>
                   ])}
+                  <td>{student.absent}</td>
+                  <td>{student.late}</td>
                   <td>
                     {editingId === student.student_id ? (
                       <span>
@@ -240,8 +242,6 @@ export default function ScoreView({ semester }) {
                   </td>
                   <td>{student.personalAvg}</td>
                   <td>{student.groupAvg}</td>
-                  <td>{student.absent}</td>
-                  <td>{student.late}</td>
                 </tr>
               ))
             )}

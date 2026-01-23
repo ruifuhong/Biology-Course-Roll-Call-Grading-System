@@ -40,6 +40,7 @@ export default function LectureRollcall() {
       const response = await fetch(`${apiBase}/sessions/lecture-dates/${semester}`);
       if (response.ok) {
         const lectureDates = await response.json();
+        console.log("lecture dates", lectureDates);
         
         const todaySession = lectureDates.find(session => 
           session.actual_date.split('T')[0] === today
@@ -150,7 +151,7 @@ export default function LectureRollcall() {
       return;
     }
 
-    if (!sessionInfo.is_active) {
+    if (!sessionInfo.status === 'open') {
       setMessage('此課程點名已關閉 Attendance submission is currently closed for this session');
       return;
     }
@@ -214,9 +215,9 @@ export default function LectureRollcall() {
       {sessionInfo && (
         <div className="session-info">
           <h3>課程資訊 Session Information</h3>
-          <div className={`attendance-status ${sessionInfo.is_active ? 'open' : 'closed'}`}>
+          <div className={`attendance-status ${sessionInfo.status === 'open' ? 'open' : 'closed'}`}>
             <strong>點名狀態 Attendance Status: </strong>
-            {sessionInfo.is_active ? (
+            {sessionInfo.status === 'open' ? (
               <span className="status-open">🟢 開放中 Open</span>
             ) : (
               <span className="status-closed">🔴 已關閉 Closed</span>
@@ -324,11 +325,12 @@ export default function LectureRollcall() {
         <button 
           type="submit" 
           className="submit-btn"
-          disabled={loading || !sessionInfo || !studentInfo.name || !sessionInfo?.is_active}
+          disabled={loading || !sessionInfo || !studentInfo.name || sessionInfo?.status !== 'open'}
         >
-          {loading ? '提交中... Submitting...' : 
-           !sessionInfo?.is_active ? '點名已關閉 Attendance Closed' :
-           '提交出席 Submit Attendance'}
+          {loading ? '提交中... Submitting...'
+            : sessionInfo?.status === 'closed'
+            ? '點名已關閉 Attendance Closed'
+            : '提交出席 Submit Attendance'}
         </button>
       </form>
 

@@ -6,16 +6,13 @@ export async function createLectureDate(semester, actualDate) {
       'SELECT * FROM "Roll-Call".lecture_dates WHERE semester = $1 AND actual_date = $2',
       [semester, actualDate]
     );
-    
     if (existingDate.rows.length > 0) {
-      throw new Error(`該學期已存在此日期 Date ${actualDate} already exists for semester ${semester}`);
+      throw new Error(`該學期已存在此正課日期 Date ${actualDate} already exists for semester ${semester}`);
     }
-
     const result = await pool.query(
-      'INSERT INTO "Roll-Call".lecture_dates (semester, actual_date, is_active) VALUES ($1, $2, $3) RETURNING *',
-      [semester, actualDate, false]
+      'INSERT INTO "Roll-Call".lecture_dates (semester, actual_date, status, opened_at) VALUES ($1, $2, $3, $4) RETURNING *',
+      [semester, actualDate, 'closed', null]
     );
-    
     return result.rows[0];
   } catch (error) {
     console.error('SessionDateModel createLectureDate error:', error);
@@ -29,22 +26,20 @@ export async function createDiscussionDate(semester, actualDate) {
       'SELECT * FROM "Roll-Call".discussion_dates WHERE semester = $1 AND actual_date = $2',
       [semester, actualDate]
     );
-
     if (existingDate.rows.length > 0) {
-      throw new Error(`該學期已存在此討論日期 Discussion date ${actualDate} already exists for semester ${semester}`);
+      throw new Error(`該學期已存在此討論課日期 Discussion date ${actualDate} already exists for semester ${semester}`);
     }
-
     const result = await pool.query(
-      'INSERT INTO "Roll-Call".discussion_dates (semester, actual_date, is_active) VALUES ($1, $2, $3) RETURNING *',
-      [semester, actualDate, false]
+      'INSERT INTO "Roll-Call".discussion_dates (semester, actual_date, status, opened_at, late_at, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, NOW(), NOW()) RETURNING *',
+      [semester, actualDate, 'closed', null, null]
     );
-    
     return result.rows[0];
   } catch (error) {
     console.error('SessionDateModel createDiscussionDate error:', error);
     throw error;
   }
 }
+
 export async function getLectureDate(semester, actualDate) {
   try {
     const result = await pool.query(
@@ -101,10 +96,9 @@ export async function getDiscussionDatesBySemester(semester) {
 export async function updateLectureDate(semester, oldDate, newDate) {
   try {
     const result = await pool.query(
-      'UPDATE "Roll-Call".lecture_dates SET actual_date = $1 WHERE semester = $2 AND actual_date = $3 RETURNING *',
+      'UPDATE "Roll-Call".lecture_dates SET actual_date = $1, updated_at = NOW() WHERE semester = $2 AND actual_date = $3 RETURNING *',
       [newDate, semester, oldDate]
     );
-    
     return result.rows[0];
   } catch (error) {
     console.error('SessionDateModel updateLectureDate error:', error);
@@ -115,10 +109,9 @@ export async function updateLectureDate(semester, oldDate, newDate) {
 export async function updateDiscussionDate(semester, oldDate, newDate) {
   try {
     const result = await pool.query(
-      'UPDATE "Roll-Call".discussion_dates SET actual_date = $1 WHERE semester = $2 AND actual_date = $3 RETURNING *',
+      'UPDATE "Roll-Call".discussion_dates SET actual_date = $1, updated_at = NOW() WHERE semester = $2 AND actual_date = $3 RETURNING *',
       [newDate, semester, oldDate]
     );
-    
     return result.rows[0];
   } catch (error) {
     console.error('SessionDateModel updateDiscussionDate error:', error);
@@ -154,12 +147,15 @@ export async function deleteDiscussionDate(semester, actualDate) {
   }
 }
 
-export async function toggleLectureAttendance(semester, selectedDate, isActive) {
+export async function toggleLectureAttendance(semester, selectedDate, status) {
   try {
-    console.log(`line 127 ${semester}, ${selectedDate}, ${isActive}`);
+    let openedAt = null;
+    if (status === 'open') {
+      openedAt = new Date();
+    }
     const result = await pool.query(
-      'UPDATE "Roll-Call".lecture_dates SET is_active = $1 WHERE semester = $2 AND actual_date = $3 RETURNING *',
-      [isActive, semester, selectedDate]
+      'UPDATE "Roll-Call".lecture_dates SET status = $1, opened_at = $2, updated_at = NOW() WHERE semester = $3 AND actual_date = $4 RETURNING *',
+      [status, openedAt, semester, selectedDate]
     );
     return result.rows[0];
   } catch (error) {
@@ -168,11 +164,22 @@ export async function toggleLectureAttendance(semester, selectedDate, isActive) 
   }
 }
 
-export async function toggleDiscussionAttendance(semester, selectedDate, isActive) {
-   try {
+export async function toggleDiscussionAttendance(semester, selectedDate, newStatus) {
+  try {
+    let openedAt = null;
+    let lateAt = null;
+    if (newStatus === 'open') {
+      openedAt = new Date();
+      lateAt = null;
+    } else if (newStatus === 'late') {
+      lateAt = new Date();
+    } else if (newStatus === 'closed') {
+      openedAt = null;
+      lateAt = null;
+    }
     const result = await pool.query(
-      'UPDATE "Roll-Call".discussion_dates SET is_active = $1 WHERE semester = $2 AND actual_date = $3 RETURNING *',
-      [isActive, semester, selectedDate]
+      'UPDATE "Roll-Call".discussion_dates SET status = $1, opened_at = $2, late_at = $3, updated_at = NOW() WHERE semester = $4 AND actual_date = $5 RETURNING *',
+      [newStatus, openedAt, lateAt, semester, selectedDate]
     );
     return result.rows[0];
   } catch (error) {
