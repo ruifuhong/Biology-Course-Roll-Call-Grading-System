@@ -25,6 +25,7 @@ function GroupReviewInput() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [feedback, setFeedback] = useState('');
+  const [alreadyReviewed, setAlreadyReviewed] = useState(false);
 
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -79,6 +80,7 @@ function GroupReviewInput() {
     setSubmittedId(studentId);
     setStudentInfo(null);
     setError('');
+    setAlreadyReviewed(false);
     if (!sessionInfo || !sessionInfo.semester) {
       setError('查無今日課程資訊 Session info for today not found');
       return;
@@ -89,6 +91,19 @@ function GroupReviewInput() {
       if (res.ok) {
         const data = await res.json();
         setStudentInfo(data);
+        const groupName = data.student?.group_name;
+        const dupRes = await fetch(
+          `${apiBase}/review/duplicate-check/${studentId}/${groupName}/${sessionInfo.semester}/${encodeURIComponent(sessionInfo.actual_date)}`
+        );
+        if (dupRes.ok) {
+          const dupData = await dupRes.json();
+          if (dupData.exists) {
+            setAlreadyReviewed(true);
+            return;
+          }
+        } else {
+          setError('無法檢查是否已提交評分 Unable to check for duplicate review');
+        }
       } else {
         const errData = await res.json();
         setError(errData.error || '請確認您輸入的學號是否正確 Please confirm the student ID number entered');
@@ -123,18 +138,31 @@ function GroupReviewInput() {
             type="button"
             className="review-back-btn"
             onClick={() => {
-              if (
+              if (alreadyReviewed || (studentInfo && studentInfo.noAttendance)) {
+                setSubmittedId(null);
+                setStudentInfo(null);
+                setError('');
+                setAlreadyReviewed(false);
+                return;
+              }
+              else if (
                 window.confirm('確定要返回輸入學號頁面嗎？若有未儲存內容將遺失\nAre you sure you want to go back to the student ID input page? Unsaved content will be lost.')
               ) {
                 setSubmittedId(null);
                 setStudentInfo(null);
                 setError('');
+                setAlreadyReviewed(false);
               }
             }}
           >
             ← 返回輸入學號頁 Back to Student ID Input
           </button>
-          {studentInfo && (
+          {alreadyReviewed ? (
+            <div className="review-no-attendance">
+              您已提交過本次評分<br />
+              You have already submitted reviews for this session.
+            </div>
+          ) : studentInfo && (
             studentInfo.noAttendance ? (
               <div className="review-no-attendance">
                 您未在本堂討論課點名，如有疑問請洽助教。<br />
@@ -146,7 +174,6 @@ function GroupReviewInput() {
                 onSubmit={async (e) => {
                   e.preventDefault();
                   setError("");
-                  // 1. Collect intra-group reviews
                   const intraReviews = [];
                   let intraValid = true;
                   if (studentInfo && studentInfo.groupMembers) {

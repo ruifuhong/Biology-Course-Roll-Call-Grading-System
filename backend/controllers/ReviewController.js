@@ -130,3 +130,16 @@ export async function putDenominator(req, res) {
     res.status(500).json({ error: '更新應出席次數失敗 Failed to upsert denominator', details: err.message });
   }
 }
+
+export async function checkReviewDuplicate(req, res) {
+  const { reviewerId, reviewerGroupId, semester, actualDate } = req.params;
+  if (!semester || !actualDate || (!reviewerId && !reviewerGroupId)) {
+    return res.status(400).json({ error: '缺少必要參數 Missing required parameters' });
+  }
+  try {
+    const exists = await ReviewModel.checkAnyReviewExists({ reviewerId, reviewerGroupId, semester, actualDate });
+    res.json({ exists });
+  } catch (err) {
+    res.status(500).json({ error: '資料庫錯誤 Database error', details: err.message });
+  }
+}

@@ -111,3 +111,31 @@ export async function upsertDenominator(semester, student_id, denominator) {
   );
   return result.rowCount;
 }
+
+export async function checkIntraReviewExists(reviewerId, semester, actualDate) {
+  const result = await pool.query(
+    `SELECT 1 FROM "Roll-Call".review_intra_group
+     WHERE reviewer_id = $1 AND semester = $2 AND actual_date = $3
+     LIMIT 1`,
+    [reviewerId, semester, actualDate]
+  );
+  return result.rows.length > 0;
+}
+
+export async function checkInterReviewExists(reviewerGroupId, semester, actualDate) {
+  const result = await pool.query(
+    `SELECT 1 FROM "Roll-Call".review_inter_group
+     WHERE reviewer_group_id = $1 AND semester = $2 AND actual_date = $3
+     LIMIT 1`,
+    [reviewerGroupId, semester, actualDate]
+  );
+  return result.rows.length > 0;
+}
+
+export async function checkAnyReviewExists({ reviewerId, reviewerGroupId, semester, actualDate }) {
+  const [intra, inter] = await Promise.all([
+    reviewerId ? checkIntraReviewExists(reviewerId, semester, actualDate) : false,
+    reviewerGroupId ? checkInterReviewExists(reviewerGroupId, semester, actualDate) : false
+  ]);
+  return intra || inter;
+}
