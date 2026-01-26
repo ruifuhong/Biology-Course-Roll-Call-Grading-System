@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { naturalSort } from '../utils/sortUtils';
 import '../styles/StudentManagement.css';
 
+const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function AttendanceView({ semester }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -9,8 +11,6 @@ export default function AttendanceView({ semester }) {
   const [attendanceData, setAttendanceData] = useState([]);
   const [sessionDates, setSessionDates] = useState([]);
   const [feedbackData, setFeedbackData] = useState([]);
-
-  const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   useEffect(() => {
     if (semester) {
@@ -116,6 +116,8 @@ export default function AttendanceView({ semester }) {
         courseType={courseType}
         loading={loading}
         onRefresh={() => { fetchAttendanceData(); fetchFeedbackData(); }}
+        setSessionDates={setSessionDates}
+        setMessage={setMessage}
       />
 
       <FeedbackList feedbackData={feedbackData} courseType={courseType} loading={loading} />
@@ -123,7 +125,7 @@ export default function AttendanceView({ semester }) {
   )
 }
 
-function AttendanceTable({ attendanceData, sessionDates, courseType, loading, onRefresh }) {
+function AttendanceTable({ attendanceData, sessionDates, courseType, loading, onRefresh, setSessionDates, setMessage }) {
   const groupAttendanceByStudent = () => {
     const grouped = {};
     attendanceData.forEach(record => {
@@ -158,6 +160,9 @@ function AttendanceTable({ attendanceData, sessionDates, courseType, loading, on
   };
 
   const groupedStudents = groupAttendanceByStudent();
+  const filteredSessionDates = courseType === 'lecture'
+    ? sessionDates.filter(session => session.attendance_required !== false)
+    : sessionDates;
   return (
     <div className="attendance-table-view">
       <div className="attendance-header">
@@ -180,23 +185,54 @@ function AttendanceTable({ attendanceData, sessionDates, courseType, loading, on
                 <th rowSpan="2">系級 Department</th>
                 <th rowSpan="2">姓名 Name</th>
                 <th colSpan={sessionDates.length}>課程日期 Session Dates</th>
-                <th rowSpan="2">{courseType === 'lecture' ? '出席次數 Present' : '準時次數 On Time'}</th>
+                {courseType === 'lecture' ? (
+                  <>
+                    <th rowSpan="2">
+                      出席次數 Present
+                      <div className="attendance-stats-note">僅計算有點名日期<br />Only count checked dates</div>
+                    </th>
+                  </>
+                ) : (
+                  <th rowSpan="2">準時次數 On Time</th>
+                )}
                 {courseType === 'discussion' && (
                   <th rowSpan="2">遲到次數 Late</th>
                 )}
-                <th rowSpan="2">缺席次數 Absent</th>
+                {courseType === 'lecture' ? (
+                  <th rowSpan="2">
+                    缺席次數 Absent
+                    <div className="attendance-stats-note">已排除未點名日期<br />Dates not checked excluded</div>
+                  </th>
+                ) : (
+                  <th rowSpan="2">缺席次數 Absent</th>
+                )}
               </tr>
               <tr>
                 {sessionDates.map((session, idx) => (
                   <th key={session.actual_date} className="date-header">
-                    {new Date(session.actual_date).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })}
+                    <div className="date-header-content">
+                      <div className="date-label">
+                        {new Date(session.actual_date).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })}
+                      </div>
+                      {courseType === 'lecture' && (
+                        <AttendanceRequiredToggleButton
+                          actualDate={session.actual_date}
+                          attendanceRequired={!!session.attendance_required}
+                          semester={session.semester}
+                          onToggled={updated => {
+                            setSessionDates(prev => prev.map(d => d.actual_date === session.actual_date ? { ...d, attendance_required: updated } : d));
+                          }}
+                          setMessage={setMessage}
+                        />
+                      )}
+                    </div>
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {groupedStudents.map(student => {
-                const stats = calculateAttendanceStats(student.attendance, sessionDates);
+                const stats = calculateAttendanceStats(student.attendance, filteredSessionDates);
                 return (
                   <tr key={student.student_id}>
                     <td>{student.group_name || 'N/A'}</td>
@@ -227,7 +263,7 @@ function AttendanceTable({ attendanceData, sessionDates, courseType, loading, on
   );
 }
 
- function FeedbackList({ feedbackData, courseType, loading }) {
+function FeedbackList({ feedbackData, courseType, loading }) {
     return (
       <div className="feedback-list-container">
         <h3 className="feedback-list-title">
@@ -253,3 +289,46 @@ function AttendanceTable({ attendanceData, sessionDates, courseType, loading, on
       </div>
     );
   }
+
+function AttendanceRequiredToggleButton({ actualDate, attendanceRequired, semester, onToggled, setMessage }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleToggleAttendanceRequired = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${apiBase}/sessions/lecture-dates/${semester}/${actualDate}/attendance-required`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ attendanceRequired: !attendanceRequired })
+      });
+      if (response.ok) {
+        const updated = await response.json();
+        onToggled(updated.attendance_required);
+        const formattedDate = new Date(actualDate).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' });
+        setMessage && setMessage(attendanceRequired ? `${formattedDate} 已設為未點名 Set as Not Checked` : `${formattedDate} 已設為有點名 Set as Checked`);
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        setMessage && setMessage(errorData.error || '切換點名狀態失敗 Failed to toggle attendance required');
+      }
+    } catch (error) {
+      setMessage && setMessage('切換點名狀態失敗 Failed to toggle attendance required: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  return (
+    <button
+      className={`btn attendance-required-toggle-btn ${attendanceRequired ? 'required' : 'not-required'}`}
+      onClick={handleToggleAttendanceRequired}
+      disabled={loading}
+      title={attendanceRequired ? '切換為未點名 Switch to Not Checked' : '切換為有點名 Switch to Checked'}
+      aria-label={attendanceRequired ? '切換為未點名 Switch to Not Checked' : '切換為有點名 Switch to Checked'}
+    >
+      <span className="toggle-icon">{attendanceRequired ? '✅' : '❌'}</span>
+      <span className="toggle-text">
+        <span className="toggle-text-chinese">{attendanceRequired ? '有點名' : '未點名'}</span>
+        <span className="toggle-text-english">{attendanceRequired ? 'Checked' : 'Not Checked'}</span>
+      </span>
+    </button>
+  );
+}

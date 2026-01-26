@@ -1,6 +1,6 @@
 import { pool } from './database.js';
 
-export async function createLectureDate(semester, actualDate) {
+export async function createLectureDate(semester, actualDate, attendanceRequired = true) {
   try {
     const existingDate = await pool.query(
       'SELECT * FROM "Roll-Call".lecture_dates WHERE semester = $1 AND actual_date = $2',
@@ -10,8 +10,8 @@ export async function createLectureDate(semester, actualDate) {
       throw new Error(`該學期已存在此正課日期 Date ${actualDate} already exists for semester ${semester}`);
     }
     const result = await pool.query(
-      'INSERT INTO "Roll-Call".lecture_dates (semester, actual_date, status, opened_at) VALUES ($1, $2, $3, $4) RETURNING *',
-      [semester, actualDate, 'closed', null]
+      'INSERT INTO "Roll-Call".lecture_dates (semester, actual_date, status, opened_at, attendance_required) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [semester, actualDate, 'closed', null, attendanceRequired]
     );
     return result.rows[0];
   } catch (error) {
@@ -43,7 +43,7 @@ export async function createDiscussionDate(semester, actualDate) {
 export async function getLectureDate(semester, actualDate) {
   try {
     const result = await pool.query(
-      'SELECT * FROM "Roll-Call".lecture_dates WHERE semester = $1 AND actual_date = $2',
+      'SELECT *, attendance_required FROM "Roll-Call".lecture_dates WHERE semester = $1 AND actual_date = $2',
       [semester, actualDate]
     );
     return result.rows[0];
@@ -68,10 +68,9 @@ export async function getDiscussionDate(semester, actualDate) {
 export async function getLectureDatesBySemester(semester) {
   try {
     const result = await pool.query(
-      'SELECT * FROM "Roll-Call".lecture_dates WHERE semester = $1 ORDER BY actual_date',
+      'SELECT *, attendance_required FROM "Roll-Call".lecture_dates WHERE semester = $1 ORDER BY actual_date',
       [semester]
     );
-    
     return result.rows;
   } catch (error) {
     console.error('SessionDateModel getLectureDates error:', error);
@@ -184,6 +183,19 @@ export async function toggleDiscussionAttendance(semester, selectedDate, newStat
     return result.rows[0];
   } catch (error) {
     console.error('SessionDateModel toggleDiscussionAttendance error:', error);
+    throw error;
+  }
+}
+
+export async function setLectureAttendanceRequired(semester, actualDate, attendanceRequired) {
+  try {
+    const result = await pool.query(
+      'UPDATE "Roll-Call".lecture_dates SET attendance_required = $1, updated_at = NOW() WHERE semester = $2 AND actual_date = $3 RETURNING *',
+      [attendanceRequired, semester, actualDate]
+    );
+    return result.rows[0];
+  } catch (error) {
+    console.error('SessionDateModel setLectureAttendanceRequired error:', error);
     throw error;
   }
 }

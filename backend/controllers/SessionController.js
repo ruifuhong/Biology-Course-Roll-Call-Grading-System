@@ -52,31 +52,26 @@ export async function setDiscussionDates(req, res) {
 
 export async function setLectureDates(req, res) {
   try {
-    const { semester, dates } = req.body;
-    
-    console.log('設定正課日期請求 setLectureDates request:', { semester, dates });
-    
+    const { semester, dates, attendanceRequired } = req.body;
+    console.log('設定正課日期請求 setLectureDates request:', { semester, dates, attendanceRequired });
     if (!semester || !Array.isArray(dates) || dates.length === 0) {
       return res.status(400).json({ 
         error: '缺少學期或日期陣列 semester and non-empty dates array are required' 
       });
     }
-    
     if (req.user && req.user.role === 'ta') {
       if (!req.user.assignedSemesters || !req.user.assignedSemesters.includes(semester)) {
         return res.status(403).json({ error: '無權限存取此學期 Access denied for this semester' });
       }
     }
-    
     const createdDates = [];
     for (const date of dates) {
       try {
         console.log(`建立正課日期 Creating lecture date: semester=${semester}, date=${date}`);
-        const result = await SessionDateModel.createLectureDate(semester, date);
+        const result = await SessionDateModel.createLectureDate(semester, date, attendanceRequired !== undefined ? attendanceRequired : true);
         createdDates.push(result);
       } catch (createError) {
         console.error(`建立正課日期失敗 Error creating date ${date}:`, createError);
-        
         if (createError.message.includes('already exists')) {
           return res.status(409).json({ 
             error: '日期已存在 Date already exists: ' + createError.message
@@ -85,9 +80,7 @@ export async function setLectureDates(req, res) {
         throw createError;
       }
     }
-    
     console.log(`成功建立正課日期 Successfully created ${createdDates.length} lecture dates`);
-    
     const allDates = await SessionDateModel.getLectureDatesBySemester(semester);
     res.status(201).json(allDates);
   } catch (error) {
@@ -98,6 +91,29 @@ export async function setLectureDates(req, res) {
       details: error.message,
       code: error.code 
     });
+  }
+}
+
+export async function setLectureAttendanceRequired(req, res) {
+  try {
+    const { semester, actualDate } = req.params;
+    const { attendanceRequired } = req.body;
+    if (typeof attendanceRequired !== 'boolean') {
+      return res.status(400).json({ error: 'attendanceRequired must be boolean' });
+    }
+    if (req.user && req.user.role === 'ta') {
+      if (!req.user.assignedSemesters || !req.user.assignedSemesters.includes(semester)) {
+        return res.status(403).json({ error: '無權限存取此學期 Access denied for this semester' });
+      }
+    }
+    const updated = await SessionDateModel.setLectureAttendanceRequired(semester, actualDate, attendanceRequired);
+    if (!updated) {
+      return res.status(404).json({ error: '查無此正課日期 Lecture date not found' });
+    }
+    res.json(updated);
+  } catch (error) {
+    console.error('更新正課點名需求失敗 setLectureAttendanceRequired error:', error);
+    res.status(500).json({ error: '更新正課點名需求失敗 Failed to update attendance requirement: ' + error.message });
   }
 }
 
