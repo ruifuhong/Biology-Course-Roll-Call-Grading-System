@@ -1,4 +1,5 @@
 import * as SessionDateModel from '../models/SessionDateModel.js';
+import { io } from '../index.js';
 
 export async function setDiscussionDates(req, res) {
   try {
@@ -292,6 +293,19 @@ export async function toggleLectureAttendance(req, res) {
     if (!updatedDate) {
       return res.status(404).json({ error: '查無此正課日期 Lecture date not found' });
     }
+
+    console.log('Emitting rollcallState:', {
+      type: 'lecture',
+      semester,
+      actualDate: selectedDate,
+      status: updatedDate.status
+    });
+    io.emit('rollcallState', {
+      type: 'lecture',
+      semester,
+      actualDate: selectedDate,
+      status: updatedDate.status
+    });
     res.json(updatedDate);
 
   } catch (error) {
@@ -317,6 +331,14 @@ export async function toggleDiscussionAttendance(req, res) {
     if (!updatedDate) {
       return res.status(404).json({ error: '查無此討論課日期 Discussion date not found' });
     }
+
+    io.emit('rollcallState', {
+      type: 'discussion',
+      semester,
+      actualDate: selectedDate,
+      status: updatedDate.status
+    });
+
     res.json(updatedDate);
   } catch (error) {
     console.error('切換討論課點名狀態失敗 SessionController toggleDiscussionDate error:', error);

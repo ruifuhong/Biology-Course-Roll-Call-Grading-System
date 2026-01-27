@@ -16,21 +16,35 @@ export default function DiscussionRollcall() {
 
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-  useEffect(() => {
-    fetchCurrentSession();
+useEffect(() => {
+  fetchCurrentSession();
 
-    // --- Socket.IO Hello World ---
-    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000');
-    socket.on('connect', () => {
-      setMessage('Socket.IO connected! Your socket id: ' + socket.id);
+  const socket = io(apiBase);
+  socket.on('connect', () => {
+    // setMessage('Socket.IO connected! Your socket id: ' + socket.id);
+  });
+  socket.on('disconnect', () => {
+    // setMessage('Socket.IO disconnected');
+  });
+
+  socket.on('rollcallState', (data) => {
+    if (data.type !== 'discussion') return;
+    setSessionInfo(prev => {
+      if (!prev) return prev;
+      if (
+        (data.session_order && prev.session_order === data.session_order) ||
+        (data.actualDate && prev.actual_date === data.actualDate)
+      ) {
+        return { ...prev, status: data.status };
+      }
+      return prev;
     });
-    socket.on('disconnect', () => {
-      setMessage('Socket.IO disconnected');
-    });
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+  });
+
+  return () => {
+    socket.disconnect();
+  };
+}, []);
 
   const fetchCurrentSession = async () => {
     try {
