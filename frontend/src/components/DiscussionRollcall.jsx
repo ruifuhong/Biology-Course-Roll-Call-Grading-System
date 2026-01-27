@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
 import '../styles/RollcallPage.css';
 
 export default function DiscussionRollcall() {
@@ -17,6 +18,18 @@ export default function DiscussionRollcall() {
 
   useEffect(() => {
     fetchCurrentSession();
+
+    // --- Socket.IO Hello World ---
+    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000');
+    socket.on('connect', () => {
+      setMessage('Socket.IO connected! Your socket id: ' + socket.id);
+    });
+    socket.on('disconnect', () => {
+      setMessage('Socket.IO disconnected');
+    });
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const fetchCurrentSession = async () => {
