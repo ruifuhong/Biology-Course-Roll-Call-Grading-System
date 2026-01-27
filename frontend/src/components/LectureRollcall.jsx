@@ -68,7 +68,6 @@ export default function LectureRollcall() {
       const response = await fetch(`${apiBase}/sessions/lecture-dates/${semester}`);
       if (response.ok) {
         const lectureDates = await response.json();
-        console.log("lecture dates", lectureDates);
         
         const todaySession = lectureDates.find(session => 
           session.actual_date.split('T')[0] === today
