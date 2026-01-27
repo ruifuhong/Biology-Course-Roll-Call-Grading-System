@@ -262,6 +262,9 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAtte
                   buttonClass = 'btn-enable';
                 }
               }
+              
+              const today = new Date().toISOString().split('T')[0];
+              const isToday = session.actual_date.split('T')[0] === today;
 
               return (
                 <tr key={currentDate} className={statusClass + '-session'}>
@@ -294,7 +297,8 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAtte
                       <button
                         onClick={() => onToggleAttendance(courseType, session.actual_date, nextStatus)}
                         className={`btn btn-toggle ${buttonClass}`}
-                        title={buttonLabel}
+                        title={isToday ? buttonLabel : '只能操作今日場次 Only today\'s session can be toggled'}
+                        disabled={!isToday}
                       >
                         {buttonLabel}
                       </button>
