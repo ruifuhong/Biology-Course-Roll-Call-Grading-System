@@ -25,7 +25,7 @@ export default function LectureRollcall() {
       // console.log('Socket.IO connected! Your socket id: ' + socket.id);
     });
     socket.on('disconnect', () => {
-      // console.log('Socket.IO connected! Your socket id: ' + socket.id);
+      // setMessage('Socket.IO disconnected');
     });
 
     socket.on('rollcallState', (data) => {
