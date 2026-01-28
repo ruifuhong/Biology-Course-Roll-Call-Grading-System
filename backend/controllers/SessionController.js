@@ -5,8 +5,6 @@ export async function setDiscussionDates(req, res) {
   try {
     const { semester, dates } = req.body;
 
-    console.log('設定討論課日期請求 setDiscussionDates request:', { semester, dates });
-
     if (!semester || !Array.isArray(dates) || dates.length === 0) {
       return res.status(400).json({
         error: '缺少學期或日期陣列 semester and non-empty dates array are required'
@@ -22,7 +20,6 @@ export async function setDiscussionDates(req, res) {
     const createdDates = [];
     for (const date of dates) {
       try {
-        console.log(`建立討論課日期 Creating discussion date: semester=${semester}, date=${date}`);
         const result = await SessionDateModel.createDiscussionDate(semester, date);
         createdDates.push(result);
       } catch (createError) {
@@ -35,8 +32,6 @@ export async function setDiscussionDates(req, res) {
         throw createError;
       }
     }
-
-    console.log(`成功建立討論課日期 Successfully created ${createdDates.length} discussion dates`);
 
     const allDates = await SessionDateModel.getDiscussionDatesBySemester(semester);
     res.status(201).json(allDates);
@@ -54,7 +49,6 @@ export async function setDiscussionDates(req, res) {
 export async function setLectureDates(req, res) {
   try {
     const { semester, dates, attendanceRequired } = req.body;
-    console.log('設定正課日期請求 setLectureDates request:', { semester, dates, attendanceRequired });
     if (!semester || !Array.isArray(dates) || dates.length === 0) {
       return res.status(400).json({ 
         error: '缺少學期或日期陣列 semester and non-empty dates array are required' 
@@ -68,7 +62,6 @@ export async function setLectureDates(req, res) {
     const createdDates = [];
     for (const date of dates) {
       try {
-        console.log(`建立正課日期 Creating lecture date: semester=${semester}, date=${date}`);
         const result = await SessionDateModel.createLectureDate(semester, date, attendanceRequired !== undefined ? attendanceRequired : true);
         createdDates.push(result);
       } catch (createError) {
@@ -81,7 +74,6 @@ export async function setLectureDates(req, res) {
         throw createError;
       }
     }
-    console.log(`成功建立正課日期 Successfully created ${createdDates.length} lecture dates`);
     const allDates = await SessionDateModel.getLectureDatesBySemester(semester);
     res.status(201).json(allDates);
   } catch (error) {
@@ -294,12 +286,6 @@ export async function toggleLectureAttendance(req, res) {
       return res.status(404).json({ error: '查無此正課日期 Lecture date not found' });
     }
 
-    console.log('Emitting rollcallState:', {
-      type: 'lecture',
-      semester,
-      actualDate: selectedDate,
-      status: updatedDate.status
-    });
     io.emit('rollcallState', {
       type: 'lecture',
       semester,
