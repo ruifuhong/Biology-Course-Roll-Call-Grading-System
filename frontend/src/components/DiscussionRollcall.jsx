@@ -31,10 +31,7 @@ useEffect(() => {
     if (data.type !== 'discussion') return;
     setSessionInfo(prev => {
       if (!prev) return prev;
-      if (
-        (data.session_order && prev.session_order === data.session_order) ||
-        (data.actualDate && prev.actual_date === data.actualDate)
-      ) {
+      if (data.actualDate && prev.actual_date === data.actualDate){
         return { ...prev, status: data.status };
       }
       return prev;
