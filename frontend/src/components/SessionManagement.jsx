@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import '../styles/SessionManagement.css';
 
 const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -84,19 +84,72 @@ const DateInputForm = ({ courseType, onSubmit, loading, semester }) => {
   );
 };
 
+function TimerCell({ courseType, session, onToggleAttendance }) {
+  const { status, actual_date, opened_at, late_at } = session;
+  const [timeLeft, setTimeLeft] = useState(null);
+  const intervalRef = useRef(null);
+
+  useEffect(() => {
+    let startTime, durationMs, timerState, nextStatus;
+    if (courseType === 'lecture' && status === 'open' && opened_at) {
+      startTime = new Date(opened_at);
+      durationMs = 10 * 60 * 1000;
+      timerState = 'open';
+      nextStatus = 'closed';
+    } else if (courseType === 'discussion' && status === 'open' && opened_at) {
+      startTime = new Date(opened_at);
+      durationMs = 10 * 60 * 1000;
+      timerState = 'open';
+      nextStatus = 'late';
+    } else if (courseType === 'discussion' && status === 'late' && late_at) {
+      startTime = new Date(late_at);
+      durationMs = 50 * 60 * 1000;
+      timerState = 'late';
+      nextStatus = 'closed';
+    } else {
+      setTimeLeft(null);
+      return;
+    }
+
+    function updateCountdown() {
+      const elapsed = Date.now() - startTime.getTime();
+      const left = durationMs - elapsed;
+      setTimeLeft(left > 0 ? left : 0);
+      if (left <= 0) {
+        clearInterval(intervalRef.current);
+        onToggleAttendance(courseType, actual_date, nextStatus);
+      }
+    }
+
+    updateCountdown();
+    intervalRef.current = setInterval(updateCountdown, 1000);
+    return () => clearInterval(intervalRef.current);
+  }, [courseType, status, opened_at, late_at, actual_date, onToggleAttendance]);
+
+  if (timeLeft == null || !(status === 'open' || status === 'late')) return null;
+  const totalSeconds = Math.floor(timeLeft / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return (
+    <span className="lecture-timer">
+      ⏳ {minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
+    </span>
+  );
+}
+
 const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAttendance, loading, semester }) => {
   const [editingDate, setEditingDate] = useState(null);
   const [editDate, setEditDate] = useState('');
 
-  const sortedDates = [...dates].sort((a, b) => new Date(a.actual_date) - new Date(b.actual_date));
+  const sortedDates = useMemo(() => {
+    return [...dates].sort((a, b) => new Date(a.actual_date) - new Date(b.actual_date));
+  }, [dates]);
 
   const getSemesterDateRange = (semester) => {
     if (!semester) return { min: '', max: '' };
-    
     const academicYear = semester.substring(0, 3);
     const semesterNum = semester.substring(3);
     const year = parseInt(academicYear) + 1911;
-    
     if (semesterNum === '1') {
       return {
         min: `${year}-08-01`,
@@ -108,7 +161,6 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAtte
         max: `${year + 1}-07-31`
       };
     }
-    
     return { min: '', max: '' };
   };
 
@@ -133,7 +185,7 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAtte
     setEditingDate(null);
     setEditDate('');
   };
-  
+
   return (
     <div className="session-dates-table">
       <h3>{courseType === 'lecture' ? '正課日期 Lecture Dates' : '討論課日期 Discussion Dates'} ({dates.length})</h3>
@@ -156,11 +208,66 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAtte
             {sortedDates.map((session, index) => {
               const date = new Date(session.actual_date);
               const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
-              const isActive = session.is_active;
+              const status = session.status;
               const currentDate = session.actual_date;
+
+              let statusLabel = '';
+              let statusIcon = '';
+              let statusClass = '';
+              if (status === 'open') {
+                statusLabel = '開放中 Open';
+                statusIcon = '🟢';
+                statusClass = 'active';
+              } else if (status === 'late') {
+                statusLabel = '遲到 Late';
+                statusIcon = '🟠';
+                statusClass = 'late';
+              } else {
+                statusLabel = '關閉中 Closed';
+                statusIcon = '🔴';
+                statusClass = 'inactive';
+              }
+
+              let nextStatus = 'open';
+              let buttonLabel = '';
+              let buttonIcon = '';
+              let buttonClass = '';
+              if (courseType === 'lecture') {
+                if (status === 'open') {
+                  nextStatus = 'closed';
+                  buttonLabel = '🔒 關閉點名 Close';
+                  buttonIcon = '🔒';
+                  buttonClass = 'btn-disable';
+                } else {
+                  nextStatus = 'open';
+                  buttonLabel = '🔓 開放點名 Open';
+                  buttonIcon = '🔓';
+                  buttonClass = 'btn-enable';
+                }
+              } else if (courseType === 'discussion') {
+                if (status === 'open') {
+                  nextStatus = 'late';
+                  buttonLabel = '🟠 設為遲到 Set Late';
+                  buttonIcon = '🟠';
+                  buttonClass = 'btn-late';
+                } else if (status === 'late') {
+                  nextStatus = 'closed';
+                  buttonLabel = '🔒 關閉點名 Close';
+                  buttonIcon = '🔒';
+                  buttonClass = 'btn-disable';
+                } else if (status === 'closed') {
+                  nextStatus = 'open';
+                  buttonLabel = '🔓 開放點名 Open';
+                  buttonIcon = '🔓';
+                  buttonClass = 'btn-enable';
+                }
+              }
               
+              const today = new Date().toISOString().split('T')[0];
+              const isToday = session.actual_date.split('T')[0] === today;
+
               return (
-                <tr key={currentDate} className={isActive ? 'active-session' : 'inactive-session'}>
+                <tr key={currentDate} className={statusClass + '-session'}>
                   <td>{index + 1}</td>
                   <td>
                     {editingDate === currentDate ? (
@@ -179,15 +286,21 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAtte
                   <td>{dayOfWeek}</td>
                   <td>
                     <div className="attendance-status">
-                      <span className={`status-indicator ${isActive ? 'active' : 'inactive'}`}>
-                        {isActive ? '🟢 開放中 Open' : '🔴 關閉中 Closed'}
+                      <span className={`status-indicator ${statusClass}`}>
+                        {statusIcon} {statusLabel}
+                        <TimerCell
+                          courseType={courseType}
+                          session={session}
+                          onToggleAttendance={onToggleAttendance}
+                        />
                       </span>
                       <button
-                        onClick={() => onToggleAttendance(courseType, session.actual_date, isActive)}
-                        className={`btn btn-toggle ${isActive ? 'btn-disable' : 'btn-enable'}`}
-                        title={isActive ? 'Click to disable attendance submission' : 'Click to enable attendance submission'}
+                        onClick={() => onToggleAttendance(courseType, session.actual_date, nextStatus)}
+                        className={`btn btn-toggle ${buttonClass}`}
+                        title={isToday ? buttonLabel : '只能操作今日場次 Only today\'s session can be toggled'}
+                        disabled={!isToday}
                       >
-                        {isActive ? '🔒 關閉點名 Close' : '🔓 開放點名 Open'}
+                        {buttonLabel}
                       </button>
                     </div>
                   </td>
@@ -273,13 +386,10 @@ export default function SessionManagement({ semester }) {
 
   const validateDateForSemester = (selectedDate, semester) => {
     const date = new Date(selectedDate);
-    
     const academicYear = semester.substring(0, 3);
     const semesterNum = semester.substring(3);
     const year = parseInt(academicYear) + 1911;
-    
     let startMonth, endMonth, startYear, endYear;
-    
     if (semesterNum === '1') {
       startMonth = 7;
       endMonth = 0;
@@ -296,12 +406,9 @@ export default function SessionManagement({ semester }) {
         message: '學期格式錯誤 Invalid semester format'
       };
     }
-    
     const startDate = new Date(startYear, startMonth, 1);
     const endDate = new Date(endYear, endMonth + 1, 0);
-    
     const isValid = date >= startDate && date <= endDate;
-    
     return {
       isValid,
       message: isValid 
@@ -319,7 +426,6 @@ export default function SessionManagement({ semester }) {
       setMessage('請至少輸入一個日期 Please provide at least one date');
       return;
     }
-
     for (const date of dates) {
       const validation = validateDateForSemester(date, semester);
       if (!validation.isValid) {
@@ -327,7 +433,6 @@ export default function SessionManagement({ semester }) {
         return;
       }
     }
-
     setLoading(true);
     try {
       const endpoint = courseType === 'lecture' ? 'lecture-dates' : 'discussion-dates';
@@ -336,7 +441,6 @@ export default function SessionManagement({ semester }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ semester, dates })
       });
-
       if (response.ok) {
         const result = await response.json();
         if (courseType === 'lecture') {
@@ -363,7 +467,6 @@ export default function SessionManagement({ semester }) {
       setMessage('日期不符學期範圍 Invalid date for semester: ' + validation.message);
       return;
     }
-
     setLoading(true);
     try {
       const endpoint = courseType === 'lecture' ? 'lecture-dates' : 'discussion-dates';
@@ -372,7 +475,6 @@ export default function SessionManagement({ semester }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ actualDate: newDate })
       });
-
       if (response.ok) {
         const updatedDate = await response.json();
         if (courseType === 'lecture') {
@@ -399,14 +501,12 @@ export default function SessionManagement({ semester }) {
 
   const handleDeleteDate = async (courseType, actualDate) => {
     if (!confirm('確定刪除此課程日期？Are you sure you want to delete this session date?')) return;
-
     setLoading(true);
     try {
       const endpoint = courseType === 'lecture' ? 'lecture-dates' : 'discussion-dates';
       const response = await fetch(`${apiBase}/sessions/${endpoint}/${semester}/${actualDate}`, {
         method: 'DELETE'
       });
-
       if (response.ok) {
         if (courseType === 'lecture') {
           setLectureDates(lectureDates.filter(d => d.actual_date !== actualDate));
@@ -426,36 +526,33 @@ export default function SessionManagement({ semester }) {
     }
   };
 
-   const handleToggleAttendance = async (courseType, selectedDate, currentStatus) => {
-    const newStatus = !currentStatus;
-
+  const handleToggleAttendance = async (courseType, selectedDate, newStatus) => {
     try {
       const endpoint = courseType === 'lecture' ? 'lecture-dates' : 'discussion-dates';
       const response = await fetch(`${apiBase}/sessions/${endpoint}/${semester}/${selectedDate}/toggle`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isActive: newStatus })
+        body: JSON.stringify({ status: newStatus })
       });
-
       if (response.ok) {
         const updatedSession = await response.json();
         if (courseType === 'lecture') {
-          setLectureDates(lectureDates.map(d => 
+          setLectureDates(prev => prev.map(d => 
             d.actual_date === selectedDate ? updatedSession : d
           ));
         } else {
-          setDiscussionDates(discussionDates.map(d => 
+          setDiscussionDates(prev => prev.map(d => 
             d.actual_date === selectedDate ? updatedSession : d
           ));
         }
-        setMessage(`點名狀態已${newStatus ? '開啟' : '關閉'} Attendance submission ${newStatus ? 'enabled' : 'disabled'} for Session ${selectedDate}`);
+        setMessage(`點名狀態已${newStatus === 'open' ? '開啟' : newStatus === 'late' ? '設為遲到' : '關閉'} Attendance submission now set to ${newStatus}`);
       } else {
         const error = await response.json();
         setMessage('錯誤 Error: ' + error.error);
       }
     } catch (error) {
       setMessage('切換點名狀態失敗 Error toggling attendance: ' + error.message);
-    } 
+    }
   };
 
   return (

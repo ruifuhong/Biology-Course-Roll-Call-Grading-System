@@ -46,48 +46,57 @@ export async function getTASemesters(req, res) {
 }
 
 export async function login(req, res) {
-  const { username, password } = req.body;
-  const user = await AdminUserModel.findUserByUsername(username);
-  if (!user) return res.status(401).json({ error: '無此帳號 Invalid credentials' });
+  try {
+    const { username, password } = req.body;
+    const user = await AdminUserModel.findUserByUsername(username);
     if (!user) {
       console.warn('登入失敗：無此帳號 Login failed: Invalid credentials');
       return res.status(401).json({ error: '無此帳號 Invalid credentials' });
     }
-  const valid = await AdminUserModel.verifyPassword(user, password);
-  if (!valid) return res.status(401).json({ error: '密碼錯誤 Invalid credentials' });
+    const valid = await AdminUserModel.verifyPassword(user, password);
     if (!valid) {
       console.warn('登入失敗：密碼錯誤 Login failed: Invalid credentials');
       return res.status(401).json({ error: '密碼錯誤 Invalid credentials' });
     }
-  let userInfo = { id: user.id, username: user.username, role: user.role, mustChangePassword: false };
-
-  if (user.role === 'ta') {
-    const name = await AdminUserModel.getTANameById(user.id);
-    userInfo.name = name || user.username;
-
-    const semesters = await AdminUserModel.getTASemesters(user.id);
-    userInfo.assignedSemesters = semesters;
-
-    // Check if password is default (username+username)
-    const isDefault = await AdminUserModel.verifyPassword(user, user.username + user.username);
-    userInfo.mustChangePassword = !!isDefault; // Always set to boolean value
+    let userInfo = { id: user.id, username: user.username, role: user.role, mustChangePassword: false };
+    if (user.role === 'ta') {
+      const name = await AdminUserModel.getTANameById(user.id);
+      userInfo.name = name || user.username;
+      const semesters = await AdminUserModel.getTASemesters(user.id);
+      userInfo.assignedSemesters = semesters;
+      // Check if password is default (username+username)
+      const isDefault = await AdminUserModel.verifyPassword(user, user.username + user.username);
+      userInfo.mustChangePassword = !!isDefault;
+    }
+    const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
+    res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
+    res.json({ user: userInfo });
+  } catch (err) {
+    console.error('登入失敗 Login failed:', err);
+    res.status(500).json({ error: '登入失敗 Login failed' });
   }
-
-  const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
-  res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
-  res.json({ user: userInfo });
 }
 
 export function logout(req, res) {
-  res.clearCookie(COOKIE_NAME, COOKIE_OPTIONS);
-  res.json({ message: '已登出 Logged out' });
+  try {
+    res.clearCookie(COOKIE_NAME, COOKIE_OPTIONS);
+    res.json({ message: '已登出 Logged out' });
+  } catch (err) {
+    console.error('登出失敗 Logout failed:', err);
+    res.status(500).json({ error: '登出失敗 Logout failed' });
+  }
 }
 
 export async function registerLecturer(req, res) {
-  const { username, password } = req.body;
-  const user = await AdminUserModel.createUser({ username, password, role: 'lecturer' });
-  if (!user) return res.status(400).json({ error: '此帳號已註冊 Username already exists' });
-  res.status(201).json({ user: { id: user.id, username: user.username, role: user.role } });
+  try {
+    const { username, password } = req.body;
+    const user = await AdminUserModel.createUser({ username, password, role: 'lecturer' });
+    if (!user) return res.status(400).json({ error: '此帳號已註冊 Username already exists' });
+    res.status(201).json({ user: { id: user.id, username: user.username, role: user.role } });
+  } catch (err) {
+    console.error('註冊講師失敗 Register lecturer failed:', err);
+    res.status(500).json({ error: '註冊講師失敗 Register lecturer failed' });
+  }
 }
 
 export async function addTA(req, res) {
@@ -117,27 +126,19 @@ export async function addTA(req, res) {
 }
 
 export async function deleteTA(req, res) {
-  if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限操作 Forbidden' });
-  const { id } = req.params;
-  const ta = await AdminUserModel.findUserById(id);
-  if (!ta || ta.role !== 'ta') return res.status(404).json({ error: '查無此助教 TA not found' });
-
-  await AdminUserModel.deleteTANames(id);
-  await AdminUserModel.deleteTASemesters(id);
-  await AdminUserModel.deleteUser(id);
-  res.json({ message: '助教刪除成功 TA deleted' });
-}
-
-export async function getAllAdmins(req, res) {
-  if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限操作 Forbidden' });
-  const users = await AdminUserModel.getAllUsers();
-  res.json({ users: users.map(u => ({ id: u.id, username: u.username, role: u.role })) });
-}
-
-export async function getAllTADetails(req, res) {
-  if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限操作 Forbidden' });
-  const tas = await AdminUserModel.getAllTADetails();
-  res.json({ tas });
+  try {
+    if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限操作 Forbidden' });
+    const { id } = req.params;
+    const ta = await AdminUserModel.findUserById(id);
+    if (!ta || ta.role !== 'ta') return res.status(404).json({ error: '查無此助教 TA not found' });
+    await AdminUserModel.deleteTANames(id);
+    await AdminUserModel.deleteTASemesters(id);
+    await AdminUserModel.deleteUser(id);
+    res.json({ message: '助教刪除成功 TA deleted' });
+  } catch (err) {
+    console.error('刪除助教失敗 Delete TA failed:', err);
+    res.status(500).json({ error: '刪除助教失敗 Delete TA failed' });
+  }
 }
 
 export async function updateTA(req, res) {
@@ -161,6 +162,28 @@ export async function updateTA(req, res) {
   } catch (err) {
     console.error('更新助教失敗 Update TA failed:', err);
     res.status(500).json(err);
+  }
+}
+
+export async function getAllTADetails(req, res) {
+  try {
+    if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限操作 Forbidden' });
+    const tas = await AdminUserModel.getAllTADetails();
+    res.json({ tas });
+  } catch (err) {
+    console.error('取得所有助教資料失敗 Get all TA details failed:', err);
+    res.status(500).json({ error: '取得所有助教資料失敗 Get all TA details failed' });
+  }
+}
+
+export async function getAllAdmins(req, res) {
+  try {
+    if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限操作 Forbidden' });
+    const users = await AdminUserModel.getAllUsers();
+    res.json({ users: users.map(u => ({ id: u.id, username: u.username, role: u.role })) });
+  } catch (err) {
+    console.error('取得所有管理員失敗 Get all admins failed:', err);
+    res.status(500).json({ error: '取得所有管理員失敗 Get all admins failed' });
   }
 }
 

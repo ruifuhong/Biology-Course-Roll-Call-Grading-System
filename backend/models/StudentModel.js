@@ -1,5 +1,40 @@
 import { pool } from './database.js';
 
+export async function findBySemesterAndGroup(semester, group_name, excludeStudentId) {
+  try {
+    const result = await pool.query(
+      'SELECT name, student_id FROM "Roll-Call".students WHERE semester = $1 AND group_name = $2 AND student_id <> $3 ORDER BY student_id',
+      [semester, group_name, excludeStudentId]
+    );
+    return result.rows;
+  } catch (error) {
+    console.error('StudentModel findBySemesterAndGroup error:', error);
+    throw error;
+  }
+}
+
+export async function findGroupsWithMembers(semester, groupNamesArray) {
+  try {
+    if (!groupNamesArray || groupNamesArray.length === 0) return [];
+    const result = await pool.query(
+      `SELECT group_name, name, student_id FROM "Roll-Call".students WHERE semester = $1 AND group_name = ANY($2) ORDER BY group_name, student_id`,
+      [semester, groupNamesArray]
+    );
+
+    const groupMap = {};
+    for (const row of result.rows) {
+      if (!groupMap[row.group_name]) groupMap[row.group_name] = [];
+      groupMap[row.group_name].push({ name: row.name, student_id: row.student_id });
+    }
+    
+    return Object.entries(groupMap).map(([group_name, members]) => ({ group_name, members }));
+
+  } catch (error) {
+    console.error('StudentModel findGroupsWithMembers error:', error);
+    throw error;
+  }
+}
+
 export async function createStudent(studentData) {
   try {
     const { student_id, semester, department, group_name, name } = studentData;

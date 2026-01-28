@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import RegisterLecturer from './RegisterLecturer';
 import LectureRollcall from './LectureRollcall';
 import DiscussionRollcall from './DiscussionRollcall';
+import ReviewInput from './ReviewInput';
 import AdminDashboard from './AdminDashboard';
 import ForcePasswordChange from './ForcePasswordChange';
 import Login from './Login';
@@ -14,8 +15,9 @@ function MainPage() {
     <div className="mainpage-container">
       <h2 className="mainpage-title">🎓 生物課點名系統 Biology Course Rollcall System</h2>
       <div className="mainpage-links">
-        <a href="/lecture-rollcall" className="mainpage-link lecture">正課 Lecture Rollcall</a>
-        <a href="/discussion-rollcall" className="mainpage-link discussion">討論課 Discussion Rollcall</a>
+        <a href="/lecture-rollcall" className="mainpage-link lecture">正課點名 Lecture Rollcall</a>
+        <a href="/discussion-rollcall" className="mainpage-link discussion">討論課點名 Discussion Rollcall</a>
+        <a href="/review" className="mainpage-link review">討論課評分 Discussion Review</a>
         <a href="/admin" className="mainpage-link admin">老師&助教登入 Admin Panel</a>
       </div>
     </div>
@@ -69,6 +71,7 @@ function App() {
         <Route path="/" element={<MainPage />} />
         <Route path="/lecture-rollcall" element={<LectureRollcall />} />
         <Route path="/discussion-rollcall" element={<DiscussionRollcall />} />
+        <Route path="/review" element={<ReviewInput />} />
         <Route path="/admin" element={
           user
             ? user.mustChangePassword

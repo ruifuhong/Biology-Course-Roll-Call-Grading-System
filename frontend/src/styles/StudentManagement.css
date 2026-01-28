@@ -1,3 +1,17 @@
+/* Attendance stats note for lecture header */
+.attendance-stats-note {
+  font-size: 0.8em;
+  font-weight: normal;
+}
+/* Denominator input field width */
+.denominator-input {
+  width: 50px;
+}
+
+/* Edit denominator button left margin */
+.edit-denominator-btn {
+  margin-left: 4px;
+}
 /* Inline styles moved from AttendanceView.jsx */
 .margin-bottom-20 {
   margin-bottom: 20px;
@@ -284,10 +298,26 @@
 
 /* Date header styling */
 .date-header {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
   height: 60px;
   min-width: 30px;
+}
+
+.date-header-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.date-label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 700;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 1px;
+  font-size: 1.1em;
+  color: #444;
 }
 
 /* Attendance cell styling */
@@ -307,7 +337,12 @@
   color: #721c24;
 }
 
-.attendance-cell:not(.present):not(.absent) {
+.attendance-cell.late {
+  background-color: #f5f4f0;
+  color: #856404;
+}
+
+.attendance-cell:not(.present):not(.absent):not(.late) {
   background-color: #e2e3e5;
   color: #6c757d;
 }
@@ -479,4 +514,52 @@
   word-break: break-word;
   display: flex;
   align-items: center;
+}
+
+.attendance-required-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;;
+  font-size: 1em;
+  border: none;
+  border-radius: 8px;
+  background: #f8f8f8;
+  cursor: pointer;
+  padding: 0.4em;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.attendance-required-toggle-btn.required {
+  background-color: #28a745;
+  color: white;
+  border-color: #28a745;
+}
+.attendance-required-toggle-btn.not-required {
+  background-color: #dc3545;
+  color: white;
+  border-color: #dc3545;
+}
+.attendance-required-toggle-btn:disabled {
+  background-color: #dc3545;
+  color: white;
+  border-color: #dc3545;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.toggle-icon {
+  font-size: 1.2em;
+  display: flex;
+  align-items: center;
+}
+.toggle-text {
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+  letter-spacing: 1px;
+}
+.toggle-text-chinese {
+   font-size: 1em;
+}
+.toggle-text-english {
+   font-size: 0.5em;
 }

@@ -1,0 +1,229 @@
+.review-error-margin {
+  margin-top: 1em;
+}
+.review-back-btn {
+  background: #bdbdbd;
+  color: #222;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 8px 18px;
+  margin-bottom: 1em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.review-back-btn:hover {
+  background: #757575;
+  color: #fff;
+}
+.feedback-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ced4da;
+  border-radius: 6px;
+  font-size: 1.1em;
+  transition: border-color 0.2s ease;
+  resize: vertical;
+  background-color: #fff;
+  color: #333;
+}
+.feedback-textarea:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
+}
+.review-feedback-field {
+  margin-top: 1.5em;
+}
+.review-info-panel {
+  margin-top: 1.5em;
+  background: #f8fafd;
+  border-radius: 8px;
+  padding: 1.2em 1.5em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.review-label {
+  font-weight: bold;
+  color: #1976d2;
+  margin-right: 0.5em;
+}
+.review-group-members {
+  margin-top: 1.2em;
+}
+.review-member-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.5em 0 0 0.5em;
+}
+.review-member-item {
+  background: #e3f2fd;
+  border-radius: 5px;
+  margin-bottom: 0.5em;
+  padding: 0.5em 1em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.review-no-members {
+  margin-left: 1.5em;
+  color: #888;
+}
+.review-other-groups {
+  margin-top: 1.5em;
+}
+.review-other-group-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.5em 0 0 0.5em;
+}
+.review-other-group-item {
+  background: #fffde7;
+  border-radius: 5px;
+  margin-bottom: 0.5em;
+  padding: 0.5em 1em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.review-dropdown-row {
+  margin-top: 0.3em;
+}
+.review-dropdown {
+  padding: 0.2em 0.8em;
+  border-radius: 4px;
+  border: 1px solid #bdbdbd;
+  font-size: 1em;
+  background: #fff;
+  margin-left: 0.5em;
+}
+.switch-page-btn {
+  margin: 0 0.5rem;
+  padding: 8px 18px;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.switch-page-btn:hover {
+  background: #0d47a1;
+}
+.review-back-link {
+  margin-top: 2rem;
+  text-align: center;
+}
+.review-to-discussion-link {
+  color: #1976d2;
+  text-decoration: underline;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+.review-to-discussion-link:hover {
+  color: #0d47a1;
+}
+.review-container {
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+.review-title {
+  margin-bottom: 1rem;
+}
+.review-session-info {
+  margin-bottom: 1rem;
+}
+.review-error {
+  color: red;
+}
+.review-input {
+  width: 100%;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+}
+.review-submit-btn {
+  width: 100%;
+  padding: 0.5rem;
+  background: #388e3c;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1.08rem;
+  font-weight: bold;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.review-submit-btn-enabled {
+  background: #4e8cff;
+  color: #fff;
+  opacity: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(78,140,255,0.12);
+}
+
+.review-submit-btn-disabled {
+  background: #bfc9d9;
+  color: #fff;
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+  border: 1px solid #bfc9d9;
+}
+.review-submit-btn:hover {
+  background: #1b5e20;
+}
+.mainpage-link-container {
+  text-align: center;
+  margin-top: 2rem;
+}
+.mainpage-back-link {
+  color: #1976d2;
+  text-decoration: underline;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+.mainpage-back-link:hover {
+  color: #0d47a1;
+}
+
+.review-submitted-id {
+  margin-top: 1.5rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.review-no-attendance {
+  color: #d32f2f;
+  font-weight: bold;
+  background: #fff3e0;
+  border-radius: 6px;
+  padding: 1.2em 1em;
+  margin: 1.5em 0;
+  text-align: center;
+  font-size: 1.1em;
+}
+
+.review-back-btn {
+    background: #bdbdbd;
+    color: #222;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 8px 18px;
+    margin-bottom: 1em;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.review-back-btn:hover {
+    background: #757575;
+    color: #fff;
+}

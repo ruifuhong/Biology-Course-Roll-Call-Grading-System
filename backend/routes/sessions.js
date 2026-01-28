@@ -16,4 +16,6 @@ router.delete('/discussion-dates/:semester/:actualDate', SessionController.delet
 router.patch('/lecture-dates/:semester/:selectedDate/toggle', SessionController.toggleLectureAttendance);
 router.patch('/discussion-dates/:semester/:selectedDate/toggle', SessionController.toggleDiscussionAttendance);
 
+router.patch('/lecture-dates/:semester/:actualDate/attendance-required', SessionController.setLectureAttendanceRequired);
+
 export default router;

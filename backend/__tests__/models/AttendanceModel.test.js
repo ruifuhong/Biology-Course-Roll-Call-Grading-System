@@ -8,7 +8,7 @@ jest.unstable_mockModule('../../models/database.js', () => ({
   }
 }));
 
-const { default: AttendanceModel } = await import('../../models/AttendanceModel.js');
+const AttendanceModel = await import('../../models/AttendanceModel.js');
 
 describe('AttendanceModel', () => {
   beforeEach(() => {
@@ -22,7 +22,7 @@ describe('AttendanceModel', () => {
 
       const semester = '1131';
       const sessionOrder = 1;
-      const expectedQuery = `\n      SELECT is_active FROM "Roll-Call".lecture_dates \n      WHERE semester = $1 AND session_order = $2;\n    `;
+      const expectedQuery = `SELECT is_active FROM "Roll-Call".lecture_dates WHERE semester = $1 AND session_order = $2;`;
       const expectedParams = [semester, sessionOrder];
 
       const result = await AttendanceModel.isLectureAttendanceActive(semester, sessionOrder);
@@ -46,7 +46,7 @@ describe('AttendanceModel', () => {
 
       const semester = '1131';
       const actualDate = '2024-10-15';
-      const expectedQuery = `\n      SELECT is_active FROM "Roll-Call".discussion_dates \n      WHERE semester = $1 AND actual_date = $2;\n    `;
+      const expectedQuery = `SELECT is_active FROM "Roll-Call".discussion_dates WHERE semester = $1 AND actual_date = $2;`;
       const expectedParams = [semester, actualDate];
 
       const result = await AttendanceModel.isDiscussionAttendanceActive(semester, actualDate);
@@ -78,9 +78,9 @@ describe('AttendanceModel', () => {
 
       const expectedActiveQuery = 'SELECT is_active FROM "Roll-Call".lecture_dates WHERE semester = $1 AND actual_date = $2;';
       const expectedActiveParams = [semester, actualDate];
-      const expectedCheckQuery = '\n      SELECT * FROM "Roll-Call".attendance_lecture\n      WHERE semester = $1 AND student_id = $2 AND actual_date = $3;\n    ';
+      const expectedCheckQuery = 'SELECT * FROM "Roll-Call".attendance_lecture WHERE semester = $1 AND student_id = $2 AND actual_date = $3;';
       const expectedCheckParams = [semester, studentId, actualDate];
-      const expectedInsertQuery = '\n      INSERT INTO "Roll-Call".attendance_lecture (semester, student_id, actual_date, status)\n      VALUES ($1, $2, $3, $4)\n      RETURNING *;\n    ';
+      const expectedInsertQuery = 'INSERT INTO "Roll-Call".attendance_lecture (semester, student_id, actual_date, status) VALUES ($1, $2, $3, $4) RETURNING *;';
       const expectedInsertParams = [semester, studentId, actualDate, status];
 
       const result = await AttendanceModel.markLectureAttendance(semester, studentId, actualDate);
@@ -123,11 +123,11 @@ describe('AttendanceModel', () => {
       const actualDate = '2024-10-15';
       const status = 'present';
 
-      const expectedActiveQuery = '\n      SELECT is_active FROM "Roll-Call".discussion_dates \n      WHERE semester = $1 AND actual_date = $2;\n    ';
+      const expectedActiveQuery = 'SELECT is_active FROM "Roll-Call".discussion_dates WHERE semester = $1 AND actual_date = $2;';
       const expectedActiveParams = [semester, actualDate];
-      const expectedCheckQuery = '\n      SELECT * FROM "Roll-Call".attendance_discussion\n      WHERE semester = $1 AND student_id = $2 AND actual_date = $3;\n    ';
+      const expectedCheckQuery = 'SELECT * FROM "Roll-Call".attendance_discussion WHERE semester = $1 AND student_id = $2 AND actual_date = $3;';
       const expectedCheckParams = [semester, studentId, actualDate];
-      const expectedInsertQuery = '\n      INSERT INTO "Roll-Call".attendance_discussion (semester, student_id, actual_date, status)\n      VALUES ($1, $2, $3, $4)\n      RETURNING *;\n    ';
+      const expectedInsertQuery = 'INSERT INTO "Roll-Call".attendance_discussion (semester, student_id, actual_date, status) VALUES ($1, $2, $3, $4) RETURNING *;';
       const expectedInsertParams = [semester, studentId, actualDate, status];
 
       const result = await AttendanceModel.markDiscussionAttendance(semester, studentId, actualDate);
@@ -164,7 +164,7 @@ describe('AttendanceModel', () => {
 
       const semester = '1131';
       const studentId = 'B100000001';
-      const expectedQuery = '\n      SELECT * FROM "Roll-Call".attendance_lecture \n      WHERE semester = $1 AND student_id = $2;\n    ';
+      const expectedQuery = 'SELECT * FROM "Roll-Call".attendance_lecture WHERE semester = $1 AND student_id = $2;';
       const expectedParams = [semester, studentId];
 
       const result = await AttendanceModel.getLectureAttendance(semester, studentId);
@@ -188,7 +188,7 @@ describe('AttendanceModel', () => {
 
       const semester = '1131';
       const studentId = 'B100000001';
-      const expectedQuery = '\n      SELECT * FROM "Roll-Call".attendance_discussion \n      WHERE semester = $1 AND student_id = $2;\n    ';
+      const expectedQuery = 'SELECT * FROM "Roll-Call".attendance_discussion WHERE semester = $1 AND student_id = $2;';
       const expectedParams = [semester, studentId];
 
       const result = await AttendanceModel.getDiscussionAttendance(semester, studentId);
@@ -211,7 +211,7 @@ describe('AttendanceModel', () => {
       mockQuery.mockResolvedValueOnce({ rows: [{ student_id: 'B100000001' }, { student_id: 'B100000002' }] });
 
       const semester = '1131';
-      const expectedQuery = '\n      SELECT s.student_id, s.name, s.department, s.group_name, a.actual_date, a.status\n      FROM "Roll-Call".students s\n      LEFT JOIN "Roll-Call".attendance_lecture a\n        ON s.semester = a.semester AND s.student_id = a.student_id\n      WHERE s.semester = $1\n      ORDER BY s.group_name, s.student_id, a.actual_date;\n    ';
+      const expectedQuery = 'SELECT s.student_id, s.name, s.department, s.group_name, a.actual_date, a.status FROM "Roll-Call".students s LEFT JOIN "Roll-Call".attendance_lecture a ON s.semester = a.semester AND s.student_id = a.student_id WHERE s.semester = $1 ORDER BY s.group_name, s.student_id, a.actual_date;';
       const expectedParams = [semester];
 
       const result = await AttendanceModel.getAllLectureAttendance(semester);
@@ -234,7 +234,7 @@ describe('AttendanceModel', () => {
       mockQuery.mockResolvedValueOnce({ rows: [{ student_id: 'B100000001' }, { student_id: 'B100000002' }] });
 
       const semester = '1131';
-      const expectedQuery = '\n      SELECT s.student_id, s.name, s.department, s.group_name, a.actual_date, a.status\n      FROM "Roll-Call".students s\n      LEFT JOIN "Roll-Call".attendance_discussion a\n        ON s.semester = a.semester AND s.student_id = a.student_id\n      WHERE s.semester = $1\n      ORDER BY s.group_name, s.student_id, a.actual_date;\n    ';
+      const expectedQuery = 'SELECT s.student_id, s.name, s.department, s.group_name, a.actual_date, a.status FROM "Roll-Call".students s LEFT JOIN "Roll-Call".attendance_discussion a ON s.semester = a.semester AND s.student_id = a.student_id WHERE s.semester = $1 ORDER BY s.group_name, s.student_id, a.actual_date;';
       const expectedParams = [semester];
 
       const result = await AttendanceModel.getAllDiscussionAttendance(semester);

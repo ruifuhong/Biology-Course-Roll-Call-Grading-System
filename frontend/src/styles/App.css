@@ -34,13 +34,34 @@
 .mainpage-link.lecture {
   background-color: #007bff;
 }
+.mainpage-link.lecture:hover {
+  background-color: #0056b3;
+  color: #fff;
+}
 
 .mainpage-link.discussion {
-  background-color: #28a745;
+  background-color: #218838;
+}
+.mainpage-link.discussion:hover {
+  background-color: #145c1b;
+  color: #fff;
+}
+
+.mainpage-link.review {
+  background-color: #3a4c40;
+  color: #fff;
+}
+.mainpage-link.review:hover {
+  background-color: #0b3d13;
+  color: #fff;
 }
 
 .mainpage-link.admin {
   background-color: #6c757d;
+}
+.mainpage-link.admin:hover {
+  background-color: #343a40;
+  color: #fff;
 }
 
 .loading-user {

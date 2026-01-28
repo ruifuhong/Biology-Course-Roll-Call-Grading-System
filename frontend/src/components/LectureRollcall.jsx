@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { io } from "socket.io-client";
 import '../styles/RollcallPage.css';
 
 export default function LectureRollcall() {
@@ -12,11 +13,35 @@ export default function LectureRollcall() {
   const [lookupLoading, setLookupLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [sessionInfo, setSessionInfo] = useState(null);
+  const [alreadySubmitted, setAlreadySubmitted] = useState(false);
 
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   useEffect(() => {
     fetchCurrentSession();
+
+    const socket = io(apiBase);
+    socket.on('connect', () => {
+      // console.log('Socket.IO connected! Your socket id: ' + socket.id);
+    });
+    socket.on('disconnect', () => {
+      // setMessage('Socket.IO disconnected');
+    });
+
+    socket.on('rollcallState', (data) => {
+      if (data.type !== 'lecture') return;
+      setSessionInfo(prev => {
+        if (!prev) return prev;
+        if (data.actualDate && prev.actual_date === data.actualDate) {
+          return { ...prev, status: data.status };
+        }
+        return prev;
+      });
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const fetchCurrentSession = async () => {
@@ -75,30 +100,31 @@ export default function LectureRollcall() {
   const lookupStudent = async (studentIdValue) => {
     if (!studentIdValue.trim()) {
       setStudentInfo({ name: '', department: '' });
+      setAlreadySubmitted(false);
       return;
     }
 
     setLookupLoading(true);
+    setAlreadySubmitted(false);
     try {
       let semester = sessionInfo?.semester;
+      let actual_date = sessionInfo?.actual_date;
       if (!semester) {
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
         const currentMonth = currentDate.getMonth() + 1;
-        
         let academicYear = currentYear - 1911;
         if (currentMonth >= 8) {
           academicYear = currentYear - 1911;
         } else {
           academicYear = currentYear - 1912;
         }
-        
         const currentSemesterNum = currentMonth >= 2 && currentMonth <= 7 ? 2 : 1;
         semester = `${academicYear}${currentSemesterNum}`;
       }
-      
+
+      // 1. Lookup student info
       const response = await fetch(`${apiBase}/students/${semester}/${studentIdValue}`);
-      
       if (response.ok) {
         const student = await response.json();
         setStudentInfo({
@@ -106,15 +132,31 @@ export default function LectureRollcall() {
           department: student.department || ''
         });
         setMessage('');
+
+        // 2. Check for duplicate attendance if sessionInfo is available
+        if (sessionInfo && sessionInfo.actual_date) {
+          const attRes = await fetch(`${apiBase}/attendance/lecture/${semester}/${studentIdValue}`);
+          if (attRes.ok) {
+            const attList = await attRes.json();
+            const found = Array.isArray(attList) && attList.some(a => a.actual_date && a.actual_date.split('T')[0] === sessionInfo.actual_date.split('T')[0]);
+            if (found) {
+              setAlreadySubmitted(true);
+              setMessage('您今天已經提交過本課程的出席紀錄\nYou have already submitted attendance for this session today');
+            } else {
+              setAlreadySubmitted(false);
+            }
+          }
+        }
       } else {
         setStudentInfo({ name: '', department: '' });
+        setAlreadySubmitted(false);
         if (response.status === 404) {
           setMessage('查無此學號 Student ID not found in this semester');
         }
       }
     } catch (error) {
-      console.error('查詢學生資訊錯誤 Error looking up student:', error);
       setStudentInfo({ name: '', department: '' });
+      setAlreadySubmitted(false);
       setMessage('查詢學生資訊錯誤 Error looking up student information');
     } finally {
       setLookupLoading(false);
@@ -134,27 +176,26 @@ export default function LectureRollcall() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!studentId.trim()) {
       setMessage('請輸入學號 Please enter your student ID');
       return;
     }
-
     if (!studentInfo.name) {
       setMessage('查無學生資訊，請確認學號 Student information not found. Please verify your student ID.');
       return;
     }
-
     if (!sessionInfo) {
       setMessage('查無有效課程 No active session found');
       return;
     }
-
-    if (!sessionInfo.is_active) {
+    if (!sessionInfo.status === 'open') {
       setMessage('此課程點名已關閉 Attendance submission is currently closed for this session');
       return;
     }
-
+    if (alreadySubmitted) {
+      setMessage('您今天已經提交過本場次的出席紀錄\nYou have already submitted attendance for this session today');
+      return;
+    }
     setLoading(true);
     try {
       const attendancePromise = fetch(`${apiBase}/attendance/lecture`, {
@@ -167,7 +208,6 @@ export default function LectureRollcall() {
           status: 'present'
         })
       });
-
       let feedbackPromise = Promise.resolve({ ok: true });
       if (feedback && feedback.trim() !== '') {
         feedbackPromise = fetch(`${apiBase}/feedback/lecture`, {
@@ -182,20 +222,15 @@ export default function LectureRollcall() {
           })
         });
       }
-
       const [attendanceRes, feedbackRes] = await Promise.all([attendancePromise, feedbackPromise]);
-
       if (attendanceRes.ok && feedbackRes.ok) {
         setMessage('提交成功！Submitted successfully!');
         setStudentId('');
         setStudentInfo({ name: '', department: '' });
         setFeedback('');
+        setAlreadySubmitted(false);
       } else {
-        const attendanceError = attendanceRes.ok ? null : await attendanceRes.json();
-        const feedbackError = feedbackRes.ok ? null : await feedbackRes.json();
-        setMessage(
-          `提交失敗 Error: ${attendanceError?.error || ''} ${feedbackError?.error || ''}`.trim()
-        );
+        setMessage('提交失敗 Error submitting attendance or feedback');
       }
     } catch (error) {
       setMessage('提交錯誤 Error submitting: ' + error.message);
@@ -214,9 +249,9 @@ export default function LectureRollcall() {
       {sessionInfo && (
         <div className="session-info">
           <h3>課程資訊 Session Information</h3>
-          <div className={`attendance-status ${sessionInfo.is_active ? 'open' : 'closed'}`}>
+          <div className={`attendance-status ${sessionInfo.status === 'open' ? 'open' : 'closed'}`}>
             <strong>點名狀態 Attendance Status: </strong>
-            {sessionInfo.is_active ? (
+            {sessionInfo.status === 'open' ? (
               <span className="status-open">🟢 開放中 Open</span>
             ) : (
               <span className="status-closed">🔴 已關閉 Closed</span>
@@ -324,11 +359,15 @@ export default function LectureRollcall() {
         <button 
           type="submit" 
           className="submit-btn"
-          disabled={loading || !sessionInfo || !studentInfo.name || !sessionInfo?.is_active}
+          disabled={loading || !sessionInfo || !studentInfo.name || sessionInfo?.status !== 'open' || alreadySubmitted}
         >
-          {loading ? '提交中... Submitting...' : 
-           !sessionInfo?.is_active ? '點名已關閉 Attendance Closed' :
-           '提交出席 Submit Attendance'}
+          {alreadySubmitted
+            ? '您已於今日點過名 Already Submitted'
+            : loading
+              ? '提交中... Submitting...'
+              : sessionInfo?.status === 'closed'
+                ? '點名已關閉 Attendance Closed'
+                : '提交出席 Submit Attendance'}
         </button>
       </form>
 
