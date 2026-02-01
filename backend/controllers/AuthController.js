@@ -1,4 +1,4 @@
-import { google } from 'googleapis'; // 確保有引入 google 對象
+import { google } from 'googleapis';
 import { oauth2Client } from '../utils/googleOAuthClient.js';
 import * as AuthModel from '../models/AuthModel.js';
 import jwt from 'jsonwebtoken';
@@ -37,11 +37,12 @@ export async function googleLogin(req, res) {
       return res.status(403).json({ error: '您的帳號尚未獲得授權，請聯繫管理員。' });
     }
 
-    if (!user.provider_id || user.provider_id === '') {
-      await AuthModel.updateOAuthUser({
-        ...user,
+    if (!user.provider_id) {
+      user = await AuthModel.updateOAuthUser({
+        id: user.id,
         provider_id: userInfo.id,
-        username: userInfo.name || user.username
+        username: user.username,
+        name: userInfo.name || user.name
       });
     }
 
@@ -88,12 +89,13 @@ export async function addGoogleTA(req, res) {
 
     if (Array.isArray(semesters)) {
       await Promise.all(
-        semesters.map(s => AuthModel.addTASemester({ ta_id: user.id, semester: s }))
+        semesters.map(s => AuthModel.addGoogleTASemester({ ta_id: user.id, semester: s }))
       );
     }
 
     res.status(201).json({ user: { ...user, semesters } });
   } catch (err) {
+    console.error('addGoogleTA Controller Error:', err);
     res.status(500).json({ error: '註冊失敗' });
   }
 }

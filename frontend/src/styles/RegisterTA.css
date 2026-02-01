@@ -478,3 +478,27 @@
   color: #fff;
   border: 1.2px solid #4285F4;
 }
+
+.google-icon {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.ta-google-name {
+  font-weight: 500;
+  color: #4285F4;
+  background: #f3f7fa;
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-left: 2px;
+  margin-right: 4px;
+}
+.ta-google-username {
+  font-weight: 500;
+  color: #333;
+  background: #e8f0fe;
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-left: 2px;
+}

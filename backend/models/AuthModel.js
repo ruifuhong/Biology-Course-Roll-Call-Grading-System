@@ -37,3 +37,34 @@ export async function createOAuthAccount({ email, username, name, role, provider
     throw err;
   }
 }
+
+export async function addGoogleTASemester({ ta_id, semester }) {
+  try {
+    await pool.query(
+      `INSERT INTO "Roll-Call".oauth_ta_semesters (ta_id, semester) VALUES ($1, $2)`, 
+      [ta_id, semester]
+    );
+  } catch (err) {
+    console.error('AuthModel addGoogleTASemester error:', err);
+    throw err;
+  }
+}
+
+export async function updateOAuthUser({ id, provider_id, username, name }) {
+  try {
+    const result = await pool.query(
+      `UPDATE "Roll-Call".oauth_accounts 
+       SET 
+         provider_id = $1, 
+         username = $2, 
+         name = $3 
+       WHERE id = $4 
+       RETURNING *`,
+      [provider_id, username, name, id]
+    );
+    return result.rows[0];
+  } catch (err) {
+    console.error('AdminUserModel updateOAuthUser error:', err);
+    throw err;
+  }
+}

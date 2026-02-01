@@ -111,21 +111,46 @@ export async function addTASemester({ ta_id, semester }) {
   }
 }
 
+// export async function getAllTADetails() {
+//   try {
+//     const result = await pool.query(`
+//       SELECT u.id, u.username, n.name, array_remove(array_agg(s.semester), NULL) AS semesters
+//       FROM "Roll-Call".admin_users u
+//       LEFT JOIN "Roll-Call".ta_names n ON u.id = n.ta_id
+//       LEFT JOIN "Roll-Call".ta_semesters s ON u.id = s.ta_id
+//       WHERE u.role = 'ta'
+//       GROUP BY u.id, u.username, n.name
+//     `);
+//     return result.rows;
+//   } catch (err) {
+//     console.error('AdminUserModel getAllTADetails error:', err);
+//     throw err;
+//   }
+// }
+
 export async function getAllTADetails() {
-  try {
-    const result = await pool.query(`
-      SELECT u.id, u.username, n.name, array_remove(array_agg(s.semester), NULL) AS semesters
-      FROM "Roll-Call".admin_users u
-      LEFT JOIN "Roll-Call".ta_names n ON u.id = n.ta_id
-      LEFT JOIN "Roll-Call".ta_semesters s ON u.id = s.ta_id
-      WHERE u.role = 'ta'
-      GROUP BY u.id, u.username, n.name
-    `);
-    return result.rows;
-  } catch (err) {
-    console.error('AdminUserModel getAllTADetails error:', err);
-    throw err;
-  }
+  const query = `
+    SELECT 
+      u.id, u.username, n.name, 'legacy' as provider,
+      array_remove(array_agg(s.semester), NULL) AS semesters
+    FROM "Roll-Call".admin_users u
+    LEFT JOIN "Roll-Call".ta_names n ON u.id = n.ta_id
+    LEFT JOIN "Roll-Call".ta_semesters s ON u.id = s.ta_id
+    WHERE u.role = 'ta'
+    GROUP BY u.id, u.username, n.name
+
+    UNION ALL
+
+    SELECT 
+      o.id, o.email as username, o.name, o.provider,
+      array_remove(array_agg(gs.semester), NULL) AS semesters
+    FROM "Roll-Call".oauth_accounts o
+    LEFT JOIN "Roll-Call".oauth_ta_semesters gs ON o.id = gs.ta_id
+    WHERE o.role = 'ta'
+    GROUP BY o.id, o.email, o.name, o.provider;
+  `;
+  const result = await pool.query(query);
+  return result.rows;
 }
 
 export async function getAllUsers() {
