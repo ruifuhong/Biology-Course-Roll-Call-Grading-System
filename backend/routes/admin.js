@@ -1,6 +1,8 @@
 import express from 'express';
 import * as AdminUserController from '../controllers/AdminUserController.js';
+import * as GoogleLoginController from '../controllers/AuthController.js';
 import jwt from 'jsonwebtoken';
+
 
 const router = express.Router();
 
@@ -23,6 +25,7 @@ function authenticateJWT(req, res, next) {
 router.post('/login', AdminUserController.login);
 router.post('/logout', AdminUserController.logout);
 router.post('/register-lecturer', AdminUserController.registerLecturer);
+router.post('/google-login', GoogleLoginController.googleLogin);
 
 // All routes below require authentication
 router.use(authenticateJWT);
