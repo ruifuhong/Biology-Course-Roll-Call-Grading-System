@@ -69,3 +69,31 @@ export async function googleLogin(req, res) {
     res.status(500).json({ error: 'Login failed' });
   }
 }
+
+export async function addGoogleTA(req, res) {
+  if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限' });
+  const { email, semesters } = req.body;
+
+  try {
+    const initialName = email.split('@')[0];
+    const user = await AuthModel.createOAuthAccount({ 
+      email, 
+      username: email, 
+      name: initialName,
+      role: 'ta', 
+      provider: 'google' 
+    });
+
+    if (!user) return res.status(400).json({ error: 'Email 已存在' });
+
+    if (Array.isArray(semesters)) {
+      await Promise.all(
+        semesters.map(s => AuthModel.addTASemester({ ta_id: user.id, semester: s }))
+      );
+    }
+
+    res.status(201).json({ user: { ...user, semesters } });
+  } catch (err) {
+    res.status(500).json({ error: '註冊失敗' });
+  }
+}

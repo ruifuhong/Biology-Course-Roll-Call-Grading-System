@@ -38,6 +38,8 @@ router.delete('/remove-ta/:id', AdminUserController.deleteTA);
 router.put('/update-ta/:id', AdminUserController.updateTA);
 router.get('/users', AdminUserController.getAllAdmins);
 
+router.post('/add-google-ta', GoogleLoginController.addGoogleTA);
+
 router.get('/ta-semesters/:taId', AdminUserController.getTASemesters);
 
 router.post('/change-password', AdminUserController.changePassword);

@@ -5,6 +5,8 @@ import '../styles/RegisterTA.css';
 const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function RegisterTA({ onRegister }) {
+  const [registerMethod, setRegisterMethod] = useState('google');
+  const [email, setEmail] = useState('');  
   const [username, setUsername] = useState('');
   const [name, setName] = useState('');
   const [registerSemesters, setRegisterSemesters] = useState([]);
@@ -15,6 +17,7 @@ export default function RegisterTA({ onRegister }) {
   const [loadingTAs, setLoadingTAs] = useState(true);
   const [editStates, setEditStates] = useState({});
   const semesterOptions = generateSemesterOptions();
+
 
   const fetchTAs = async () => {
     setLoadingTAs(true);
@@ -47,6 +50,42 @@ export default function RegisterTA({ onRegister }) {
         : [...prev, semester]
     );
   };
+
+  const handleGoogleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
+  setSuccess('');
+
+  const fullEmail = email.includes('@') ? email : `${email}@g.nccu.edu.tw`;
+
+  try {
+    const response = await fetch(`${apiBase}/api/admin/add-google-ta`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ 
+        email: fullEmail,
+        semesters: registerSemesters 
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setSuccess(`成功授權：${fullEmail}`);
+      setEmail('');
+      setRegisterSemesters([]);
+      fetchTAs(); 
+    } else {
+      setError(data.error || '授權失敗');
+    }
+  } catch (err) {
+    setError('連線失敗');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -178,43 +217,92 @@ export default function RegisterTA({ onRegister }) {
     fetchTAs();
   },[]);
 
+  useEffect(() => {
+    setRegisterSemesters([]);
+  }, [registerMethod]);
+
   return (
     <div className="register-ta-container">
       <h2>註冊助教 Register TA</h2>
-      <form onSubmit={handleSubmit} className="register-ta-form">
-        <input
-          value={username}
-          onChange={e => setUsername(e.target.value)}
-          required
-          placeholder="帳號 Username"
-          className="register-ta-input register-ta-username"
-        />
-        <input
-          value={name}
-          onChange={e => setName(e.target.value)}
-          required
-          placeholder="助教姓名 TA Name"
-          className="register-ta-input register-ta-name"
-        />
-        <div className="register-ta-semester-toggle-group">
-          {semesterOptions.map(opt => (
-            <button
-              key={opt.value}
-              type="button"
-              className={
-                'register-ta-semester-btn' +
-                (registerSemesters.includes(opt.value) ? ' selected' : '')
-              }
-              onClick={() => handleSemesterToggleRegister(opt.value)}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-        <button type="submit" disabled={loading} className="register-ta-submit-btn">
-          {loading ? '註冊中... Registering...' : '註冊 Register'}
+      <div className="register-ta-method-tabs">
+        <button
+          className={registerMethod === 'google' ? 'active' : ''}
+          onClick={() => setRegisterMethod('google')}
+        >
+          使用 Google 帳號註冊 Register with Google
         </button>
-      </form>
+        <button
+          className={registerMethod === 'legacy' ? 'active' : ''}
+          onClick={() => setRegisterMethod('legacy')}
+        >
+          使用帳號密碼註冊 Register with Username/Password
+        </button>
+      </div>
+      {registerMethod === 'google' ? (
+        <form onSubmit={handleGoogleSubmit} className="register-ta-form google-active">
+          <input
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+            type="text"
+            placeholder="助教學號 TA's Student ID"
+            className="register-ta-input register-ta-email"
+          />@g.nccu.edu.tw
+          <div className="register-ta-semester-toggle-group">
+            {semesterOptions.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                className={
+                  'register-ta-semester-btn' +
+                  (registerSemesters.includes(opt.value) ? ' selected' : '')
+                }
+                onClick={() => handleSemesterToggleRegister(opt.value)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <button type="submit" disabled={loading} className="register-ta-submit-btn">
+            {loading ? '註冊中... Registering...' : '註冊 Register'}
+          </button>
+        </form>
+      ) : (
+        <form onSubmit={handleSubmit} className="register-ta-form">
+          <input
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            required
+            placeholder="帳號 Username"
+            className="register-ta-input register-ta-username"
+          />
+          <input
+            value={name}
+            onChange={e => setName(e.target.value)}
+            required
+            placeholder="助教姓名 TA Name"
+            className="register-ta-input register-ta-name"
+          />
+          <div className="register-ta-semester-toggle-group">
+            {semesterOptions.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                className={
+                  'register-ta-semester-btn' +
+                  (registerSemesters.includes(opt.value) ? ' selected' : '')
+                }
+                onClick={() => handleSemesterToggleRegister(opt.value)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <button type="submit" disabled={loading} className="register-ta-submit-btn">
+            {loading ? '註冊中... Registering...' : '註冊 Register'}
+          </button>
+        </form>
+      )}
       {error && <div className="error">{error}</div>}
       {success && <div className="success">{success}</div>}
 
