@@ -17,6 +17,16 @@ export async function findUserByUsername(username) {
   }
 }
 
+export async function findUserById(id) {
+  try {
+    const result = await pool.query(`SELECT * FROM ${TABLE} WHERE id = $1`, [id]);
+    return result.rows[0];
+  } catch (err) {
+    console.error('AdminUserModel findUserById error:', err);
+    throw err;
+  }
+}
+
 export async function verifyPassword(user, password) {
   try {
     return await bcrypt.compare(password, user.password_hash);
