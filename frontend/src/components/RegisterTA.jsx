@@ -83,7 +83,7 @@ export default function RegisterTA({ onRegister }) {
     const data = await response.json();
 
     if (response.ok) {
-      setSuccess(`成功授權：${fullEmail}`);
+      setSuccess(`以Google帳號新增助教成功：${fullEmail}`);
       setEmail('');
       setRegisterSemesters([]);
       fetchTAs(); 
@@ -218,7 +218,7 @@ export default function RegisterTA({ onRegister }) {
         const data = await res.json();
         setError(data.error || '刪除失敗 Delete failed');
       }
-    } catch {
+    } catch(err) {
       setError(err);
     }
   };

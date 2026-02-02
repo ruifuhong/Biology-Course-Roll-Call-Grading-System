@@ -69,16 +69,6 @@ export async function getTAInfoById(id) {
   }
 }
 
-export async function findUserById(id) {
-  try {
-    const result = await pool.query(`SELECT * FROM ${TABLE} WHERE id = $1`, [id]);
-    return result.rows[0];
-  } catch (err) {
-    console.error('AdminUserModel findUserById error:', err);
-    throw err;
-  }
-}
-
 export async function createUser({ username, password, role }) {
   try {
     const exists = await findUserByUsername(username);
@@ -110,23 +100,6 @@ export async function addTASemester({ ta_id, semester }) {
     throw err;
   }
 }
-
-// export async function getAllTADetails() {
-//   try {
-//     const result = await pool.query(`
-//       SELECT u.id, u.username, n.name, array_remove(array_agg(s.semester), NULL) AS semesters
-//       FROM "Roll-Call".admin_users u
-//       LEFT JOIN "Roll-Call".ta_names n ON u.id = n.ta_id
-//       LEFT JOIN "Roll-Call".ta_semesters s ON u.id = s.ta_id
-//       WHERE u.role = 'ta'
-//       GROUP BY u.id, u.username, n.name
-//     `);
-//     return result.rows;
-//   } catch (err) {
-//     console.error('AdminUserModel getAllTADetails error:', err);
-//     throw err;
-//   }
-// }
 
 export async function getAllTADetails() {
   const query = `
@@ -163,29 +136,19 @@ export async function getAllUsers() {
   }
 }
 
-export async function deleteUser(id) {
+export async function deleteAnyUserById(id) {
   try {
-    await pool.query(`DELETE FROM ${TABLE} WHERE id = $1`, [id]);
+    const resLegacy = await pool.query(
+      'DELETE FROM "Roll-Call".admin_users WHERE id = $1', 
+      [id]
+    );
+    const resGoogle = await pool.query(
+      'DELETE FROM "Roll-Call".oauth_accounts WHERE id = $1', 
+      [id]
+    );
+    return resLegacy.rowCount > 0 || resGoogle.rowCount > 0;
   } catch (err) {
-    console.error('AdminUserModel deleteUser error:', err);
-    throw err;
-  }
-}
-
-export async function deleteTANames(ta_id) {
-  try {
-    await pool.query(`DELETE FROM "Roll-Call".ta_names WHERE ta_id = $1`, [ta_id]);
-  } catch (err) {
-    console.error('AdminUserModel deleteTANames error:', err);
-    throw err;
-  }
-}
-
-export async function deleteTASemesters(ta_id) {
-  try {
-    await pool.query('DELETE FROM "Roll-Call".ta_semesters WHERE ta_id = $1', [ta_id]);
-  } catch (err) {
-    console.error('AdminUserModel deleteTASemesters error:', err);
+    console.error('AdminUserModel deleteAnyUserById error:', err);
     throw err;
   }
 }
@@ -212,23 +175,25 @@ export async function updateTAUsername(id, username) {
   }
 }
 
-export async function setTASemesters(ta_id, semesters) {
-  try {
-    const result = await pool.query('SELECT semester FROM "Roll-Call".ta_semesters WHERE ta_id = $1', [ta_id]);
-    const oldSemesters = result.rows.map(row => row.semester).sort();
-    const newSemesters = (Array.isArray(semesters) ? semesters : []).slice().sort();
-    const isSame = oldSemesters.length === newSemesters.length && oldSemesters.every((v, i) => v === newSemesters[i]);
-    if (!isSame) {
-      await pool.query('DELETE FROM "Roll-Call".ta_semesters WHERE ta_id = $1', [ta_id]);
-      if (newSemesters.length > 0) {
-        for (const semester of newSemesters) {
-          await pool.query('INSERT INTO "Roll-Call".ta_semesters (ta_id, semester) VALUES ($1, $2)', [ta_id, semester]);
-        }
-      }
+export async function findAnyUserById(id) {
+  const query = `
+    SELECT id, username, role, 'legacy' as provider FROM "Roll-Call".admin_users WHERE id = $1
+    UNION ALL
+    SELECT id, email as username, role, 'google' as provider FROM "Roll-Call".oauth_accounts WHERE id = $1
+  `;
+  const result = await pool.query(query, [id]);
+  return result.rows[0];
+}
+
+export async function setTASemesters(ta_id, semesters, provider = 'legacy') {
+  const table = provider === 'google' ? '"Roll-Call".oauth_ta_semesters' : '"Roll-Call".ta_semesters';
+  
+  await pool.query(`DELETE FROM ${table} WHERE ta_id = $1`, [ta_id]);
+  
+  if (Array.isArray(semesters) && semesters.length > 0) {
+    for (const semester of semesters) {
+      await pool.query(`INSERT INTO ${table} (ta_id, semester) VALUES ($1, $2)`, [ta_id, semester]);
     }
-  } catch (err) {
-    console.error('AdminUserModel setTASemesters error:', err);
-    throw err;
   }
 }
 
