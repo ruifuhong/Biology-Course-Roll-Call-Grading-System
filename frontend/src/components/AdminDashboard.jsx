@@ -6,7 +6,6 @@ import RegisterTA from './RegisterTA';
 import { generateSemesterOptions } from '../utils/semesterUtils';
 import '../styles/AdminDashboard.css';
 
-
 export default function AdminDashboard({ user, onLogout }) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('students');

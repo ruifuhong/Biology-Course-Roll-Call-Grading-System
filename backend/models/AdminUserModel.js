@@ -48,7 +48,12 @@ export async function getTANameById(ta_id) {
 
 export async function getTASemesters(ta_id) {
   try {
-    const result = await pool.query(`SELECT semester FROM "Roll-Call".ta_semesters WHERE ta_id = $1`, [ta_id]);
+    const result = await pool.query(`
+      SELECT semester FROM "Roll-Call".ta_semesters WHERE ta_id = $1
+      UNION
+      SELECT semester FROM "Roll-Call".oauth_ta_semesters WHERE ta_id = $1
+    `, [ta_id]);
+
     return result.rows.map(row => row.semester);
   } catch (err) {
     console.error('AdminUserModel getTASemesters error:', err);
@@ -68,11 +73,27 @@ export async function getLecturerInfoById(id) {
 
 export async function getTAInfoById(id) {
   try {
-    const userResult = await pool.query(`SELECT username FROM "Roll-Call".admin_users WHERE id = $1`, [id]);
-    const username = userResult.rows[0]?.username || '';
-    const nameResult = await pool.query('SELECT name FROM "Roll-Call".ta_names WHERE ta_id = $1', [id]);
-    const name = nameResult.rows[0]?.name || username;
-    return { username, name };
+    const result = await pool.query(`
+      SELECT 
+        u.username, 
+        n.name 
+      FROM "Roll-Call".admin_users u
+      LEFT JOIN "Roll-Call".ta_names n ON u.id = n.ta_id
+      WHERE u.id = $1
+
+      UNION ALL
+
+      SELECT 
+        email AS username, 
+        name 
+      FROM "Roll-Call".oauth_accounts 
+      WHERE id = $1
+    `, [id]);
+    if (result.rows.length === 0) {
+      return { username: '', name: '' };
+    }
+
+    return result.rows[0];
   } catch (err) {
     console.error('AdminUserModel getTAInfoById error:', err);
     throw err;

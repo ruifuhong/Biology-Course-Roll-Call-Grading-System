@@ -59,14 +59,20 @@ export default function Login({ onLogin }) {
         const data = await response.json();
 
         if (response.ok) {
-          console.log('Login Success, Role:', data.user.role);
-          
-          localStorage.setItem('user', JSON.stringify(data.user));
-          
-          if (onLogin) {
-            onLogin(data.user);
+          try {
+            const meRes = await fetch(`${apiBase}/api/admin/me`, { credentials: 'include' });
+            const meData = await meRes.json();
+            if (meRes.ok && meData.user) {
+              localStorage.setItem('user', JSON.stringify(meData.user));
+              if (onLogin) onLogin(meData.user);
+            } else {
+              localStorage.setItem('user', JSON.stringify(data.user));
+              if (onLogin) onLogin(data.user);
+            }
+          } catch (err) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+            if (onLogin) onLogin(data.user);
           }
-          
         } else {
           setError(data.error || 'Google 驗證失敗');
         }

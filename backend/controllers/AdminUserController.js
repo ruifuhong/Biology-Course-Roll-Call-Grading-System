@@ -26,6 +26,7 @@ export async function getMe(req, res) {
       userInfo.name = info.name;
       const semesters = await AdminUserModel.getTASemesters(id);
       userInfo.assignedSemesters = semesters;
+      console.log(userInfo);
     }
     res.json({ user: userInfo });
   } catch (err) {
