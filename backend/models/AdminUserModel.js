@@ -63,8 +63,30 @@ export async function getTASemesters(ta_id) {
 
 export async function getLecturerInfoById(id) {
   try {
-    const result = await pool.query(`SELECT username FROM ${TABLE} WHERE id = $1`, [id]);
-    return { username: result.rows[0]?.username || '' };
+    const result = await pool.query(`
+      SELECT 
+        username, 
+        NULL AS name
+      FROM "Roll-Call".admin_users
+      WHERE id = $1
+
+      UNION ALL
+
+      SELECT 
+        email AS username, 
+        name 
+      FROM "Roll-Call".oauth_accounts 
+      WHERE id = $1
+    `, [id]);
+
+    if (result.rows.length === 0) {
+      return { username: '', name: '' };
+    }
+
+    return { 
+      username: result.rows[0].username || '', 
+      name: result.rows[0].name || '' 
+    };
   } catch (err) {
     console.error('AdminUserModel getLecturerInfoById error:', err);
     throw err;

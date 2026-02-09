@@ -31,7 +31,7 @@ export default function AdminDashboard({ user, onLogout }) {
       <div className="admin-header-row">
         <h1>管理面板 Admin Dashboard</h1>
         <div className="admin-header-user">
-          <span>您好！Hi! <b>{user?.role === 'lecturer' ? user?.username : user?.name}</b></span>
+          <span>您好！Hi! <br /> <b>{user?.name || user?.username}</b></span>
           <button
             className="change-password-btn"
             onClick={() => navigate('/admin/change-password')}
