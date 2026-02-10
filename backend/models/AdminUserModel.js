@@ -179,16 +179,6 @@ export async function getAllTADetails() {
   return result.rows;
 }
 
-export async function getAllUsers() {
-  try {
-    const result = await pool.query(`SELECT * FROM ${TABLE}`);
-    return result.rows;
-  } catch (err) {
-    console.error('AdminUserModel getAllUsers error:', err);
-    throw err;
-  }
-}
-
 export async function deleteAnyUserById(id) {
   try {
     const resLegacy = await pool.query(

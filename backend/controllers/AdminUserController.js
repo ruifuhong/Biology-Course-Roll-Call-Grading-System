@@ -192,17 +192,6 @@ export async function getAllTADetails(req, res) {
   }
 }
 
-export async function getAllAdmins(req, res) {
-  try {
-    if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限操作 Forbidden' });
-    const users = await AdminUserModel.getAllUsers();
-    res.json({ users: users.map(u => ({ id: u.id, username: u.username, role: u.role })) });
-  } catch (err) {
-    console.error('取得所有管理員失敗 Get all admins failed:', err);
-    res.status(500).json({ error: '取得所有管理員失敗 Get all admins failed' });
-  }
-}
-
 export async function changePassword(req, res) {
   if (!req.user) return res.status(401).json({ error: '未登入 Not authenticated' });
   const { oldPassword, newPassword } = req.body;
