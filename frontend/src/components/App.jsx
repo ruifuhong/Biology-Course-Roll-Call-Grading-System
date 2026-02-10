@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { googleLogout } from '@react-oauth/google';
 import RegisterLecturer from './RegisterLecturer';
 import LectureRollcall from './LectureRollcall';
 import DiscussionRollcall from './DiscussionRollcall';
@@ -35,16 +36,20 @@ function App() {
     setLoadingUser(true);
     try {
       const res = await fetch(`${apiBase}/api/admin/me`, { credentials: 'include' });
+      
       if (res.ok) {
-        const data = await res.json();
+        const data = await res.json();        
         setUser(data.user);
+        console.log(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
       } else {
         setUser(null);
+        localStorage.removeItem('user');
         console.log('找不到登入者 No user found');
       }
-    } catch {
+    } catch (err) {
       setUser(null);
-      console.log('讀取登入者時發生錯誤 User fetch error');
+      console.error('讀取登入者時發生錯誤:', err);
     } finally {
       setLoadingUser(false);
     }
@@ -58,10 +63,23 @@ function App() {
     setUser(user);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+  try {
+    await fetch(`${apiBase}/api/admin/logout`, { 
+      method: 'POST', 
+      credentials: 'include' 
+    });
+  } catch (err) {
+    console.error("Logout API failed", err);
+  } finally {
     setUser(null);
-    fetch(`${apiBase}/api/admin/logout`, { method: 'POST', credentials: 'include' });
-  };
+    localStorage.removeItem('user');
+    
+    googleLogout();
+    
+    // navigate('/admin');
+  }
+};
 
   if (loadingUser) return <div className="loading-user">載入中... Loading...</div>;
 

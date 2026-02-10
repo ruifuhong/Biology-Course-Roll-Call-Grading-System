@@ -347,12 +347,20 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAtte
   );
 };
 
+const TAB_KEY = 'sessionManagementActiveTab';
+
 export default function SessionManagement({ semester }) {
   const [lectureDates, setLectureDates] = useState([]);
   const [discussionDates, setDiscussionDates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [activeTab, setActiveTab] = useState('lecture');
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem(TAB_KEY) || 'lecture';
+  });
+
+  useEffect(() => {
+    localStorage.setItem(TAB_KEY, activeTab);
+  }, [activeTab]);
 
   useEffect(() => {
     if (semester) {

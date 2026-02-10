@@ -37,6 +37,7 @@
 .ta-action-btn.edit-btn:hover {
   background: #1565c0;
 }
+
 .ta-list-table {
   width: 100%;
   max-width: 800px;
@@ -435,4 +436,69 @@
     font-size: 0.98rem;
     padding: 4px 0 4px 0;
   }
+}
+
+.register-ta-method-tabs {
+  display: flex;
+  margin-bottom: 1rem;
+}
+.register-ta-method-tabs button {
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: bold;
+  transition: background 0.2s, color 0.2s;
+  background: #f5f5f5;
+  color: #333;
+}
+.register-ta-method-tabs button.active {
+  color: #fff;
+}
+.register-ta-method-tabs button.active:nth-child(1) {
+  background: #4285F4;
+}
+.register-ta-method-tabs button.active:nth-child(2) {
+  background: #28a745;
+}
+
+.google-active .register-ta-input.register-ta-email {
+  border: 1.5px solid #4285F4;
+}
+.google-active .register-ta-semester-btn:hover {
+  background: #4285F4;
+  color: #fff;
+}
+.google-active .register-ta-submit-btn {
+  background: #4285F4;
+  color: #fff;
+  border: none;
+}
+.google-active .register-ta-semester-btn.selected {
+  background: #42a5f5;
+  color: #fff;
+  border: 1.2px solid #4285F4;
+}
+
+.google-icon {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.ta-google-name {
+  font-weight: 500;
+  color: #4285F4;
+  background: #f3f7fa;
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-left: 2px;
+  margin-right: 4px;
+}
+.ta-google-username {
+  font-weight: 500;
+  color: #333;
+  background: #e8f0fe;
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-left: 2px;
 }

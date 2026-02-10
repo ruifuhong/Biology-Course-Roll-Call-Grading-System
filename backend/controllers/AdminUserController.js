@@ -18,9 +18,10 @@ export async function getMe(req, res) {
   let userInfo = { id, role };
   try {
     if (role === 'lecturer') {
-      const info = await AdminUserModel.getLecturerInfoById(id);
-      userInfo.username = info.username;
-    } else if (role === 'ta') {
+    const info = await AdminUserModel.getLecturerInfoById(id);
+    userInfo.username = info.username;
+    userInfo.name = info.name || info.username;
+  } else if (role === 'ta') {
       const info = await AdminUserModel.getTAInfoById(id);
       userInfo.username = info.username;
       userInfo.name = info.name;
@@ -127,41 +128,56 @@ export async function addTA(req, res) {
 
 export async function deleteTA(req, res) {
   try {
-    if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限操作 Forbidden' });
+    if (req.user.role !== 'lecturer') {
+      return res.status(403).json({ error: '無權限操作 Forbidden' });
+    }
+    
     const { id } = req.params;
-    const ta = await AdminUserModel.findUserById(id);
-    if (!ta || ta.role !== 'ta') return res.status(404).json({ error: '查無此助教 TA not found' });
-    await AdminUserModel.deleteTANames(id);
-    await AdminUserModel.deleteTASemesters(id);
-    await AdminUserModel.deleteUser(id);
-    res.json({ message: '助教刪除成功 TA deleted' });
+
+    const isDeleted = await AdminUserModel.deleteAnyUserById(id);
+
+    if (!isDeleted) {
+      return res.status(404).json({ error: '查無此助教 TA not found' });
+    }
+
+    res.json({ message: '助教刪除成功 TA deleted successfully' });
   } catch (err) {
-    console.error('刪除助教失敗 Delete TA failed:', err);
+    console.error('刪除助教 Controller 失敗:', err);
     res.status(500).json({ error: '刪除助教失敗 Delete TA failed' });
   }
 }
 
 export async function updateTA(req, res) {
-  if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限操作 Forbidden' });
+  if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限操作' });
+  
   const { id } = req.params;
   const { name, username, semesters } = req.body;
-  const ta = await AdminUserModel.findUserById(id);
-  if (!ta || ta.role !== 'ta') return res.status(404).json({ error: '查無此助教 TA not found' });
+
   try {
-    if (username && username !== ta.username) {
-      await AdminUserModel.updateTAUsername(id, username);
+    const ta = await AdminUserModel.findAnyUserById(id);
+    if (!ta || ta.role !== 'ta') return res.status(404).json({ error: '查無此助教' });
+
+    if (ta.provider === 'google') {
+      if (Array.isArray(semesters)) {
+        await AdminUserModel.setTASemesters(id, semesters, 'google');
+      }
+    } else {
+      if (username && username !== ta.username) {
+        await AdminUserModel.updateTAUsername(id, username);
+      }
+      if (name && name !== ta.name) {
+        await AdminUserModel.updateTAName({ ta_id: id, name });
+      }
+      if (Array.isArray(semesters)) {
+        await AdminUserModel.setTASemesters(id, semesters, 'legacy');
+      }
     }
-    if (name) {
-      await AdminUserModel.updateTAName({ ta_id: id, name });
-    }
-    if (Array.isArray(semesters)) {
-      await AdminUserModel.setTASemesters(id, semesters);
-    }
-    const updatedTA = await AdminUserModel.findUserById(id);
+    const updatedTA = await AdminUserModel.findAnyUserById(id);
     res.json({ ta: updatedTA });
+
   } catch (err) {
-    console.error('更新助教失敗 Update TA failed:', err);
-    res.status(500).json(err);
+    console.error('更新助教失敗:', err);
+    res.status(500).json({ error: '更新失敗' });
   }
 }
 
@@ -173,17 +189,6 @@ export async function getAllTADetails(req, res) {
   } catch (err) {
     console.error('取得所有助教資料失敗 Get all TA details failed:', err);
     res.status(500).json({ error: '取得所有助教資料失敗 Get all TA details failed' });
-  }
-}
-
-export async function getAllAdmins(req, res) {
-  try {
-    if (req.user.role !== 'lecturer') return res.status(403).json({ error: '無權限操作 Forbidden' });
-    const users = await AdminUserModel.getAllUsers();
-    res.json({ users: users.map(u => ({ id: u.id, username: u.username, role: u.role })) });
-  } catch (err) {
-    console.error('取得所有管理員失敗 Get all admins failed:', err);
-    res.status(500).json({ error: '取得所有管理員失敗 Get all admins failed' });
   }
 }
 

@@ -4,7 +4,28 @@ import '../styles/RegisterTA.css';
 
 const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+// Google SVG Icon component
+const GoogleIcon = () => (
+  <svg viewBox="0 0 48 48" className="google-icon">
+    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"/>
+    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+  </svg>
+);
+
 export default function RegisterTA({ onRegister }) {
+  const TAB_KEY = 'registerTAActiveTab';
+  
+  const [registerMethod, setRegisterMethod] = useState(() => {
+    return localStorage.getItem(TAB_KEY) || 'google'; // default tab
+  });
+
+  useEffect(() => {
+    localStorage.setItem(TAB_KEY, registerMethod);
+  }, [registerMethod]);
+
+  const [email, setEmail] = useState('');  
   const [username, setUsername] = useState('');
   const [name, setName] = useState('');
   const [registerSemesters, setRegisterSemesters] = useState([]);
@@ -47,6 +68,42 @@ export default function RegisterTA({ onRegister }) {
         : [...prev, semester]
     );
   };
+
+  const handleGoogleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
+  setSuccess('');
+
+  const fullEmail = email.includes('@') ? email : `${email}@g.nccu.edu.tw`;
+
+  try {
+    const response = await fetch(`${apiBase}/api/admin/add-google-ta`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ 
+        email: fullEmail,
+        semesters: registerSemesters 
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setSuccess(`以Google帳號新增助教成功：${fullEmail}`);
+      setEmail('');
+      setRegisterSemesters([]);
+      fetchTAs(); 
+    } else {
+      setError(data.error || '授權失敗');
+    }
+  } catch (err) {
+    setError('連線失敗');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -169,7 +226,7 @@ export default function RegisterTA({ onRegister }) {
         const data = await res.json();
         setError(data.error || '刪除失敗 Delete failed');
       }
-    } catch {
+    } catch(err) {
       setError(err);
     }
   };
@@ -178,43 +235,92 @@ export default function RegisterTA({ onRegister }) {
     fetchTAs();
   },[]);
 
+  useEffect(() => {
+    setRegisterSemesters([]);
+  }, [registerMethod]);
+
   return (
     <div className="register-ta-container">
       <h2>註冊助教 Register TA</h2>
-      <form onSubmit={handleSubmit} className="register-ta-form">
-        <input
-          value={username}
-          onChange={e => setUsername(e.target.value)}
-          required
-          placeholder="帳號 Username"
-          className="register-ta-input register-ta-username"
-        />
-        <input
-          value={name}
-          onChange={e => setName(e.target.value)}
-          required
-          placeholder="助教姓名 TA Name"
-          className="register-ta-input register-ta-name"
-        />
-        <div className="register-ta-semester-toggle-group">
-          {semesterOptions.map(opt => (
-            <button
-              key={opt.value}
-              type="button"
-              className={
-                'register-ta-semester-btn' +
-                (registerSemesters.includes(opt.value) ? ' selected' : '')
-              }
-              onClick={() => handleSemesterToggleRegister(opt.value)}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-        <button type="submit" disabled={loading} className="register-ta-submit-btn">
-          {loading ? '註冊中... Registering...' : '註冊 Register'}
+      <div className="register-ta-method-tabs">
+        <button
+          className={registerMethod === 'google' ? 'active' : ''}
+          onClick={() => setRegisterMethod('google')}
+        >
+          使用 Google 帳號註冊 Register with Google
         </button>
-      </form>
+        <button
+          className={registerMethod === 'legacy' ? 'active' : ''}
+          onClick={() => setRegisterMethod('legacy')}
+        >
+          使用帳號密碼註冊 Register with Username/Password
+        </button>
+      </div>
+      {registerMethod === 'google' ? (
+        <form onSubmit={handleGoogleSubmit} className="register-ta-form google-active">
+          <input
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+            type="text"
+            placeholder="助教學號 TA's Student ID"
+            className="register-ta-input register-ta-email"
+          />@g.nccu.edu.tw
+          <div className="register-ta-semester-toggle-group">
+            {semesterOptions.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                className={
+                  'register-ta-semester-btn' +
+                  (registerSemesters.includes(opt.value) ? ' selected' : '')
+                }
+                onClick={() => handleSemesterToggleRegister(opt.value)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <button type="submit" disabled={loading} className="register-ta-submit-btn">
+            {loading ? '註冊中... Registering...' : '註冊 Register'}
+          </button>
+        </form>
+      ) : (
+        <form onSubmit={handleSubmit} className="register-ta-form">
+          <input
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            required
+            placeholder="帳號 Username"
+            className="register-ta-input register-ta-username"
+          />
+          <input
+            value={name}
+            onChange={e => setName(e.target.value)}
+            required
+            placeholder="助教姓名 TA Name"
+            className="register-ta-input register-ta-name"
+          />
+          <div className="register-ta-semester-toggle-group">
+            {semesterOptions.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                className={
+                  'register-ta-semester-btn' +
+                  (registerSemesters.includes(opt.value) ? ' selected' : '')
+                }
+                onClick={() => handleSemesterToggleRegister(opt.value)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <button type="submit" disabled={loading} className="register-ta-submit-btn">
+            {loading ? '註冊中... Registering...' : '註冊 Register'}
+          </button>
+        </form>
+      )}
       {error && <div className="error">{error}</div>}
       {success && <div className="success">{success}</div>}
 
@@ -232,28 +338,38 @@ export default function RegisterTA({ onRegister }) {
           {tas.length === 0 && <div className="ta-list-empty">找不到助教 No TAs found.</div>}
           {tas.map(ta => {
             const isEditing = editStates[ta.id]?.editing;
+            const isGoogleTA = ta.provider === 'google';
             return (
               <div key={ta.id} className="ta-list-row">
                 <div className="ta-list-name">
+                  {isGoogleTA && <GoogleIcon />}
                   {isEditing ? (
-                    <input
-                      value={editStates[ta.id]?.name || ''}
-                      onChange={e => handleEditChange(ta.id, 'name', e.target.value)}
-                      placeholder="助教名字 TA Name"
-                    />
+                    isGoogleTA ? (
+                      <span className="ta-google-name">{ta.name}</span>
+                    ) : (
+                      <input
+                        value={editStates[ta.id]?.name || ''}
+                        onChange={e => handleEditChange(ta.id, 'name', e.target.value)}
+                        placeholder="助教名字 TA Name"
+                      />
+                    )
                   ) : (
                     <span>{ta.name || ta.username}</span>
                   )}
                 </div>
                 <div className="ta-list-username">
                   {isEditing ? (
-                    <input
-                      value={editStates[ta.id]?.username || ''}
-                      onChange={e => handleEditChange(ta.id, 'username', e.target.value)}
-                      placeholder="助教帳號 TA Username"
-                    />
+                    isGoogleTA ? (
+                      <span className="ta-google-username">{ta.username.split('@')[0]}</span>
+                    ) : (
+                      <input
+                        value={editStates[ta.id]?.username || ''}
+                        onChange={e => handleEditChange(ta.id, 'username', e.target.value)}
+                        placeholder="助教帳號 TA Username"
+                      />
+                    )
                   ) : (
-                    <span>{ta.username}</span>
+                    <span>{isGoogleTA ? ta.username.split('@')[0] : ta.username}</span>
                   )}
                 </div>
                 <div className="ta-list-semesters">
@@ -266,7 +382,8 @@ export default function RegisterTA({ onRegister }) {
                           'ta-semester-toggle-btn' +
                           (editStates[ta.id]?.semesters?.includes(opt.value) ? ' selected' : '')
                         }
-                        onClick={() => handleSemesterToggle(ta.id, opt.value)}
+                        onClick={() => isGoogleTA ? handleSemesterToggle(ta.id, opt.value) : handleSemesterToggle(ta.id, opt.value)}
+                        disabled={!isGoogleTA && isEditing && (isGoogleTA ? false : false)}
                       >
                         {opt.label}
                       </button>
