@@ -18,13 +18,15 @@ export async function getMe(req, res) {
   let userInfo = { id, role };
   try {
     if (role === 'lecturer') {
-    const info = await AdminUserModel.getLecturerInfoById(id);
-    userInfo.username = info.username;
-    userInfo.name = info.name || info.username;
-  } else if (role === 'ta') {
+      const info = await AdminUserModel.getLecturerInfoById(id);
+      userInfo.username = info.username;
+      userInfo.name = info.name || info.username;
+      userInfo.provider = info.provider || '';
+    } else if (role === 'ta') {
       const info = await AdminUserModel.getTAInfoById(id);
       userInfo.username = info.username;
       userInfo.name = info.name;
+      userInfo.provider = info.provider || '';
       const semesters = await AdminUserModel.getTASemesters(id);
       userInfo.assignedSemesters = semesters;
     }

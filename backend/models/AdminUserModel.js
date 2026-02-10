@@ -66,7 +66,8 @@ export async function getLecturerInfoById(id) {
     const result = await pool.query(`
       SELECT 
         username, 
-        NULL AS name
+        NULL AS name,
+        'legacy' as provider
       FROM "Roll-Call".admin_users
       WHERE id = $1
 
@@ -74,18 +75,20 @@ export async function getLecturerInfoById(id) {
 
       SELECT 
         email AS username, 
-        name 
+        name,
+        provider
       FROM "Roll-Call".oauth_accounts 
       WHERE id = $1
     `, [id]);
 
     if (result.rows.length === 0) {
-      return { username: '', name: '' };
+      return { username: '', name: '', provider: '' };
     }
 
-    return { 
-      username: result.rows[0].username || '', 
-      name: result.rows[0].name || '' 
+    return {
+      username: result.rows[0].username || '',
+      name: result.rows[0].name || '',
+      provider: result.rows[0].provider || ''
     };
   } catch (err) {
     console.error('AdminUserModel getLecturerInfoById error:', err);
@@ -98,7 +101,8 @@ export async function getTAInfoById(id) {
     const result = await pool.query(`
       SELECT 
         u.username, 
-        n.name 
+        n.name,
+        'legacy' as provider
       FROM "Roll-Call".admin_users u
       LEFT JOIN "Roll-Call".ta_names n ON u.id = n.ta_id
       WHERE u.id = $1
@@ -107,12 +111,13 @@ export async function getTAInfoById(id) {
 
       SELECT 
         email AS username, 
-        name 
+        name,
+        provider
       FROM "Roll-Call".oauth_accounts 
       WHERE id = $1
     `, [id]);
     if (result.rows.length === 0) {
-      return { username: '', name: '' };
+      return { username: '', name: '', provider: '' };
     }
 
     return result.rows[0];

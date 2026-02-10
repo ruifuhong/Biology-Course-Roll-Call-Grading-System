@@ -47,12 +47,14 @@ export default function AdminDashboard({ user, onLogout }) {
         <h1>管理面板 Admin Dashboard</h1>
         <div className="admin-header-user">
           <span>您好！Hi! <br /> <b>{user?.name || user?.username}</b></span>
-          <button
-            className="change-password-btn"
-            onClick={() => navigate('/admin/change-password')}
-          >
-            更改密碼 Change Password
-          </button>
+          {!user.provider && (
+            <button
+              className="change-password-btn"
+              onClick={() => navigate('/admin/change-password')}
+            >
+              更改密碼 Change Password
+            </button>
+          )}
           <button onClick={onLogout}>登出 Logout</button>
         </div>
       </div>

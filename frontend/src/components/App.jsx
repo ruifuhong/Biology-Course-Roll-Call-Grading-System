@@ -40,7 +40,6 @@ function App() {
       if (res.ok) {
         const data = await res.json();        
         setUser(data.user);
-        console.log(data.user);
         localStorage.setItem('user', JSON.stringify(data.user));
       } else {
         setUser(null);
