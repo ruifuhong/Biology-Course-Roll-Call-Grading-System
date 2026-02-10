@@ -1,11 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import StudentList from './StudentList';
 import AttendanceView from './AttendanceView';
 import ScoreView from './ScoreView';
 import '../styles/StudentManagement.css';
 
+const TAB_KEY = 'studentManagementActiveTab';
+
 export default function StudentManagement({ semester }) {
-  const [viewMode, setViewMode] = useState('attendance');
+  const [viewMode, setViewMode] = useState(() => {
+    return localStorage.getItem(TAB_KEY) || 'students'; // default tab
+  });
+
+  useEffect(() => {
+    localStorage.setItem(TAB_KEY, viewMode);
+  }, [viewMode]);
 
   return (
     <div className="student-management">

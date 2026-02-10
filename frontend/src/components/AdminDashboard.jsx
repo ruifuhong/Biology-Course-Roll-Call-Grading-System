@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StudentManagement from './StudentManagement';
 import SessionManagement from './SessionManagement';
@@ -8,13 +8,28 @@ import '../styles/AdminDashboard.css';
 
 export default function AdminDashboard({ user, onLogout }) {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('students');
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('adminDashboardActiveTab') || 'students'; // default tab
+  });
+
+  useEffect(() => {
+    localStorage.setItem('adminDashboardActiveTab', activeTab);
+  }, [activeTab]);
+
+  const SEMESTER_KEY = 'adminDashboardCurrentSemester';
 
   const allSemesterOptions = generateSemesterOptions();
   const semesterOptions = user?.role === 'ta'
     ? allSemesterOptions.filter(opt => user.assignedSemesters?.includes(opt.value))
     : allSemesterOptions;
-  const [currentSemester, setCurrentSemester] = useState(semesterOptions[0]?.value || '1131');
+
+    const [currentSemester, setCurrentSemester] = useState(() => {
+    return localStorage.getItem(SEMESTER_KEY) || semesterOptions[0]?.value || '1131';
+  });
+
+  useEffect(() => {
+    localStorage.setItem(SEMESTER_KEY, currentSemester);
+  }, [currentSemester]);
 
   const tabs = [
     { id: 'students', label: '學生管理 Student Management', component: StudentManagement },

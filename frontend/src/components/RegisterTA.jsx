@@ -15,7 +15,16 @@ const GoogleIcon = () => (
 );
 
 export default function RegisterTA({ onRegister }) {
-  const [registerMethod, setRegisterMethod] = useState('google');
+  const TAB_KEY = 'registerTAActiveTab';
+  
+  const [registerMethod, setRegisterMethod] = useState(() => {
+    return localStorage.getItem(TAB_KEY) || 'google'; // default tab
+  });
+
+  useEffect(() => {
+    localStorage.setItem(TAB_KEY, registerMethod);
+  }, [registerMethod]);
+
   const [email, setEmail] = useState('');  
   const [username, setUsername] = useState('');
   const [name, setName] = useState('');
@@ -27,7 +36,6 @@ export default function RegisterTA({ onRegister }) {
   const [loadingTAs, setLoadingTAs] = useState(true);
   const [editStates, setEditStates] = useState({});
   const semesterOptions = generateSemesterOptions();
-
 
   const fetchTAs = async () => {
     setLoadingTAs(true);

@@ -3,14 +3,21 @@ import { naturalSort } from '../utils/sortUtils';
 import '../styles/StudentManagement.css';
 
 const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const COURSE_TYPE_KEY = 'attendanceViewCourseType';
 
 export default function AttendanceView({ semester }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [courseType, setCourseType] = useState('lecture');
   const [attendanceData, setAttendanceData] = useState([]);
   const [sessionDates, setSessionDates] = useState([]);
   const [feedbackData, setFeedbackData] = useState([]);
+  const [courseType, setCourseType] = useState(() => {
+    return localStorage.getItem(COURSE_TYPE_KEY) || 'lecture';
+  });
+
+  useEffect(() => {
+    localStorage.setItem(COURSE_TYPE_KEY, courseType);
+  }, [courseType]);
 
   useEffect(() => {
     if (semester) {
