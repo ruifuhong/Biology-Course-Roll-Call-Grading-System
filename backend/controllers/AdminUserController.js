@@ -165,7 +165,7 @@ export async function updateTA(req, res) {
       if (username && username !== ta.username) {
         await AdminUserModel.updateTAUsername(id, username);
       }
-      if (name) {
+      if (name && name !== ta.name) {
         await AdminUserModel.updateTAName({ ta_id: id, name });
       }
       if (Array.isArray(semesters)) {
