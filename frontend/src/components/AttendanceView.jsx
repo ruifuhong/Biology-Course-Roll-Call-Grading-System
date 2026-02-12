@@ -166,7 +166,7 @@ function AttendanceTable({ attendanceData, sessionDates, courseType, loading, on
     return { present, absent, late };
   };
 
-  const groupedStudents = groupAttendanceByStudent();
+  const groupedStudents = groupAttendanceByStudent().sort(naturalSort);
   const filteredSessionDates = courseType === 'lecture'
     ? sessionDates.filter(session => session.attendance_required !== false)
     : sessionDates;
