@@ -91,9 +91,8 @@ function GroupReviewInput() {
       if (res.ok) {
         const data = await res.json();
         setStudentInfo(data);
-        const groupName = data.student?.group_name;
         const dupRes = await fetch(
-          `${apiBase}/review/duplicate-check/${studentId}/${groupName}/${sessionInfo.semester}/${encodeURIComponent(sessionInfo.actual_date)}`
+          `${apiBase}/review/duplicate-check/${studentId}/${sessionInfo.semester}/${encodeURIComponent(sessionInfo.actual_date)}`
         );
         if (dupRes.ok) {
           const dupData = await dupRes.json();
@@ -178,7 +177,7 @@ function GroupReviewInput() {
                   let intraValid = true;
                   if (studentInfo && studentInfo.groupMembers) {
                     studentInfo.groupMembers.forEach((member, idx) => {
-                      if (member.attendance_status === "present") {
+                      if (member.attendance_status === "present" || member.attendance_status === "late") {
                         const select = document.querySelectorAll('.review-member-list .review-dropdown')[idx];
                         const score = select ? parseInt(select.value) : null;
                         if (!score) intraValid = false;
@@ -206,7 +205,7 @@ function GroupReviewInput() {
                       if (!score) interValid = false;
                       if (score) {
                         interReviews.push({
-                          reviewer_group_id: studentInfo.student.group_name,
+                          reviewer_student_id: studentInfo.student.student_id,
                           reviewee_group_id: group.group_name,
                           score,
                           semester: sessionInfo.semester,

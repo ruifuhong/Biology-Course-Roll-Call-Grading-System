@@ -34,13 +34,13 @@ export async function insertInterReviews(reviews) {
     params.push(
       r.semester,
       r.actual_date,
-      r.reviewer_group_id,
+      r.reviewer_student_id,
       r.reviewee_group_id,
       r.score
     );
   }
   const sql = `INSERT INTO "Roll-Call".review_inter_group
-    (semester, actual_date, reviewer_group_id, reviewee_group_id, score)
+    (semester, actual_date, reviewer_student_id, reviewee_group_id, score)
     VALUES ${values.join(', ')} RETURNING id`;
   const result = await pool.query(sql, params);
   return result.rowCount;
@@ -122,20 +122,20 @@ export async function checkIntraReviewExists(reviewerId, semester, actualDate) {
   return result.rows.length > 0;
 }
 
-export async function checkInterReviewExists(reviewerGroupId, semester, actualDate) {
+export async function checkInterReviewExists(reviewerStudentId, semester, actualDate) {
   const result = await pool.query(
     `SELECT 1 FROM "Roll-Call".review_inter_group
-     WHERE reviewer_group_id = $1 AND semester = $2 AND actual_date = $3
+     WHERE reviewer_student_id = $1 AND semester = $2 AND actual_date = $3
      LIMIT 1`,
-    [reviewerGroupId, semester, actualDate]
+    [reviewerStudentId, semester, actualDate]
   );
   return result.rows.length > 0;
 }
 
-export async function checkAnyReviewExists({ reviewerId, reviewerGroupId, semester, actualDate }) {
+export async function checkAnyReviewExists({ reviewerId, semester, actualDate }) {
   const [intra, inter] = await Promise.all([
     reviewerId ? checkIntraReviewExists(reviewerId, semester, actualDate) : false,
-    reviewerGroupId ? checkInterReviewExists(reviewerGroupId, semester, actualDate) : false
+    reviewerId ? checkInterReviewExists(reviewerId, semester, actualDate) : false
   ]);
   return intra || inter;
 }

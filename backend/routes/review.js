@@ -14,6 +14,6 @@ router.post('/inter', ReviewController.submitInterReviews);
 router.get('/intra/summary/:semester', ReviewController.getIntraReviewSummary);
 router.get('/inter/summary/:semester', ReviewController.getInterReviewSummary);
 
-router.get('/duplicate-check/:reviewerId/:reviewerGroupId/:semester/:actualDate', ReviewController.checkReviewDuplicate);
+router.get('/duplicate-check/:reviewerId/:semester/:actualDate', ReviewController.checkReviewDuplicate);
 
 export default router;
