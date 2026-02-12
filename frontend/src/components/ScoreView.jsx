@@ -89,8 +89,8 @@ export default function ScoreView({ semester }) {
           ...student,
           scores,
           denominator,
-          personalAvg: denominator ? (personalSum / denominator).toFixed(2) : '0',
-          groupAvg: denominator ? (groupSum / denominator).toFixed(2) : '0',
+          personalAvg: denominator ? personalSum / denominator : 0,
+          groupAvg: denominator ? groupSum / denominator : 0,
           absent,
           late
         };
@@ -102,6 +102,14 @@ export default function ScoreView({ semester }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const formatScore = (value) => {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value.toFixed(2);
+    }
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric.toFixed(2) : '0.00';
   };
 
   const handleEditClick = (student_id, currentValue) => {
@@ -194,10 +202,10 @@ export default function ScoreView({ semester }) {
                   <td>{student.name}</td>
                   {sessionDates.map(session => [
                     <td key={student.student_id + '-' + session.actual_date + '-personal'}>
-                      {student.scores?.[session.actual_date]?.personal}
+                      {formatScore(student.scores?.[session.actual_date]?.personal)}
                     </td>,
                     <td key={student.student_id + '-' + session.actual_date + '-group'}>
-                      {student.scores?.[session.actual_date]?.group}
+                      {formatScore(student.scores?.[session.actual_date]?.group)}
                     </td>
                   ])}
                   <td>{student.absent}</td>
@@ -240,8 +248,8 @@ export default function ScoreView({ semester }) {
                       </span>
                     )}
                   </td>
-                  <td>{student.personalAvg}</td>
-                  <td>{student.groupAvg}</td>
+                  <td>{formatScore(student.personalAvg)}</td>
+                  <td>{formatScore(student.groupAvg)}</td>
                 </tr>
               ))
             )}
