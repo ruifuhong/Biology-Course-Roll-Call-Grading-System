@@ -1,10 +1,10 @@
 import { pool } from './database.js';
 
-export async function findBySemesterAndGroup(semester, group_name, excludeStudentId) {
+export async function findBySemesterAndGroup(semester, group_name) {
   try {
     const result = await pool.query(
-      'SELECT name, student_id FROM "Roll-Call".students WHERE semester = $1 AND group_name = $2 AND student_id <> $3 ORDER BY student_id',
-      [semester, group_name, excludeStudentId]
+      'SELECT name, student_id FROM "Roll-Call".students WHERE semester = $1 AND group_name = $2 ORDER BY student_id',
+      [semester, group_name]
     );
     return result.rows;
   } catch (error) {

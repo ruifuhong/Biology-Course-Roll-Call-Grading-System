@@ -20,7 +20,7 @@ export async function getReviewInfo(req, res) {
     }
 
     const group_name = student.group_name;
-    const groupMembers = await StudentModel.findBySemesterAndGroup(semester, group_name, studentId);
+    const groupMembers = await StudentModel.findBySemesterAndGroup(semester, group_name);
     
     let groupNum = parseInt(group_name, 10);
     let groupSet = [];
@@ -30,7 +30,7 @@ export async function getReviewInfo(req, res) {
       groupSet = ['6','7','8','9','10'];
     }
     
-    const otherGroups = await StudentModel.findGroupsWithMembers(semester, groupSet.filter(g => g !== group_name));
+    const classGroups = await StudentModel.findGroupsWithMembers(semester, groupSet);
 
     const groupMemberIds = groupMembers.map(m => m.student_id);
     const attendanceStatusMap = await ReviewModel.getDiscussionAttendanceStatus(semester, actual_date, groupMemberIds);
@@ -42,7 +42,7 @@ export async function getReviewInfo(req, res) {
     res.json({
       student,
       groupMembers: groupMembersWithAttendance,
-      otherGroups
+      classGroups
     });
   } catch (err) {
     console.error('取得組內與組間互評資訊失敗 Failed to get intra/inter-group review info:', err);

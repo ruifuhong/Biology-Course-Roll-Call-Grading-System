@@ -199,8 +199,8 @@ function GroupReviewInput() {
                   // 2. Collect inter-group reviews
                   const interReviews = [];
                   let interValid = true;
-                  if (studentInfo && studentInfo.otherGroups) {
-                    studentInfo.otherGroups.forEach((group, idx) => {
+                  if (studentInfo && studentInfo.classGroups) {
+                    studentInfo.classGroups.forEach((group, idx) => {
                       const select = document.querySelectorAll('.review-other-group-list .review-dropdown')[idx];
                       const score = select ? parseInt(select.value) : null;
                       if (!score) interValid = false;
@@ -300,11 +300,11 @@ function GroupReviewInput() {
                     <div className="review-no-members">無其他組員 No other group members</div>
                   )}
                 </div>
-                {studentInfo.otherGroups && studentInfo.otherGroups.length > 0 && (
+                {studentInfo.classGroups && studentInfo.classGroups.length > 0 && (
                   <div className="review-other-groups">
                     <span className="review-label">組間互評 Inter-group Scores:</span>
                     <ul className="review-other-group-list">
-                      {studentInfo.otherGroups.map((group, idx) => (
+                      {studentInfo.classGroups.map((group, idx) => (
                         <li key={group.group_name || idx} className="review-other-group-item">
                           第{group.group_name}組
                           <div className="review-dropdown-row">
