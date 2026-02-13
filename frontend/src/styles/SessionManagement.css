@@ -189,6 +189,16 @@
   gap: 5px;
 }
 
+.session-date-hint {
+  font-size: 11px;
+  color: #6c757d;
+}
+
+.session-date-hint.no-actions {
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .status-indicator {
   padding: 4px 8px;
   border-radius: 12px;

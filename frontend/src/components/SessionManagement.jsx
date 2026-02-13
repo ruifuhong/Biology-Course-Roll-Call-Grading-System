@@ -210,6 +210,7 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAtte
               const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
               const status = session.status;
               const currentDate = session.actual_date;
+              const sessionDate = session.actual_date.split('T')[0];
 
               let statusLabel = '';
               let statusIcon = '';
@@ -264,7 +265,8 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAtte
               }
               
               const today = new Date().toISOString().split('T')[0];
-              const isToday = session.actual_date.split('T')[0] === today;
+              const isToday = sessionDate === today;
+              const dateHintLabel = sessionDate < today ? '已過期 Past session' : '未來課程 Upcoming session';
 
               return (
                 <tr key={currentDate} className={statusClass + '-session'}>
@@ -280,29 +282,36 @@ const SessionDatesTable = ({ courseType, dates, onUpdate, onDelete, onToggleAtte
                         className="edit-date-input"
                       />
                     ) : (
-                      session.actual_date.split('T')[0]
+                      sessionDate
                     )}
                   </td>
                   <td>{dayOfWeek}</td>
                   <td>
-                    <div className="attendance-status">
-                      <span className={`status-indicator ${statusClass}`}>
-                        {statusIcon} {statusLabel}
-                        <TimerCell
-                          courseType={courseType}
-                          session={session}
-                          onToggleAttendance={onToggleAttendance}
-                        />
-                      </span>
-                      <button
-                        onClick={() => onToggleAttendance(courseType, session.actual_date, nextStatus)}
-                        className={`btn btn-toggle ${buttonClass}`}
-                        title={isToday ? buttonLabel : '只能操作今日場次 Only today\'s session can be toggled'}
-                        disabled={!isToday}
-                      >
-                        {buttonLabel}
-                      </button>
-                    </div>
+                    {isToday ? (
+                      <div className="attendance-status">
+                        <span className={`status-indicator ${statusClass}`}>
+                          {statusIcon} {statusLabel}
+                          <TimerCell
+                            courseType={courseType}
+                            session={session}
+                            onToggleAttendance={onToggleAttendance}
+                          />
+                        </span>
+                        <button
+                          onClick={() => onToggleAttendance(courseType, session.actual_date, nextStatus)}
+                          className={`btn btn-toggle ${buttonClass}`}
+                          title={buttonLabel}
+                        >
+                          {buttonLabel}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="attendance-status">
+                        <span className="session-date-hint no-actions">
+                          {dateHintLabel}
+                        </span>
+                      </div>
+                    )}
                   </td>
                   <td>
                     {editingDate === currentDate ? (
