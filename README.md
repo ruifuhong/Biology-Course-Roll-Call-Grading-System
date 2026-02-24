@@ -48,7 +48,7 @@ This project is built to reduce the time and effort for repetitive manual tasks 
 - Authentication: Google OAuth + JWT
 - Deployment: Render (frontend, backend, and PostgreSQL), MongoDB Atlas (MongoDB)
 
-# Technical Articles:
+## Technical Articles on Medium
 
 - [身為一名懶助教，我打造了全自動化點名評分系統！As a Lazy TA, I Developed a Fully Automated Roll-Call & Grading System!](https://medium.com/@ralph-tech/中英雙語-zh-en-bilingual-身為一名懶助教-我打造了全自動化點名評分系統-as-a-lazy-ta-i-developed-a-fully-automated-roll-call-7b6533b5c891)
 
