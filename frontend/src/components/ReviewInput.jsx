@@ -184,9 +184,9 @@ function GroupReviewInput() {
                         if (score) {
                           intraReviews.push({
                             reviewer_id: studentInfo.student.student_id,
-                            reviewer_semester: sessionInfo.semester,
+
                             reviewee_id: member.student_id,
-                            reviewee_semester: sessionInfo.semester,
+
                             score,
                             semester: sessionInfo.semester,
                             actual_date: sessionInfo.actual_date

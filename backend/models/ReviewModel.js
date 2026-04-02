@@ -6,19 +6,17 @@ export async function insertIntraReviews(reviews) {
   const params = [];
   let idx = 1;
   for (const r of reviews) {
-    values.push(`($${idx++}, $${idx++}, $${idx++}, $${idx++}, $${idx++}, $${idx++}, $${idx++})`);
+    values.push(`($${idx++}, $${idx++}, $${idx++}, $${idx++}, $${idx++})`);
     params.push(
       r.semester,
       r.actual_date,
       r.reviewer_id,
-      r.reviewer_semester,
       r.reviewee_id,
-      r.reviewee_semester,
       r.score
     );
   }
   const sql = `INSERT INTO "Roll-Call".review_intra_group
-    (semester, actual_date, reviewer_id, reviewer_semester, reviewee_id, reviewee_semester, score)
+    (semester, actual_date, reviewer_id, reviewee_id, score)
     VALUES ${values.join(', ')} RETURNING id`;
   const result = await pool.query(sql, params);
   return result.rowCount;
