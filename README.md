@@ -6,7 +6,8 @@ A MERN and PostgreSQL-powered platform built to simplify course management workf
 [https://biology-attendence-new-static-frontend.onrender.com](https://biology-attendence-new-static-frontend.onrender.com)
 
 ## System Architecture
-<img width="1975" height="1385" alt="SystemArchitecture" src="https://github.com/user-attachments/assets/c930dfc7-a4f6-4100-8896-05acb5834fee" />
+<img width="1975" height="1385" alt="SystemArchitecture" src="https://github.com/user-attachments/assets/15c0a70d-6a7a-49bd-97ce-e9fced504121" />
+
 
 ## Description
 This project is built to reduce the time and effort for repetitive manual tasks during my time as the course TA.
